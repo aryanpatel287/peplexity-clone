@@ -40,4 +40,26 @@ const registerValidator = [
     validateRequest,
 ];
 
-export { registerValidator, validateRequest };
+const loginValidator = [
+    body('username')
+        .trim()
+        .isLength({ min: 3 })
+        .withMessage('username must be at least 3 characters long'),
+    body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('email is required')
+        .isEmail()
+        .withMessage('email must be valid')
+        .normalizeEmail(),
+    body('password')
+        .trim()
+        .notEmpty()
+        .withMessage('password is required')
+        .isLength({ min: 6 })
+        .withMessage('password must be at least 6 characters long'),
+
+    validateRequest,
+];
+
+export { registerValidator, loginValidator, validateRequest };

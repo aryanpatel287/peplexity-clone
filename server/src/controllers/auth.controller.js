@@ -64,7 +64,7 @@ async function registerController(req, res) {
             process.env.JWT_SECRET,
         );
 
-        const verificationLink = ` http://localhost:${process.env.SERVER_PORT}/api/auth/verify-email?token=${emailVerificationToken}`;
+        const emailVerificationLink = ` http://localhost:${process.env.SERVER_PORT}/api/auth/verify-email?token=${emailVerificationToken}`;
 
         await sendEmail({
             to: normalizedEmail,
@@ -74,7 +74,7 @@ async function registerController(req, res) {
                         <p>Hi <b>${username}</b>,</p>
                         <p>Thank you for registering on Perplexity! Please verify your email address to activate your account.</p>
                         <div style="text-align:center; margin:32px 0;">
-                        <a href="${verificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                        <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
                             Verify Email
                         </a>
                         </div>
@@ -119,8 +119,25 @@ async function verifyEmail(req, res) {
         });
     }
 
-    user.verified = true;
+    if (user.verified) {
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
+                <h2 style="color:#4B6EF5;">Email Already Verified</h2>
+                <p>Hi <b>${user.username}</b>,</p>
+                <p>Your email is already verified. You can log in to your account.</p>
+                <div style="text-align:center; margin:32px 0;">
+                    <a href="http://localhost:${process.env.SERVER_PORT}/login" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                        Go to Login
+                    </a>
+                </div>
+                <p>If you did not request this, you can ignore this email.</p>
+                <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
+            </div>
+        `;
+        return res.send(html);
+    }
 
+    user.verified = true;
     await user.save();
 
     const html = `
@@ -139,12 +156,6 @@ async function verifyEmail(req, res) {
     `;
 
     res.send(html);
-
-    // return res.status(200).json({
-    //     message: 'Email verified successfully. You can now log in.',
-    //     success: true,
-    //     html,
-    // });
 }
 
 /**
@@ -222,6 +233,84 @@ async function loginController(req, res) {
     });
 }
 
+async function resendEmailVerificationLink(req, res) {
+    const { email } = req.body;
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!email) {
+        return res.status(400).json({
+            message: 'Registered email is required',
+            success: false,
+            error: 'no email provided',
+        });
+    }
+
+    const user = await userModel.findOne({ email: normalizedEmail });
+    if (!user) {
+        return res.status(404).json({
+            message: 'Invalid credentials',
+            success: false,
+            error: 'user not found',
+        });
+    }
+
+    if (user.verified) {
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
+                <h2 style="color:#4B6EF5;">Email Already Verified</h2>
+                <p>Hi <b>${user.username}</b>,</p>
+                <p>Your email is already verified. You can log in to your account.</p>
+                <div style="text-align:center; margin:32px 0;">
+                    <a href="http://localhost:${process.env.SERVER_PORT}/login" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                        Go to Login
+                    </a>
+                </div>
+                <p>If you did not request this, you can ignore this email.</p>
+                <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
+            </div>
+        `;
+        return res.send(html);
+    }
+
+    const emailVerificationToken = jwt.sign(
+        {
+            email: normalizedEmail,
+        },
+        process.env.JWT_SECRET,
+    );
+
+    const emailVerificationLink = `http://localhost:${process.env.SERVER_PORT}/api/auth/verify-email?token=${emailVerificationToken}`;
+
+    await sendEmail({
+        to: normalizedEmail,
+        subject: 'Welcome to Perplexity',
+        html: ` <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
+                        <h2 style="color:#4B6EF5;">Verify your email for Perplexity</h2>
+                        <p>Hi <b>${user.username}</b>,</p>
+                        <p>Thank you for registering on Perplexity! Please verify your email address to activate your account.</p>
+                        <div style="text-align:center; margin:32px 0;">
+                        <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                            Verify Email
+                        </a>
+                        </div>
+                        <p>If you did not sign up, you can ignore this email.</p>
+                        <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
+                    </div>`,
+    });
+
+    return res.status(200).json({
+        message: 'Verification link sent registered email successfully',
+        success: true,
+    });
+}
+
+/**
+ * @description get the user details using token
+ * @route GET /api/auth/get-me
+ * @access Public
+ * @body none
+ */
 async function getMeController(req, res) {
     const userId = req.user.id;
 
@@ -249,4 +338,10 @@ async function getMeController(req, res) {
     });
 }
 
-export { registerController, verifyEmail, loginController, getMeController };
+export {
+    registerController,
+    verifyEmail,
+    loginController,
+    getMeController,
+    resendEmailVerificationLink,
+};

@@ -4,10 +4,12 @@ import {
     getMeController,
     loginController,
     registerController,
+    resendEmailVerificationLink,
     verifyEmail,
 } from '../controllers/auth.controller.js';
 
 import {
+    loginValidator,
     registerValidator,
     validateRequest,
 } from '../validators/auth.validator.js';
@@ -38,7 +40,7 @@ authRoutes.get('/verify-email', verifyEmail);
  * @access Public
  * @body {username,email,password}
  */
-authRoutes.post('/login', registerValidator, loginController);
+authRoutes.post('/login', loginValidator, loginController);
 
 /**
  * @route GET /api/auth/get-me
@@ -48,4 +50,11 @@ authRoutes.post('/login', registerValidator, loginController);
  */
 authRoutes.get('/get-me', authUser, getMeController);
 
+/**
+ * @route GET /api/auth/resend-verify-email
+ * @description resend the email verification link to the registered user
+ * @access Public
+ * @body {email}
+ */
+authRoutes.post('/resend-verify-email', resendEmailVerificationLink);
 export default authRoutes;
