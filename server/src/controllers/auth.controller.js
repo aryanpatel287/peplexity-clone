@@ -3,8 +3,8 @@ import { sendEmail } from '../services/mail.service.js';
 import jwt from 'jsonwebtoken';
 
 /**
- * @route POST /api/auth/register
  * @description Register a user
+ * @route POST /api/auth/register
  * @access Public
  * @body {username,email,password}
  */
@@ -99,8 +99,8 @@ async function registerController(req, res) {
 }
 
 /**
- * @route POST /api/auth/verifiy-email?token={verificationToken}
  * @description Verify the registered email
+ * @route POST /api/auth/verifiy-email?token={verificationToken}
  * @access Public
  * @body none
  */
@@ -148,8 +148,8 @@ async function verifyEmail(req, res) {
 }
 
 /**
- * @route POST /api/auth/login
  * @description login a user
+ * @route POST /api/auth/login
  * @access Public
  * @body {username,email,password}
  */
@@ -222,5 +222,31 @@ async function loginController(req, res) {
     });
 }
 
+async function getMeController(req, res) {
+    const userId = req.user.id;
 
-export { registerController, verifyEmail, loginController };
+    if (!userId) {
+        return res.status(401).json({
+            message: 'unauthorized access',
+            success: true,
+            error: 'user details not attached in the req',
+        });
+    }
+
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'user not found',
+            success: false,
+            error: 'user not found',
+        });
+    }
+
+    return res.status(200).json({
+        message: 'user found successfully',
+        success: true,
+    });
+}
+
+export { registerController, verifyEmail, loginController, getMeController };

@@ -1,13 +1,18 @@
 import { Router } from 'express';
+
 import {
+    getMeController,
     loginController,
     registerController,
     verifyEmail,
 } from '../controllers/auth.controller.js';
+
 import {
     registerValidator,
     validateRequest,
 } from '../validators/auth.validator.js';
+
+import { authUser } from '../middlewares/auth.middleware.js';
 
 const authRoutes = Router();
 
@@ -34,5 +39,13 @@ authRoutes.get('/verify-email', verifyEmail);
  * @body {username,email,password}
  */
 authRoutes.post('/login', registerValidator, loginController);
+
+/**
+ * @route GET /api/auth/get-me
+ * @description get the user details using token
+ * @access Public
+ * @body none
+ */
+authRoutes.get('/get-me', authUser, getMeController);
 
 export default authRoutes;
