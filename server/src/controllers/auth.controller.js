@@ -1,3 +1,4 @@
+import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
 import { sendEmail } from '../services/mail.service.js';
 import jwt from 'jsonwebtoken';
@@ -83,9 +84,8 @@ async function registerController(req, res) {
                     </div>`,
         });
 
-        return res.status(201).json({
+        return res.status(200).json({
             message: 'user registered successfully',
-            user,
         });
     } catch (error) {
         console.log(error);
@@ -167,18 +167,10 @@ async function verifyEmail(req, res) {
 async function loginController(req, res) {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-        return res.status(400).json({
-            message: 'username, email and password are required',
-            success: false,
-            error: 'username, email and password are required',
-        });
-    }
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedUsername = username?.trim();
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedUsername = username.trim();
-
-    if (!normalizedUsername || !normalizedEmail) {
+    if (!normalizedUsername && !normalizedEmail) {
         return res.status(400).json({
             message: 'username, email and password are required',
             success: false,
@@ -230,10 +222,22 @@ async function loginController(req, res) {
     return res.status(200).json({
         message: 'logged in successfully',
         success: true,
+        user: {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            verified: user.verified,
+        },
     });
 }
 
-async function resendEmailVerificationLink(req, res) {
+/**
+ * @description resend the email verification link to the registered user
+ * @route GET /api/auth/resend-verify-email
+ * @access Public
+ * @body {email}
+ */
+async function resendVerificationEmail(req, res) {
     const { email } = req.body;
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -335,7 +339,155 @@ async function getMeController(req, res) {
     return res.status(200).json({
         message: 'user found successfully',
         success: true,
+        user,
     });
+}
+
+/**
+ * @description logout a user
+ * @route POST /api/auth/logout
+ * @access Public
+ * @body none
+ */
+async function logoutController(req, res) {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({
+            message: 'Invalid token',
+            success: false,
+            error: 'No token provided',
+        });
+    }
+
+    res.clearCookie('token');
+
+    await redis.set(token, Date.now().toString(), 'EX', 3600 * 24);
+
+    return res.status(200).json({
+        message: 'Logged out successfully',
+        success: true,
+    });
+}
+
+/**
+ * @route POST /api/auth/forgot-password
+ * @description send an email to reset the password
+ * @access Public
+ * @body email
+ */
+async function forgotPasswordEmail(req, res) {
+    const { email } = req.body;
+    const normalizedEmail = email.trim();
+
+    if (!email) {
+        return res.status(400).json({
+            message: 'Email is required',
+            success: false,
+            error: 'Email is required',
+        });
+    }
+
+    const user = await userModel.findOne({ email: normalizedEmail });
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'Invalid credentials',
+            success: false,
+            error: 'user not found',
+        });
+    }
+
+    const emailVerificationToken = jwt.sign(
+        {
+            id: user._id,
+            email: user.email,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' },
+    );
+
+    const emailVerificationLink = `${process.env.CLIENT_ORIGINS}/update-password?token=${emailVerificationToken}`;
+
+    const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
+            <h2 style="color:#4B6EF5;">Reset Your Password</h2>
+            <p>Hi <b>${user.username}</b>,</p>
+            <p>We received a request to reset your password. Click the button below to set a new password:</p>
+            <div style="text-align:center; margin:32px 0;">
+                <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                    Reset Password
+                </a>
+            </div>
+            <p>If the button above does not work, click the following link:</p>
+            <div style="word-break:break-all; background:#f5f5f5; padding:10px; border-radius:4px; margin-bottom:16px;">
+                <a href="${emailVerificationLink}" style="color:#4B6EF5;">${emailVerificationLink}</a>
+            </div>
+            <p>If you did not request a password reset, you can ignore this email.</p>
+            <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
+        </div>
+    `;
+
+    await sendEmail({
+        to: normalizedEmail,
+        subject: 'Reset Password',
+        html: html,
+    });
+
+    return res.status(200).json({
+        message: 'Reset Password link sent to email',
+        success: true,
+    });
+}
+
+/**
+ * @route PATCH /api/auth/update-password?token={token-sent-on-email}
+ * @description reset password of registered email
+ * @access Private
+ * @body password
+ */
+async function updatePasswordControlller(req, res) {
+    const { token } = req.query;
+    console.log(token);
+    const { password } = req.body;
+
+    if (!token) {
+        return res.status(401).json({
+            message: 'Invalid token',
+            success: false,
+            error: 'No token provided',
+        });
+    }
+
+    let decodedToken = '';
+    try {
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        return res.status(401).json({
+            message: 'Invalid token',
+            success: false,
+            error: 'No token provided',
+        });
+    }
+
+    try {
+        const user = await userModel
+            .findByIdAndUpdate(decodedToken?.id, {
+                password: password,
+            })
+            .select('password');
+
+        return res.status(200).json({
+            message: 'Password reset successfull',
+            success: true,
+        });
+    } catch (error) {
+        return res.status(401).json({
+            message: 'Reset password failed',
+            success: false,
+            error: 'Reset password failed',
+        });
+    }
 }
 
 export {
@@ -343,5 +495,8 @@ export {
     verifyEmail,
     loginController,
     getMeController,
-    resendEmailVerificationLink,
+    resendVerificationEmail,
+    logoutController,
+    forgotPasswordEmail,
+    updatePasswordControlller,
 };

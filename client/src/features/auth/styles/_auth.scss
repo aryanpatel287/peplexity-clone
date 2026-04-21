@@ -1,0 +1,46 @@
+@use '../../shared/styles/mixins' as *;
+
+.auth-container {
+    @include flex(center, center, column);
+    min-height: 100vh;
+    padding: 20px;
+    background-color: var(--bg-dark);
+
+    .auth-card {
+        @include flex(flex-start, stretch, column, $gap: 1.5rem);
+        background-color: var(--bg-card);
+        width: 100%;
+        max-width: 420px;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+
+        .auth-header {
+            text-align: center;
+            @include flex(center, center, column, $gap: 0.5rem);
+
+            h1 {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: var(--text-main);
+            }
+
+            p {
+                color: var(--text-muted);
+                font-size: 0.95rem;
+            }
+        }
+
+        form {
+            width: 100%;
+            @include flex(center, center, column, $gap: 1.5rem);
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+    }
+}

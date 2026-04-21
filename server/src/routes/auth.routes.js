@@ -1,17 +1,20 @@
 import { Router } from 'express';
 
 import {
+    forgotPasswordEmail,
     getMeController,
     loginController,
+    logoutController,
     registerController,
-    resendEmailVerificationLink,
+    resendVerificationEmail,
+    updatePasswordControlller,
     verifyEmail,
 } from '../controllers/auth.controller.js';
 
 import {
+    forgotPasswordValidator,
     loginValidator,
     registerValidator,
-    validateRequest,
 } from '../validators/auth.validator.js';
 
 import { authUser } from '../middlewares/auth.middleware.js';
@@ -56,5 +59,34 @@ authRoutes.get('/get-me', authUser, getMeController);
  * @access Public
  * @body {email}
  */
-authRoutes.post('/resend-verify-email', resendEmailVerificationLink);
+authRoutes.post('/resend-verify-email', resendVerificationEmail);
+
+/**
+ * @route POST /api/auth/logout
+ * @description logout a user
+ * @access Public
+ * @body none
+ */
+authRoutes.post('/logout', authUser, logoutController);
+
+/**
+ * @route POST /api/auth/forgot-password
+ * @description send an email to reset the password
+ * @access Public
+ * @body email
+ */
+authRoutes.post(
+    '/forgot-password',
+    forgotPasswordValidator,
+    forgotPasswordEmail,
+);
+
+/**
+ * @route PATCH /api/auth/update-password?token={token-sent-on-email}
+ * @description reset password of registered email
+ * @access Private
+ * @body password
+ */
+authRoutes.patch('/update-password', updatePasswordControlller);
+
 export default authRoutes;

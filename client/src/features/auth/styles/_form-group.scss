@@ -1,0 +1,60 @@
+@use '../../shared/styles/mixins' as *;
+
+.form-group {
+    @include flex(flex-start, stretch, column, 8px);
+    width: 100%;
+    position: relative;
+
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        background-color: transparent;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+
+        &::placeholder {
+            color: transparent;
+            transition: color 0.2s ease;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: var(--primary);
+
+            &::placeholder {
+                color: var(--text-muted);
+            }
+        }
+    }
+
+    .form-label {
+        position: absolute;
+        left: 12px;
+        top: 22px;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--text-muted);
+        background-color: var(--bg-card);
+        padding: 0 4px;
+        pointer-events: none;
+        transition: all 0.2s ease;
+        border-radius: 4px;
+    }
+
+    .form-input:focus ~ .form-label,
+    .form-input:not(:placeholder-shown) ~ .form-label {
+        top: 0;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--primary);
+    }
+
+    .form-input:not(:focus):not(:placeholder-shown) ~ .form-label {
+        color: var(--text-muted);
+    }
+}

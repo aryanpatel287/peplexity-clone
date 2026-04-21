@@ -1,0 +1,29 @@
+@use './mixins' as *;
+
+.error-page-container {
+    @include flex(center, center, column, 1.5rem);
+    height: 100vh;
+    text-align: center;
+    padding: 2rem;
+
+    h1 {
+        font-size: 6rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+        color: var(--text-main);
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: var(--text-muted);
+        max-width: 400px;
+        margin-bottom: 2rem;
+        line-height: 1.5;
+    }
+}
