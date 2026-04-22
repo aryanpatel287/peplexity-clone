@@ -35,6 +35,22 @@
         form {
             width: 100%;
             @include flex(center, center, column, $gap: 1.5rem);
+
+            .forgot-password-link {
+                width: 100%;
+                text-align: right;
+                margin-top: -0.5rem;
+                font-size: 0.9rem;
+
+                a {
+                    color: var(--text-muted);
+                    transition: color 0.2s ease;
+
+                    &:hover {
+                        color: var(--primary);
+                    }
+                }
+            }
         }
 
         .auth-footer {

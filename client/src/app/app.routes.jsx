@@ -1,44 +1,49 @@
-import { createBrowserRouter } from 'react-router'
-import Login from '../features/auth/pages/Login'
-import Register from '../features/auth/pages/Register'
-import LogoutButton from '../features/auth/components/LogoutButton'
-import Dashboard from '../features/chat/pages/Dashboard'
-import ProtectedPage from '../features/auth/components/ProtectedPage'
-import ForgotPassword from '../features/auth/pages/ForgotPassword'
-import UpdatePassword from '../features/auth/pages/UpdatePassword'
-import ForbiddenPage from '../features/shared/pages/ForbiddenPage'
-import NotFoundPage from '../features/shared/pages/NotFoundPage'
+import { createBrowserRouter, Navigate } from 'react-router';
+import Login from '../features/auth/pages/Login';
+import Register from '../features/auth/pages/Register';
+import LogoutButton from '../features/auth/components/LogoutButton';
+import Dashboard from '../features/chat/pages/Dashboard';
+import ProtectedPage from '../features/auth/components/ProtectedPage';
+import ForgotPassword from '../features/auth/pages/ForgotPassword';
+import UpdatePassword from '../features/auth/pages/UpdatePassword';
+import ForbiddenPage from '../features/shared/pages/ForbiddenPage';
+import NotFoundPage from '../features/shared/pages/NotFoundPage';
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element:
+        element: (
             <ProtectedPage>
                 <Dashboard />
             </ProtectedPage>
+        ),
+    },
+    {
+        path: '/dashboard',
+        element: <Navigate to={'/'} replace />,
     },
     {
         path: '/login',
-        element: <Login />
+        element: <Login />,
     },
     {
         path: '/register',
-        element: <Register />
+        element: <Register />,
     },
     {
         path: '/forgot-password',
-        element: <ForgotPassword />
+        element: <ForgotPassword />,
     },
     {
         path: '/update-password',
-        element: <UpdatePassword />
+        element: <UpdatePassword />,
     },
     {
         path: '/forbidden',
-        element: <ForbiddenPage />
+        element: <ForbiddenPage />,
     },
     {
         path: '*',
-        element: <NotFoundPage />
-    }
-])
+        element: <NotFoundPage />,
+    },
+]);

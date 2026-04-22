@@ -63,6 +63,10 @@ const Login = () => {
                         onChange={handleChange}
                     />
 
+                    <div className="forgot-password-link">
+                        <Link to="/forgot-password">Forgot your password?</Link>
+                    </div>
+
                     <button type="submit" className="btn btn-primary">
                         Log In
                     </button>

@@ -1,7 +1,8 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import authRoutes from './routes/auth.routes.js';
+import authRouter from './routes/auth.routes.js';
+import chatRouter from './routes/chat.route.js';
 import morgan from 'morgan';
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(
     }),
 );
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRouter);
+app.use('/api/chats', chatRouter);
 
 export default app;

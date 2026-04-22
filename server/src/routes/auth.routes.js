@@ -19,7 +19,7 @@ import {
 
 import { authUser } from '../middlewares/auth.middleware.js';
 
-const authRoutes = Router();
+const authRouter = Router();
 
 /**
  * @route POST /api/auth/register
@@ -27,7 +27,7 @@ const authRoutes = Router();
  * @access Public
  * @body {username,email,password}
  */
-authRoutes.post('/register', registerValidator, registerController);
+authRouter.post('/register', registerValidator, registerController);
 
 /**
  * @route POST /api/auth/verifiy-email?token={verificationToken}
@@ -35,7 +35,7 @@ authRoutes.post('/register', registerValidator, registerController);
  * @access Public
  * @body none
  */
-authRoutes.get('/verify-email', verifyEmail);
+authRouter.get('/verify-email', verifyEmail);
 
 /**
  * @route POST /api/auth/login
@@ -43,7 +43,7 @@ authRoutes.get('/verify-email', verifyEmail);
  * @access Public
  * @body {username,email,password}
  */
-authRoutes.post('/login', loginValidator, loginController);
+authRouter.post('/login', loginValidator, loginController);
 
 /**
  * @route GET /api/auth/get-me
@@ -51,7 +51,7 @@ authRoutes.post('/login', loginValidator, loginController);
  * @access Public
  * @body none
  */
-authRoutes.get('/get-me', authUser, getMeController);
+authRouter.get('/get-me', authUser, getMeController);
 
 /**
  * @route GET /api/auth/resend-verify-email
@@ -59,7 +59,7 @@ authRoutes.get('/get-me', authUser, getMeController);
  * @access Public
  * @body {email}
  */
-authRoutes.post('/resend-verify-email', resendVerificationEmail);
+authRouter.post('/resend-verify-email', resendVerificationEmail);
 
 /**
  * @route POST /api/auth/logout
@@ -67,7 +67,7 @@ authRoutes.post('/resend-verify-email', resendVerificationEmail);
  * @access Public
  * @body none
  */
-authRoutes.post('/logout', authUser, logoutController);
+authRouter.post('/logout', authUser, logoutController);
 
 /**
  * @route POST /api/auth/forgot-password
@@ -75,7 +75,7 @@ authRoutes.post('/logout', authUser, logoutController);
  * @access Public
  * @body email
  */
-authRoutes.post(
+authRouter.post(
     '/forgot-password',
     forgotPasswordValidator,
     forgotPasswordEmail,
@@ -87,6 +87,6 @@ authRoutes.post(
  * @access Private
  * @body password
  */
-authRoutes.patch('/update-password', updatePasswordControlller);
+authRouter.patch('/update-password', updatePasswordControlller);
 
-export default authRoutes;
+export default authRouter;

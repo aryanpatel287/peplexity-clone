@@ -2,6 +2,7 @@ import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
 import { sendEmail } from '../services/mail.service.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 /**
  * @description Register a user
@@ -471,13 +472,23 @@ async function updatePasswordControlller(req, res) {
     }
 
     try {
-        const user = await userModel
-            .findByIdAndUpdate(decodedToken?.id, {
-                password: password,
-            })
-            .select('password');
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        return res.status(200).json({
+        const user = await userModel.findByIdAndUpdate(
+            decodedToken.id,
+            { password: hashedPassword },
+            { new: true, runValidators: true },
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found',
+                success: false,
+                error: 'user not found',
+            });
+        }
+
+        return res.status(204).json({
             message: 'Password reset successfull',
             success: true,
         });
