@@ -48,12 +48,12 @@ const ChatArea = ({ activeChatId, setActiveChatId }) => {
         setMessageInput('');
         if (textareaRef.current) textareaRef.current.style.height = '';
 
-        await handleSendMessage({
+        const newChatId = await handleSendMessage({
             message: msg,
             chatId: activeChatId,
         });
 
-        setActiveChatId(currentChatId);
+        setActiveChatId(newChatId);
     };
 
     return (
