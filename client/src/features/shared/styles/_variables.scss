@@ -1,13 +1,19 @@
 :root {
-    --primary: #ff9900;
+    --primary: #32575c;
     --primary-hover: #f39200;
 
-    --bg-dark: #121212;
+    --bg-dark: #171615;
+    --bg-sidebar: #1E1D1B;
+    --bg-message: #1E1D1B;
+    --bg-input: #1E1D1C;
+    --bg-active-chat: #252421;
     --bg-card: #1e1e1e;
-    --bg-input: #2a2a2a;
 
     --text-main: #ffffff;
     --text-muted: #a0a0a0;
+
+    --btn-send: #7A7978;
+    --icon-color: #969593;
 
     --border-color: #333333;
     --border-radius: 8px;

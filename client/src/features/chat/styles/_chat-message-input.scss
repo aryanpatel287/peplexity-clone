@@ -1,0 +1,79 @@
+@use '../../shared/styles/mixins' as *;
+
+// Input is absolutely pinned to the bottom of .chat-area at all times.
+// The messages area gets bottom padding equal to the input height so
+// the last message is never hidden behind it.
+.chat-input-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background-color: var(--bg-dark);
+    @include flex(center, center, column);
+    padding: 16px 10%;
+
+    @media (max-width: 1024px) { padding: 14px 6%; }
+    @media (max-width: 768px)  { padding: 12px 20px 16px; }
+    @media (max-width: 480px)  { padding: 10px 14px 14px; }
+
+    .hero-input-area {
+        width: 100%;
+        max-width: 800px;
+
+        .input-wrapper {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            @include flex(flex-start, stretch, column, 12px);
+            min-height: 60px;
+
+            .hero-textarea {
+                background: transparent;
+                border: none;
+                color: var(--text-main);
+                resize: none;
+                font-family: inherit;
+                font-size: 1rem;
+                outline: none;
+                max-height: 200px;
+                overflow-y: auto;
+
+                &::placeholder { color: var(--text-muted); }
+            }
+
+            .input-footer {
+                @include flex(flex-end, center, row);
+
+                .hero-send-btn {
+                    background-color: var(--btn-send);
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    border: none;
+                    @include flex(center, center);
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+
+                    &:not(:disabled) { background-color: var(--text-main); }
+
+                    svg { color: var(--bg-dark); }
+                }
+            }
+        }
+    }
+
+    .spinner-small {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-top-color: var(--bg-dark);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

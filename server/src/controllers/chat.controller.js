@@ -5,10 +5,13 @@ import { generateChatTitle, generateResponse } from '../services/ai.service.js';
 async function sendMessage(req, res) {
     const { message, chat: chatId } = req.body;
 
+    console.log('chatId: ', chatId);
+
     let chatTitle = null,
         chat = null;
 
     if (!chatId) {
+        console.log('new chat created');
         chatTitle = await generateChatTitle(message);
         chat = await chatModel.create({
             user: req.user.id,
@@ -37,7 +40,6 @@ async function sendMessage(req, res) {
     });
 
     res.status(201).json({
-        title: chatTitle,
         chat,
         aiMessage,
         userMessage,

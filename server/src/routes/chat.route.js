@@ -23,7 +23,7 @@ chatRouter.post('/message', authUser, sendMessage);
  * @access Private
  * @body none
  */
-chatRouter.get('/get-chats', authUser, getChats);
+chatRouter.get('/', authUser, getChats);
 
 /**
  * @route /api/chats/get-messages/:chatId
@@ -31,7 +31,7 @@ chatRouter.get('/get-chats', authUser, getChats);
  * @access Private
  * @body none
  */
-chatRouter.get('/get-messages/:chatId', authUser, getMessages);
+chatRouter.get('/:chatId/messages', authUser, getMessages);
 
 /**
  * @route /api/chats/delete-chat/:chatId
@@ -39,6 +39,6 @@ chatRouter.get('/get-messages/:chatId', authUser, getMessages);
  * @access Private
  * @body none
  */
-chatRouter.delete('/delete-chat/:chatId', authUser, deleteChat);
+chatRouter.delete('/delete/:chatId', authUser, deleteChat);
 
 export default chatRouter;

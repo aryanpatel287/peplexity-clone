@@ -1,0 +1,97 @@
+@use '../../shared/styles/mixins' as *;
+
+.chat-dashboard {
+  @include flex(flex-start, stretch, row);
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-dark);
+  overflow: hidden;
+  position: relative;
+
+  .mobile-header {
+    display: none;
+  }
+
+  .mobile-overlay {
+    display: none;
+  }
+
+  .dashboard-sidebar {
+    border-right: 1px solid var(--border-color);
+    background-color: var(--bg-sidebar);
+    @include flex(flex-start, stretch, column);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+
+  .dashboard-main {
+    flex: 1;
+    @include flex(flex-start, stretch, column);
+    background-color: var(--bg-dark);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    @include flex(flex-start, stretch, column);
+
+    .mobile-header {
+      @include flex(flex-start, center, row, 12px);
+      padding: 16px 20px;
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 90;
+
+      .menu-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        cursor: pointer;
+        padding: 4px;
+        @include flex(center, center);
+      }
+
+      .new-chat-btn-mobile {
+        height: 36px;
+        border-radius: 8px;
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        cursor: pointer;
+        @include flex(center, center, row, 8px);
+        padding: 0 16px;
+        font-size: 0.9rem;
+
+        .plus-icon {
+          font-size: 1.1rem;
+          color: var(--icon-color);
+        }
+      }
+    }
+
+    .dashboard-sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 220px;
+      min-width: 220px;
+      transform: translateX(-100%);
+      
+      &.open {
+        transform: translateX(0);
+      }
+    }
+
+    .mobile-overlay {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 95;
+    }
+  }
+}

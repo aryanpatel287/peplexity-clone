@@ -1,0 +1,9 @@
+@use '../../shared/styles/mixins' as *;
+
+.chat-area {
+    position: relative;   // required for absolute input positioning
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg-dark);
+    overflow: hidden;     // prevent content escaping the container
+}
