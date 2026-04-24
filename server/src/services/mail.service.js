@@ -16,11 +16,13 @@ transporter
     .then(() => {
         console.log('email server is ready to send email');
     })
-    .catch(() => {
+    .catch((error) => {
         console.error('Error connecting to the email server', error);
     });
 
 export async function sendEmail({ to, subject, html, text }) {
+    console.log('emailTool Selected');
+
     const mailOptions = {
         from: process.env.GOOGLE_USER,
         to,
@@ -30,6 +32,5 @@ export async function sendEmail({ to, subject, html, text }) {
     };
 
     const details = await transporter.sendMail(mailOptions);
-
     return 'email sent successfully to ' + to;
 }

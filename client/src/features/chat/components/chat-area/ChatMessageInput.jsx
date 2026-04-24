@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowUp } from 'lucide-react';
 import '../../styles/_chat-message-input.scss';
 
 const ChatMessageInput = ({
@@ -10,12 +11,12 @@ const ChatMessageInput = ({
     isAwaitingAI,
 }) => {
     return (
-        <div className="chat-input-container">
-            <form className="hero-input-area" onSubmit={handleSend}>
+        <div className={`chat-input-container ${hasChat ? '' : 'new-chat'}`}>
+            <form className="chat-input-form" onSubmit={handleSend}>
                 <div className="input-wrapper">
                     <textarea
                         ref={textareaRef}
-                        className="hero-textarea"
+                        className="chat-textarea"
                         placeholder={
                             hasChat
                                 ? 'Ask anything...'
@@ -28,30 +29,22 @@ const ChatMessageInput = ({
                     <div className="input-footer">
                         <button
                             type="submit"
-                            className="hero-send-btn"
+                            className="send-btn"
                             disabled={!messageInput.trim() || isAwaitingAI}
                         >
                             {isAwaitingAI ? (
                                 <div className="spinner-small"></div>
                             ) : (
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="12" y1="19" x2="12" y2="5"></line>
-                                    <polyline points="5 12 12 5 19 12"></polyline>
-                                </svg>
+                                <ArrowUp size={18} />
                             )}
                         </button>
                     </div>
                 </div>
             </form>
+            <p className={`input-disclaimer ${hasChat ? '' : 'new-chat'}`} >
+                Perplexity Clone can make mistakes and may provide outdated information.<br />
+                Always verify critical details from reliable sources.
+            </p>
         </div>
     );
 };

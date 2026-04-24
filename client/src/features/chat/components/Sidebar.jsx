@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
-import LogoutButton from '../../auth/components/LogoutButton';
-import '../styles/_sidebar.scss';
+import React from 'react';
+import { Trash, SquarePen } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
+import LogoutButton from '../../auth/components/LogoutButton';
+import '../styles/_sidebar.scss';
+import UserDetailCard from '../../auth/components/UserDetailCard';
 
-const Sidebar = ({ activeChatId, onSelectChat }) => {
+const Sidebar = ({ onSelectChat }) => {
     const chats = useSelector((state) => state.chat.chats);
     const loading = useSelector((state) => state.chat.loading);
+    const currentChatId = useSelector((state) => state.chat.currentChatId);
+    const { handleDeleteChat } = useChat();
 
     return (
         <div className="chat-sidebar">
@@ -15,16 +19,8 @@ const Sidebar = ({ activeChatId, onSelectChat }) => {
                     className="new-chat-btn"
                     onClick={() => onSelectChat(null)}
                 >
-                    <span
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                        }}
-                    >
-                        <span className="plus-icon">+</span> New Chat
-                    </span>
-                    <span className="shortcut">⌘N</span>
+                    <SquarePen size={15} />
+                    New Chat
                 </button>
             </div>
 
@@ -40,10 +36,19 @@ const Sidebar = ({ activeChatId, onSelectChat }) => {
                         {Object.values(chats).map((chat) => (
                             <div
                                 key={chat._id}
-                                className={`chat-item ${activeChatId === chat._id ? 'active' : ''}`}
+                                className={`chat-item ${currentChatId === chat._id ? 'active' : ''}`}
                                 onClick={() => onSelectChat(chat._id)}
                             >
                                 <div className="chat-title">{chat.title}</div>
+                                <button
+                                    className="chat-delete-btn"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteChat({ chatId: chat._id });
+                                    }}
+                                >
+                                    <Trash size={14} />
+                                </button>
                             </div>
                         ))}
                     </>
@@ -56,6 +61,7 @@ const Sidebar = ({ activeChatId, onSelectChat }) => {
             </div>
 
             <div className="sidebar-footer">
+                <UserDetailCard />
                 <LogoutButton />
             </div>
         </div>

@@ -14,5 +14,5 @@ export async function searchWeb(query) {
 
     console.log(searchResults);
 
-    return searchResults.content;
+    return searchResults;
 }

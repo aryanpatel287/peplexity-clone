@@ -5,22 +5,14 @@ import { useChat } from '../../hooks/useChat';
 import ChatMessages from './ChatMessages';
 import ChatMessageInput from './ChatMessageInput';
 
-const ChatArea = ({ activeChatId, setActiveChatId }) => {
-    const chats = useSelector((state) => state.chat.chats);
+const ChatArea = () => {
     const currentChatId = useSelector((state) => state.chat.currentChatId);
-    const messages = chats[activeChatId]?.messages;
-    const loading = useSelector((state) => state.chat.loading);
+    const isSending = useSelector((state) => state.chat.isSending);
 
     const { handleSendMessage } = useChat();
 
     const [messageInput, setMessageInput] = useState('');
     const textareaRef = useRef(null);
-
-    const isAwaitingAI =
-        loading &&
-        messages &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user';
 
     const handleInputChange = (e) => {
         const textarea = e.target;
@@ -28,11 +20,6 @@ const ChatArea = ({ activeChatId, setActiveChatId }) => {
         textarea.style.height = '0px';
         textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     };
-
-    let hasChat;
-    useEffect(() => {
-        hasChat = !!activeChatId;
-    }, [activeChatId]);
 
     useEffect(() => {
         if (messageInput === '' && textareaRef.current) {
@@ -42,31 +29,26 @@ const ChatArea = ({ activeChatId, setActiveChatId }) => {
 
     const handleSend = async (e) => {
         e.preventDefault();
-        if (!messageInput.trim() || isAwaitingAI) return;
+        if (!messageInput.trim() || isSending) return;
 
         const msg = messageInput;
         setMessageInput('');
         if (textareaRef.current) textareaRef.current.style.height = '';
 
-        const newChatId = await handleSendMessage({
-            message: msg,
-            chatId: activeChatId,
-        });
-
-        setActiveChatId(newChatId);
+        await handleSendMessage({ message: msg, chatId: currentChatId });
     };
 
     return (
         <div className="chat-area">
-            <ChatMessages activeChatId={activeChatId} />
+            <ChatMessages />
 
             <ChatMessageInput
                 textareaRef={textareaRef}
                 messageInput={messageInput}
-                hasChat={hasChat}
+                hasChat={!!currentChatId}
                 handleInputChange={handleInputChange}
                 handleSend={handleSend}
-                isAwaitingAI={isAwaitingAI}
+                isAwaitingAI={isSending}
             />
         </div>
     );

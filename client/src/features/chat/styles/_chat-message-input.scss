@@ -1,8 +1,7 @@
 @use '../../shared/styles/mixins' as *;
 
-// Input is absolutely pinned to the bottom of .chat-area at all times.
-// The messages area gets bottom padding equal to the input height so
-// the last message is never hidden behind it.
+// Pinned to the bottom of .chat-area; messages area gets bottom
+// padding equal to this container's height to avoid overlap.
 .chat-input-container {
     position: absolute;
     bottom: 0;
@@ -11,13 +10,23 @@
     z-index: 10;
     background-color: var(--bg-dark);
     @include flex(center, center, column);
-    padding: 16px 10%;
+    padding: 0 10% 16px 10%;
 
-    @media (max-width: 1024px) { padding: 14px 6%; }
-    @media (max-width: 768px)  { padding: 12px 20px 16px; }
-    @media (max-width: 480px)  { padding: 10px 14px 14px; }
+    @media (max-width: 1024px) {
+        padding: 0 6% 14px 6%;
+    }
+    @media (max-width: 768px) {
+        padding: 0 20px 16px 20px;
+    }
+    @media (max-width: 480px) {
+        padding: 0 14px 14px 14px;
+    }
 
-    .hero-input-area {
+    &.new-chat {
+        top: 0;
+    }
+
+    .chat-input-form {
         width: 100%;
         max-width: 800px;
 
@@ -29,7 +38,7 @@
             @include flex(flex-start, stretch, column, 12px);
             min-height: 60px;
 
-            .hero-textarea {
+            .chat-textarea {
                 background: transparent;
                 border: none;
                 color: var(--text-main);
@@ -40,13 +49,15 @@
                 max-height: 200px;
                 overflow-y: auto;
 
-                &::placeholder { color: var(--text-muted); }
+                &::placeholder {
+                    color: var(--text-muted);
+                }
             }
 
             .input-footer {
                 @include flex(flex-end, center, row);
 
-                .hero-send-btn {
+                .send-btn {
                     background-color: var(--btn-send);
                     width: 32px;
                     height: 32px;
@@ -56,9 +67,13 @@
                     cursor: pointer;
                     transition: background-color 0.2s;
 
-                    &:not(:disabled) { background-color: var(--text-main); }
+                    &:not(:disabled) {
+                        background-color: var(--text-main);
+                    }
 
-                    svg { color: var(--bg-dark); }
+                    svg {
+                        color: var(--bg-dark);
+                    }
                 }
             }
         }
@@ -72,8 +87,25 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
+
+    .input-disclaimer {
+        margin-top: 8px;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        text-align: center;
+        opacity: 0.7;
+        max-width: 800px;
+        width: 100%;
+
+        &.new-chat {
+            position: absolute;
+            bottom: 1rem;
+        }
+    }
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }

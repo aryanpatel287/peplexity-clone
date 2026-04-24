@@ -4,10 +4,12 @@ import {
     setChats,
     setCurrentChatId,
     setLoading,
+    setSending,
     setError,
     createNewChat,
     addNewMessage,
     setAllMessages,
+    setDeleteChat,
 } from '../chat.slice';
 import {
     sendMessage,
@@ -20,79 +22,80 @@ export const useChat = () => {
     const dispatch = useDispatch();
 
     async function handleSendMessage({ message, chatId }) {
-        dispatch(setLoading(true));
+        dispatch(setSending(true));
+        try {
+            const data = await sendMessage({ message, chatId });
+            const { chat, aiMessage } = data;
 
-        console.log('useChat ChatId: ', chatId);
+            if (!chatId) {
+                dispatch(createNewChat({ chatId: chat._id, title: chat.title }));
+            }
 
-        const data = await sendMessage({ message, chatId });
-        console.log(data);
+            dispatch(addNewMessage({ chatId: chatId || chat._id, content: message, role: 'user' }));
+            dispatch(addNewMessage({ chatId: chatId || chat._id, content: aiMessage.content, role: aiMessage.role }));
+            dispatch(setCurrentChatId(chat._id));
 
-        const { chat, aiMessage } = data;
-
-        if (!chatId) {
-            dispatch(
-                createNewChat({
-                    chatId: chat._id,
-                    title: chat.title,
-                }),
-            );
+            return chat._id;
+        } catch (err) {
+            dispatch(setError(err?.message ?? 'Failed to send message'));
+        } finally {
+            dispatch(setSending(false));
         }
-
-        dispatch(
-            addNewMessage({
-                chatId: chatId || chat._id,
-                content: message,
-                role: 'user',
-            }),
-        );
-
-        dispatch(
-            addNewMessage({
-                chatId: chatId || chat._id,
-                content: aiMessage.content,
-                role: aiMessage.role,
-            }),
-        );
-
-        dispatch(setCurrentChatId(chat._id));
-        dispatch(setLoading(false));
-
-        return chat._id;
     }
 
     async function handleGetChats() {
         dispatch(setLoading(true));
+        try {
+            const data = await getChats();
+            const { chats } = data;
 
-        const data = await getChats();
-        const { chats } = data;
-
-        dispatch(
-            setChats(
-                chats.reduce((acc, chat) => {
-                    acc[chat._id] = {
-                        _id: chat._id,
-                        title: chat.title,
-                        messages: [],
-                        lastUpdated: chat.updatedAt,
-                    };
-
-                    return acc;
-                }, {}),
-            ),
-        );
-
-        dispatch(setLoading(false));
+            dispatch(
+                setChats(
+                    chats.reduce((acc, chat) => {
+                        acc[chat._id] = {
+                            _id: chat._id,
+                            title: chat.title,
+                            messages: [],
+                            lastUpdated: chat.updatedAt,
+                        };
+                        return acc;
+                    }, {}),
+                ),
+            );
+        } catch (err) {
+            dispatch(setError(err?.message ?? 'Failed to load chats'));
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
 
-    async function handleGetMessages({chatId}) {
+    async function handleGetMessages({ chatId }) {
         dispatch(setLoading(true));
+        try {
+            const data = await getMessages({ chatId });
+            const { messages } = data;
+            dispatch(setAllMessages({ chatId, messages }));
+        } catch (err) {
+            dispatch(setError(err?.message ?? 'Failed to load messages'));
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
 
-        const data = await getMessages({ chatId });
-        const { messages } = data;
+    function handleCurrentChatId(chatId) {
+        dispatch(setCurrentChatId(chatId));
+    }
 
-        dispatch(setAllMessages({ chatId, messages }));
-
-        dispatch(setLoading(false));
+    async function handleDeleteChat({ chatId }) {
+        dispatch(setLoading(true));
+        try {
+            await deleteChat({ chatId });
+            dispatch(setDeleteChat({ chatId }));
+        } catch (err) {
+            dispatch(setError(err?.message ?? 'Failed to delete chat'));
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
 
     return {
@@ -100,5 +103,7 @@ export const useChat = () => {
         handleSendMessage,
         handleGetChats,
         handleGetMessages,
+        handleDeleteChat,
+        handleCurrentChatId,
     };
 };

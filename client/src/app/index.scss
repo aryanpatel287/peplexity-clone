@@ -27,3 +27,22 @@ a {
         color: var(--primary-hover);
     }
 }
+
+// Global scrollbar — themed to match the dark UI
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+
+    &:hover {
+        background: var(--text-muted);
+    }
+}

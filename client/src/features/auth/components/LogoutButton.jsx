@@ -1,5 +1,6 @@
 import React from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { LogOut } from 'lucide-react'
 
 const LogoutButton = () => {
     const { handleLogout } = useAuth()
@@ -7,9 +8,9 @@ const LogoutButton = () => {
     return (
         <button
             onClick={() => handleLogout()}
-            className='btn btn-primary'
+            className='btn btn-primary-transparent'
         >
-            Logout
+            <LogOut size={20} /> Logout
         </button>
     )
 }

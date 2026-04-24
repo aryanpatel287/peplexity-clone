@@ -18,11 +18,33 @@
         &:hover {
             background-color: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 154, 0, 0.3);
+            background-color: rgba(70, 138, 147, 0.08);
         }
 
         &:active {
             transform: translateY(0);
+        }
+    }
+
+    &.btn-transparent {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+
+        &:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    }
+
+    &.btn-primary-transparent {
+        background: transparent;
+        border: none;
+        color: var(--primary);
+
+        &:hover {
+            color: var(--primary-hover);
+            background-color: rgba(70, 138, 147, 0.08);
         }
     }
 }

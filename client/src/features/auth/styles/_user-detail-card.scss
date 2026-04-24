@@ -1,0 +1,28 @@
+@use '../../shared/styles/mixins' as *;
+
+.user-detail-card {
+    @include flex(flex-start, center, row, 10px);
+    flex: 1;
+    min-width: 0;
+
+    .user-avatar {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        @include flex(center, center);
+    }
+
+    .user-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

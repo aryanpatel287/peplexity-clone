@@ -61,11 +61,6 @@
         @include flex(center, center, row, 8px);
         padding: 0 16px;
         font-size: 0.9rem;
-
-        .plus-icon {
-          font-size: 1.1rem;
-          color: var(--icon-color);
-        }
       }
     }
 

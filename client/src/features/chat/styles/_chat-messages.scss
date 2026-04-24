@@ -10,17 +10,11 @@
     bottom: 0;           // fills full height; padding-bottom pushes content up
     overflow-y: auto;
     @include flex(flex-start, stretch, column, 1.5rem);
-    padding: 24px 10% 160px; // 160px ≈ input container height
+    padding: 24px max(10%, calc((100% - 800px) / 2)) 180px;
 
-    @media (max-width: 1024px) { padding: 20px 6% 160px; }
+    @media (max-width: 1024px) { padding: 20px max(6%, calc((100% - 800px) / 2)) 160px; }
     @media (max-width: 768px)  { padding: 16px 20px 140px; }
     @media (max-width: 480px)  { padding: 12px 14px 130px; }
-
-    &::-webkit-scrollbar { width: 6px; }
-    &::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
-    }
 
     .message {
         max-width: 80%;
@@ -91,7 +85,7 @@
         }
     }
 
-    .loading-container {
+    .ai-loading-container {
         @include flex(center, center, column);
         padding: 32px 12px;
         text-align: center;
@@ -113,6 +107,10 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+    }
+
+    &.new-chat{
+        display: none;
     }
 }
 
