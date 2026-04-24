@@ -21,8 +21,6 @@ transporter
     });
 
 export async function sendEmail({ to, subject, html, text }) {
-    console.log('emailTool Selected');
-
     const mailOptions = {
         from: process.env.GOOGLE_USER,
         to,
@@ -32,5 +30,6 @@ export async function sendEmail({ to, subject, html, text }) {
     };
 
     const details = await transporter.sendMail(mailOptions);
+    console.log('email sent successfully');
     return 'email sent successfully to ' + to;
 }
