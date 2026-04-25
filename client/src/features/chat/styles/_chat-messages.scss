@@ -109,11 +109,91 @@
         }
     }
 
-    &.new-chat{
+    // ── Thinking bubble ──────────────────────────────────────────────────────
+    .thinking-bubble {
+        margin-bottom: 10px;
+        align-self: flex-start; // left-align within the AI message column
+
+        .thinking-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 0;
+
+            &:hover { color: var(--text-main); }
+
+            .chevron {
+                transition: transform 0.2s ease;
+                &.open { transform: rotate(180deg); }
+            }
+        }
+
+        .thinking-content {
+            margin-top: 10px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 2px solid var(--border-color);
+            border-radius: 0 4px 4px 0;
+            white-space: pre-wrap;
+        }
+    }
+
+    // ── Tool status chips ────────────────────────────────────────────────────
+    .tool-status {
+        @include flex(flex-start, center, row, 8px);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        padding: 4px 0;
+
+        .tool-icon { font-size: 0.9rem; }
+
+        .tool-spinner {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border-color);
+            border-top-color: var(--primary);
+            animation: spin 0.9s linear infinite;
+        }
+
+        &.done {
+            color: var(--text-muted);
+            opacity: 0.7;
+            .tool-spinner { display: none; }
+        }
+    }
+
+    // ── Typewriter cursor (blinks while AnimatedText is running) ─────────────
+    .typewriter-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.1em;
+        background: var(--text-main);
+        margin-left: 2px;
+        vertical-align: text-bottom;
+        animation: blink 0.65s step-end infinite;
+    }
+
+    &.new-chat {
         display: none;
     }
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
 }

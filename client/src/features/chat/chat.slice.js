@@ -51,8 +51,52 @@ const chatSlice = createSlice({
             state.isSending = action.payload;
         },
 
+        // Sets AI reasoning/thinking text on the last (streaming) AI message
+        setThinking: (state, action) => {
+            const { chatId, thinking } = action.payload;
+            const msgs = state.chats[chatId]?.messages;
+            if (!msgs?.length) return;
+            msgs[msgs.length - 1].thinking = thinking;
+        },
+
+        // Appends a tool name to the last (streaming) AI message
+        setToolCall: (state, action) => {
+            const { chatId, toolName } = action.payload;
+            const msgs = state.chats[chatId]?.messages;
+            if (!msgs?.length) return;
+            const last = msgs[msgs.length - 1];
+            if (!last.toolCalls) last.toolCalls = [];
+            last.toolCalls.push(toolName);
+        },
+
         setError: (state, action) => {
             state.error = action.payload;
+        },
+
+        // --- Socket streaming reducers ---
+
+        // streamAiReponse gives FULL accumulated text each time → REPLACE not append
+        setStreamingChunk: (state, action) => {
+            const { chatId, chunk } = action.payload;
+            const msgs = state.chats[chatId]?.messages;
+            if (!msgs?.length) return;
+            msgs[msgs.length - 1].content = chunk;
+        },
+
+        // Stamp the DB _id and authoritative final text on the AI bubble
+        finalizeMessage: (state, action) => {
+            const { chatId, messageId, finalText } = action.payload;
+            const msgs = state.chats[chatId]?.messages;
+            if (!msgs?.length) return;
+            const last = msgs[msgs.length - 1];
+            last._id = messageId;
+            last.content = finalText;
+        },
+
+        // Remove the empty AI bubble on stream error
+        removeLastMessage: (state, action) => {
+            const { chatId } = action.payload;
+            state.chats[chatId]?.messages.pop();
         },
     },
 });
@@ -62,11 +106,16 @@ export const {
     setCurrentChatId,
     setLoading,
     setSending,
+    setThinking,
+    setToolCall,
     setError,
     setAllMessages,
     createNewChat,
     addNewMessage,
     setDeleteChat,
+    setStreamingChunk,
+    finalizeMessage,
+    removeLastMessage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

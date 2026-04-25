@@ -9,7 +9,7 @@ const ChatArea = () => {
     const currentChatId = useSelector((state) => state.chat.currentChatId);
     const isSending = useSelector((state) => state.chat.isSending);
 
-    const { handleSendMessage } = useChat();
+    const { handleSendMessageSocket } = useChat();
 
     const [messageInput, setMessageInput] = useState('');
     const textareaRef = useRef(null);
@@ -27,7 +27,7 @@ const ChatArea = () => {
         }
     }, [messageInput]);
 
-    const handleSend = async (e) => {
+    const handleSend = (e) => {
         e.preventDefault();
         if (!messageInput.trim() || isSending) return;
 
@@ -35,7 +35,7 @@ const ChatArea = () => {
         setMessageInput('');
         if (textareaRef.current) textareaRef.current.style.height = '';
 
-        await handleSendMessage({ message: msg, chatId: currentChatId });
+        handleSendMessageSocket({ message: msg, chatId: currentChatId });
     };
 
     return (

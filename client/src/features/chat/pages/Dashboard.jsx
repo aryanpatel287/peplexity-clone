@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Menu, SquarePen } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import Sidebar from '../components/Sidebar';
@@ -7,14 +7,18 @@ import ChatArea from '../components/chat-area/ChatArea';
 import '../styles/_dashboard.scss';
 
 const Dashboard = () => {
+    const dispatch = useDispatch();
     const chat = useChat();
-    const user = useSelector((state) => state.auth);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
+        // Initialize socket connection first, then register Redux listeners
         chat.initializeSocketConnection();
+        chat.registerSocketListeners(dispatch);
+
+        // Fetch existing chats via HTTP
         chat.handleGetChats();
     }, []);
 
@@ -42,9 +46,7 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            <div
-                className={`dashboard-sidebar ${isMobileMenuOpen ? 'open' : ''}`}
-            >
+            <div className={`dashboard-sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
                 <Sidebar onSelectChat={handleSelectChat} />
             </div>
 

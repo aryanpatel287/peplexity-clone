@@ -1,4 +1,4 @@
-import { initializeSocketConnection } from '../services/chat.socket';
+import { initializeSocketConnection, getSocket, registerSocketListeners } from '../services/chat.socket';
 import { useDispatch } from 'react-redux';
 import {
     setChats,
@@ -20,6 +20,8 @@ import {
 
 export const useChat = () => {
     const dispatch = useDispatch();
+
+    // ─── HTTP handlers (unchanged) ────────────────────────────────────────────
 
     async function handleSendMessage({ message, chatId }) {
         dispatch(setSending(true));
@@ -98,9 +100,29 @@ export const useChat = () => {
         }
     }
 
+    // ─── Socket handler (NEW) ─────────────────────────────────────────────────
+
+    function handleSendMessageSocket({ message, chatId }) {
+        const socket = getSocket();
+        if (!socket?.connected) return;
+
+        dispatch(setSending(true));
+
+        if (chatId) {
+            // Existing chat: optimistically show user bubble + empty AI bubble immediately
+            dispatch(addNewMessage({ chatId, content: message, role: 'user' }));
+            dispatch(addNewMessage({ chatId, content: '', role: 'ai' }));
+        }
+        // New chat: chat:chat_created listener will add both bubbles once chatId is known
+
+        socket.emit('chat:send', { message, chatId });
+    }
+
     return {
         initializeSocketConnection,
+        registerSocketListeners,
         handleSendMessage,
+        handleSendMessageSocket,
         handleGetChats,
         handleGetMessages,
         handleDeleteChat,
