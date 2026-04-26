@@ -40,7 +40,10 @@ export async function handleChatSend(socket, { message, chatId }) {
             socket.emit('chat:tool_call', { chatId: resolvedChatId, toolName });
         };
 
-        const finalText = await streamAiReponse(history, { onThinking, onToolCall });
+        const finalText = await streamAiReponse(history, {
+            onThinking,
+            onToolCall,
+        });
 
         // Persist AI message
         const aiMessage = await messageModel.create({
@@ -57,7 +60,7 @@ export async function handleChatSend(socket, { message, chatId }) {
     } catch (err) {
         console.error('[socket] handleChatSend error:', err);
         socket.emit('chat:error', {
-            chatId,
+            chatId: resolvedChatId ?? chatId,
             error: err?.message ?? 'Something went wrong',
         });
     }

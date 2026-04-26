@@ -3,12 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Menu, SquarePen } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import Sidebar from '../components/Sidebar';
-import ChatArea from '../components/chat-area/ChatArea';
 import '../styles/_dashboard.scss';
+import { Outlet, useNavigate, useLocation } from 'react-router';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
     const chat = useChat();
+    const navigate = useNavigate();
+    const location = useLocation();
     const currentChatId = useSelector((state) => state.chat.currentChatId);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -22,12 +24,19 @@ const Dashboard = () => {
         chat.handleGetChats();
     }, []);
 
-    const handleSelectChat = (selectedChatId) => {
-        chat.handleCurrentChatId(selectedChatId);
-        if (selectedChatId) {
-            chat.handleGetMessages({ chatId: selectedChatId });
+    useEffect(() => {
+        if (currentChatId && location.pathname !== `/c/${currentChatId}`) {
+            navigate(`/c/${currentChatId}`);
         }
+    }, [currentChatId]);
+
+    const handleSelectChat = (selectedChatId) => {
         setIsMobileMenuOpen(false);
+        if (selectedChatId) {
+            navigate(`/c/${selectedChatId}`);
+        } else {
+            navigate('/');
+        }
     };
 
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -58,7 +67,7 @@ const Dashboard = () => {
             )}
 
             <div className="dashboard-main">
-                <ChatArea />
+                <Outlet />
             </div>
         </div>
     );

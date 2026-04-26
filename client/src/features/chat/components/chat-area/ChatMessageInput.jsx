@@ -17,6 +17,7 @@ const ChatMessageInput = ({
                     <textarea
                         ref={textareaRef}
                         className="chat-textarea"
+                        rows={1}
                         placeholder={
                             hasChat
                                 ? 'Ask anything...'

@@ -11,6 +11,8 @@ export function initSocket(httpServer) {
             origin: process.env.CLIENT_ORIGINS,
             credentials: true,
         },
+        pingTimeout: 120000, // 2 minutes
+        pingInterval: 25000, // 25 seconds
     });
 
     // --- Auth middleware ---

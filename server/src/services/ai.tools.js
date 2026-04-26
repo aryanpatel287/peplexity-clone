@@ -20,4 +20,29 @@ const searchInternetTool = tool(searchWeb, {
     schema: z.string().describe('The query to search on web'),
 });
 
-export { emailTool, searchInternetTool };
+const getCurrentDateTimeTool = tool(
+    async () => {
+        const now = new Date();
+
+        const formatted = now.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            dateStyle: 'full',
+            timeStyle: 'medium',
+        });
+
+        const iso = now.toISOString();
+
+        return JSON.stringify({
+            readable: formatted,
+            iso,
+            timezone: 'Asia/Kolkata',
+        });
+    },
+    {
+        name: 'getCurrentDateTime',
+        description:
+            "Returns the current date and time in the user's timezone. Use this when the user asks about current time, today, now, or date.",
+    },
+);
+
+export { emailTool, searchInternetTool, getCurrentDateTimeTool };

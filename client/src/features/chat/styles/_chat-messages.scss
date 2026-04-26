@@ -7,14 +7,20 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;           // fills full height; padding-bottom pushes content up
+    bottom: 0; // fills full height; padding-bottom pushes content up
     overflow-y: auto;
     @include flex(flex-start, stretch, column, 1.5rem);
     padding: 24px max(10%, calc((100% - 800px) / 2)) 180px;
 
-    @media (max-width: 1024px) { padding: 20px max(6%, calc((100% - 800px) / 2)) 160px; }
-    @media (max-width: 768px)  { padding: 16px 20px 140px; }
-    @media (max-width: 480px)  { padding: 12px 14px 130px; }
+    @media (max-width: 1024px) {
+        padding: 20px max(6%, calc((100% - 800px) / 2)) 160px;
+    }
+    @media (max-width: 768px) {
+        padding: 16px 20px 140px;
+    }
+    @media (max-width: 480px) {
+        padding: 12px 14px 130px;
+    }
 
     .message {
         max-width: 80%;
@@ -22,8 +28,14 @@
         line-height: 1.6;
         @include flex(flex-start, flex-start, column, 6px);
 
-        @media (max-width: 768px) { max-width: 92%; font-size: 0.95rem; }
-        @media (max-width: 480px) { max-width: 100%; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            max-width: 92%;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 480px) {
+            max-width: 100%;
+            font-size: 0.9rem;
+        }
 
         &.ai-message {
             align-self: flex-start;
@@ -33,30 +45,61 @@
                 padding: 0;
                 background-color: transparent;
 
-                p { margin: 0 0 0.75em; &:last-child { margin-bottom: 0; } }
-                h1, h2, h3, h4 { font-weight: 600; margin: 1em 0 0.4em; line-height: 1.3; }
-                h1 { font-size: 1.3rem; }
-                h2 { font-size: 1.15rem; }
-                h3 { font-size: 1rem; }
-                ul, ol { padding-left: 1.4em; margin: 0.5em 0; }
-                li { margin-bottom: 0.25em; }
+                p {
+                    margin: 0 0 0.75em;
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+                h1,
+                h2,
+                h3,
+                h4 {
+                    font-weight: 600;
+                    margin: 1em 0 0.4em;
+                    line-height: 1.3;
+                }
+                h1 {
+                    font-size: 1.3rem;
+                }
+                h2 {
+                    font-size: 1.15rem;
+                }
+                h3 {
+                    font-size: 1rem;
+                }
+                ul,
+                ol {
+                    padding-left: 1.4em;
+                    margin: 0.5em 0;
+                }
+                li {
+                    margin-bottom: 0.25em;
+                }
                 code {
-                    background: rgba(255,255,255,0.08);
+                    background: rgba(255, 255, 255, 0.08);
                     border-radius: 4px;
                     padding: 2px 6px;
                     font-size: 0.875em;
                     font-family: 'JetBrains Mono', 'Fira Code', monospace;
                 }
                 pre {
-                    background: rgba(255,255,255,0.06);
+                    background: rgba(255, 255, 255, 0.06);
                     border-radius: 8px;
                     padding: 14px 16px;
                     overflow-x: auto;
                     margin: 0.75em 0;
                     max-width: 100%;
-                    code { background: none; padding: 0; font-size: 0.85rem; }
+                    code {
+                        background: none;
+                        padding: 0;
+                        font-size: 0.85rem;
+                    }
 
-                    @media (max-width: 480px) { padding: 10px 12px; border-radius: 6px; }
+                    @media (max-width: 480px) {
+                        padding: 10px 12px;
+                        border-radius: 6px;
+                    }
                 }
                 blockquote {
                     border-left: 3px solid var(--border-color);
@@ -64,9 +107,19 @@
                     color: var(--text-muted);
                     margin: 0.5em 0;
                 }
-                a { color: var(--text-main); text-decoration: underline; opacity: 0.8; }
-                strong { font-weight: 600; }
-                hr { border: none; border-top: 1px solid var(--border-color); margin: 0.75em 0; }
+                a {
+                    color: var(--text-main);
+                    text-decoration: underline;
+                    opacity: 0.8;
+                }
+                strong {
+                    font-weight: 600;
+                }
+                hr {
+                    border: none;
+                    border-top: 1px solid var(--border-color);
+                    margin: 0.75em 0;
+                }
             }
         }
 
@@ -80,13 +133,16 @@
                 padding: 12px 18px;
                 border-radius: 16px;
 
-                @media (max-width: 480px) { padding: 10px 14px; border-radius: 12px; }
+                @media (max-width: 480px) {
+                    padding: 10px 14px;
+                    border-radius: 12px;
+                }
             }
         }
     }
 
     .ai-loading-container {
-        @include flex(center, center, column);
+        @include flex(center, flex-start, column);
         padding: 32px 12px;
         text-align: center;
         color: var(--text-muted);
@@ -109,80 +165,7 @@
         }
     }
 
-    // ── Thinking bubble ──────────────────────────────────────────────────────
-    .thinking-bubble {
-        margin-bottom: 10px;
-        align-self: flex-start; // left-align within the AI message column
 
-        .thinking-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            padding: 0;
-
-            &:hover { color: var(--text-main); }
-
-            .chevron {
-                transition: transform 0.2s ease;
-                &.open { transform: rotate(180deg); }
-            }
-        }
-
-        .thinking-content {
-            margin-top: 10px;
-            max-height: 160px;
-            overflow-y: auto;
-            padding: 10px 14px;
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid var(--border-color);
-            border-radius: 0 4px 4px 0;
-            white-space: pre-wrap;
-        }
-    }
-
-    // ── Tool status chips ────────────────────────────────────────────────────
-    .tool-status {
-        @include flex(flex-start, center, row, 8px);
-        font-size: 0.82rem;
-        color: var(--text-muted);
-        padding: 4px 0;
-
-        .tool-icon { font-size: 0.9rem; }
-
-        .tool-spinner {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 1.5px solid var(--border-color);
-            border-top-color: var(--primary);
-            animation: spin 0.9s linear infinite;
-        }
-
-        &.done {
-            color: var(--text-muted);
-            opacity: 0.7;
-            .tool-spinner { display: none; }
-        }
-    }
-
-    // ── Typewriter cursor (blinks while AnimatedText is running) ─────────────
-    .typewriter-cursor {
-        display: inline-block;
-        width: 2px;
-        height: 1.1em;
-        background: var(--text-main);
-        margin-left: 2px;
-        vertical-align: text-bottom;
-        animation: blink 0.65s step-end infinite;
-    }
 
     &.new-chat {
         display: none;
@@ -190,10 +173,8 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
-}

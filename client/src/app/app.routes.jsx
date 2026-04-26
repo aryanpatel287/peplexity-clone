@@ -8,6 +8,7 @@ import ForgotPassword from '../features/auth/pages/ForgotPassword';
 import UpdatePassword from '../features/auth/pages/UpdatePassword';
 import ForbiddenPage from '../features/shared/pages/ForbiddenPage';
 import NotFoundPage from '../features/shared/pages/NotFoundPage';
+import ChatArea from '../features/chat/components/chat-area/ChatArea';
 
 export const router = createBrowserRouter([
     {
@@ -17,6 +18,16 @@ export const router = createBrowserRouter([
                 <Dashboard />
             </ProtectedPage>
         ),
+        children: [
+            {
+                index: true,
+                element: <ChatArea />,
+            },
+            {
+                path: 'c/:chatId',
+                element: <ChatArea />,
+            },
+        ],
     },
     {
         path: '/dashboard',

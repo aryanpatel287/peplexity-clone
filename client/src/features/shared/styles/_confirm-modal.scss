@@ -1,0 +1,156 @@
+@use './mixins' as *;
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    @include flex(center, center);
+    animation: fadeIn 0.2s ease;
+
+    .modal-content {
+        background-color: var(--bg-card, #1c1c1e);
+        border: 1px solid var(--border-color, #2d2d2f);
+        border-radius: 12px;
+        padding: 24px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        animation: slideUp 0.2s ease;
+        @include flex(flex-start, stretch, column, 16px);
+
+        .modal-header {
+            @include flex(space-between, center, row);
+
+            h3 {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--text-main, #fff);
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                color: var(--text-muted, #8e8e93);
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
+                @include flex(center, center);
+                transition:
+                    color 0.2s,
+                    background-color 0.2s;
+
+                &:hover {
+                    color: var(--text-main, #fff);
+                    background-color: rgba(255, 255, 255, 0.1);
+                }
+            }
+        }
+
+        .modal-body {
+            p {
+                margin: 0;
+                font-size: 0.95rem;
+                color: var(--text-muted, #8e8e93);
+                line-height: 1.5;
+            }
+        }
+
+        .modal-footer {
+            @include flex(flex-end, center, row, 12px);
+            margin-top: 8px;
+
+            button {
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: none;
+
+                &.cancel-btn {
+                    background-color: transparent;
+                    border: 1px solid var(--border-color, #2d2d2f);
+                    color: var(--text-main, #fff);
+
+                    &:hover {
+                        background-color: rgba(255, 255, 255, 0.05);
+                    }
+                }
+
+                &.confirm-btn {
+                    color: white;
+
+                    &.danger {
+                        background-color: #e02e2a;
+
+                        &:hover {
+                            background-color: #911e1b;
+                        }
+                    }
+
+                    &.primary {
+                        background-color: var(--primary);
+
+                        &:hover {
+                            background-color: var(--primary-hover);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    &.is-closing {
+        animation: fadeOut 0.2s ease forwards;
+
+        .modal-content {
+            animation: slideDown 0.2s ease forwards;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+}

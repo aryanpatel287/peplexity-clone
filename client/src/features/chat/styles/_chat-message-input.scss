@@ -36,7 +36,6 @@
             border-radius: 12px;
             padding: 16px;
             @include flex(flex-start, stretch, column, 12px);
-            min-height: 60px;
 
             .chat-textarea {
                 background: transparent;

@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trash, SquarePen } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
 import LogoutButton from '../../auth/components/LogoutButton';
 import '../styles/_sidebar.scss';
 import UserDetailCard from '../../auth/components/UserDetailCard';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 
 const Sidebar = ({ onSelectChat }) => {
     const chats = useSelector((state) => state.chat.chats);
     const loading = useSelector((state) => state.chat.loading);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
     const { handleDeleteChat } = useChat();
+
+    const [chatToDelete, setChatToDelete] = useState(null);
 
     return (
         <div className="chat-sidebar">
@@ -44,7 +47,7 @@ const Sidebar = ({ onSelectChat }) => {
                                     className="chat-delete-btn"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDeleteChat({ chatId: chat._id });
+                                        setChatToDelete(chat._id);
                                     }}
                                 >
                                     <Trash size={14} />
@@ -64,6 +67,21 @@ const Sidebar = ({ onSelectChat }) => {
                 <UserDetailCard />
                 <LogoutButton />
             </div>
+
+            <ConfirmModal
+                isOpen={!!chatToDelete}
+                onClose={() => setChatToDelete(null)}
+                onConfirm={() => {
+                    if (chatToDelete) {
+                        handleDeleteChat({ chatId: chatToDelete });
+                        setChatToDelete(null);
+                    }
+                }}
+                title="Delete Chat"
+                message="Are you sure you want to delete this chat? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+            />
         </div>
     );
 };

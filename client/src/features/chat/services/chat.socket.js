@@ -16,6 +16,8 @@ let socket = null;
 let listenersRegistered = false;
 
 export function initializeSocketConnection() {
+    if (socket) return socket;
+
     socket = io(import.meta.env.VITE_SOCKET_URL, {
         withCredentials: true,
     });
@@ -37,11 +39,15 @@ export function getSocket() {
 
 /**
  * Register all socket → Redux listeners once.
- * Call from Dashboard's useEffect with dispatch from useDispatch().
  */
 export function registerSocketListeners(dispatch) {
     if (listenersRegistered) return;
     listenersRegistered = true;
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from Socket.IO server');
+        dispatch(setSending(false));
+    });
 
     // New chat created server-side — add both message bubbles now
     socket.on('chat:chat_created', ({ chatId, title, userMessage }) => {

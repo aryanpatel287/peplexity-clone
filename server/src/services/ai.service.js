@@ -1,7 +1,31 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatMistralAI } from '@langchain/mistralai';
 import { AIMessage, createAgent, HumanMessage, SystemMessage } from 'langchain';
-import { emailTool, searchInternetTool } from './ai.tools.js';
+import {
+    emailTool,
+    getCurrentDateTimeTool,
+    searchInternetTool,
+} from './ai.tools.js';
+
+const toolAgentSystemPrompt = `You are an AI assistant that can use tools when needed.
+
+Rules:
+
+* If data is real-time, future, or uncertain → use tools
+* Never guess unknown facts
+* Never claim tool usage unless actually called
+* If tool is needed → return ONLY tool call
+* Otherwise → return final answer
+
+Time Awareness:
+
+* If the user asks about current time, date, today, or now → MUST call the 'getCurrentDateTimeTool' tool
+* Never guess current time or date
+* Never answer time-related queries from memory
+* Always rely on the tool for accurate time information
+
+If unsure → use tools, not reasoning.
+`;
 
 const geminiModel = new ChatGoogleGenerativeAI({
     model: 'gemma-4-31b-it',
@@ -10,7 +34,8 @@ const geminiModel = new ChatGoogleGenerativeAI({
 
 export const geminiAgent = createAgent({
     model: geminiModel,
-    tools: [emailTool, searchInternetTool],
+    systemPrompt: toolAgentSystemPrompt,
+    tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
 });
 
 const mistralModel = new ChatMistralAI({
@@ -20,7 +45,7 @@ const mistralModel = new ChatMistralAI({
 
 export const mistralAgent = createAgent({
     model: mistralModel,
-    tools: [emailTool, searchInternetTool],
+    tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
 });
 
 export async function generateResponse(messages) {
@@ -36,7 +61,7 @@ export async function generateResponse(messages) {
 export async function generateChatTitle(message) {
     const response = await mistralModel.invoke([
         new SystemMessage(`You are a helpful assistant that generates concise and descriptive titles for chat conversations. 
-        User will provide you the first message of a chat conversation, your task is to create a title that accurately reflects the main topic or theme of the conversation. The title should be brief, ideally no more than 2-4 words, and should capture the essence of the discussion in a clear and engaging way.    
+        User will provide you the first message of a chat conversation, your task is to create a title that accurately reflects the main topic or theme of the conversation. The title should be brief, ideally no more than 2-4 words, and should capture the essence of the discussion in a clear and engaging way.Return a title as normal string not markdown    
             `),
         new HumanMessage(
             `Generate a concise and descriptive title for a chat conversation based on the following message:
@@ -71,12 +96,7 @@ export async function streamAiReponse(
 
     const stream = await geminiAgent.stream(
         {
-            messages: [
-                new SystemMessage(`You are a helpful assistant that generates concise and descriptive titles for chat conversations. 
-        User will provide you the first message of a chat conversation, your task is to create a title that accurately reflects the main topic or theme of the conversation. The title should be brief, ideally no more than 2-4 words, and should capture the essence of the discussion in a clear and engaging way.    
-            `),
-                ...mappedMessages,
-            ],
+            messages: mappedMessages,
         },
         { streamMode: 'values' },
     );

@@ -6,6 +6,7 @@ import chatRouter from './routes/chat.route.js';
 import morgan from 'morgan';
 
 const app = express();
+console.log(new Date().toISOString().split('T')[0]);
 
 app.use(express.json());
 app.use(cookieParser());

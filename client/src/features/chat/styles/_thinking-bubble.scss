@@ -1,0 +1,41 @@
+.thinking-bubble {
+    margin-bottom: 10px;
+    align-self: flex-start; // left-align within the AI message column
+
+    .thinking-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding: 0;
+
+        &:hover {
+            color: var(--text-main);
+        }
+
+        .chevron {
+            transition: transform 0.2s ease;
+            &.open {
+                transform: rotate(180deg);
+            }
+        }
+    }
+
+    .thinking-content {
+        margin-top: 10px;
+        max-height: 160px;
+        overflow-y: auto;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 2px solid var(--border-color);
+        border-radius: 0 4px 4px 0;
+        white-space: pre-wrap;
+    }
+}
