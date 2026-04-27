@@ -11,13 +11,11 @@ import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
 
-    console.log('chatId: ', chatId);
 
     let chatTitle = null,
         chat = null;
 
     if (!chatId) {
-        console.log('new chat created');
         chatTitle = await generateChatTitle(message);
         chat = await chatModel.create({
             user: req.user.id,
@@ -47,8 +45,6 @@ async function sendMessage(req, res) {
     const messageHistory = await messageModel.find({
         chat: chatId || chat._id,
     });
-
-    console.log('messageHistory: ', messageHistory);
 
     // const aiResponse = await generateResponse(messageHistory);
     const aiResponse = await streamAiReponse(messageHistory, userFiles);
@@ -125,8 +121,15 @@ async function deleteChat(req, res) {
     });
 }
 
-async function uploadImageController(req, res) {
-    console.log('req.files: ', req.files);
+
+
+/**
+ * @description Upload the files provided by user
+ * @route /api/chats/uploads
+ * @access Private
+ * @body none
+ */
+async function uploadFileController(req, res) {
     try {
         const uploadedFiles = await uploadMultipleImagesOnImageKit(req.files);
 
@@ -150,7 +153,7 @@ export {
     getChats,
     getMessages,
     deleteChat,
-    uploadImageController,
+    uploadFileController,
 };
 
 // // Success response:

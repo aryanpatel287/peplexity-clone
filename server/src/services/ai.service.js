@@ -147,7 +147,6 @@ export async function streamAiReponse(
             const thinkingPart = content.find((p) => p.type === 'thinking');
             if (thinkingPart?.thinking && onThinking) {
                 onThinking(thinkingPart.thinking);
-                console.log('thinking: ', thinkingPart.thinking);
             }
         }
 
@@ -156,7 +155,6 @@ export async function streamAiReponse(
             if (onToolCall) {
                 latest.tool_calls.forEach((t) => {
                     onToolCall(t.name);
-                    console.log('toolName: ', t.name);
                 });
             }
             continue; // no text to extract from this chunk

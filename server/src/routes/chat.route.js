@@ -5,7 +5,7 @@ import {
     getChats,
     getMessages,
     sendMessage,
-    uploadImageController,
+    uploadFileController,
 } from '../controllers/chat.controller.js';
 import multer from 'multer';
 
@@ -57,11 +57,17 @@ chatRouter.get('/:chatId/messages', authUser, getMessages);
  */
 chatRouter.delete('/delete/:chatId', authUser, deleteChat);
 
+/**
+ * @route /api/chats/uploads
+ * @description Upload the files provided by user
+ * @access Private
+ * @body none
+ */
 chatRouter.post(
     '/uploads',
     authUser,
     upload.array('files'),
-    uploadImageController,
+    uploadFileController,
 );
 
 export default chatRouter;

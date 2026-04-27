@@ -376,7 +376,6 @@ async function forgotPasswordEmail(req, res) {
  */
 async function updatePasswordControlller(req, res) {
     const { token } = req.query;
-    console.log(token);
     const { password } = req.body;
 
     if (!token) {

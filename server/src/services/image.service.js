@@ -12,8 +12,6 @@ export async function uploadImageOnImageKit({ image }) {
         fileName: image.originalname,
         folder: '/cohort2-genAi/images',
     });
-
-    console.log('UploadedImage: ', file);
 }
 
 export async function uploadMultipleImagesOnImageKit(files) {
