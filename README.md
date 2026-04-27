@@ -7,6 +7,7 @@ This repository contains a full-stack AI chat application split into two apps:
 
 ## API Collection and Quick Testing
 
+- Live demo (deployed): [https://cohort2-0-backend-1-kphk.onrender.com](https://cohort2-0-backend-1-kphk.onrender.com)
 - Postman collection: [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
 - Route-by-route request and response examples: [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md)
 
