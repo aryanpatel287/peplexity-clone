@@ -1,4 +1,6 @@
 import { io } from 'socket.io-client';
+import { toast } from 'react-toastify';
+import { capitalize } from '../../shared/utils/format';
 import {
     createNewChat,
     setCurrentChatId,
@@ -75,7 +77,9 @@ export function registerSocketListeners(dispatch) {
 
     // Error — clean up
     socket.on('chat:error', ({ chatId, error }) => {
-        dispatch(setError(error));
+        const msg = capitalize(error);
+        dispatch(setError(msg));
+        toast.error(msg);
         dispatch(setSending(false));
         if (chatId) dispatch(removeLastMessage({ chatId }));
     });

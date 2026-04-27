@@ -1,9 +1,9 @@
 import React from 'react'
 import '../styles/_form-group.scss'
 
-const FormGroup = ({ label, id, placeholder, type, value, onChange, name }) => {
+const FormGroup = ({ label, id, placeholder, type, value, onChange, name, hasError }) => {
   return (
-    <div className='form-group'>
+    <div className={`form-group${hasError ? ' error' : ''}`}>
       <input
         value={value}
         onChange={onChange}

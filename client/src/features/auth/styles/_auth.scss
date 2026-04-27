@@ -53,10 +53,40 @@
             }
         }
 
+        .auth-error-container {
+            min-height: 20px; // Reserve space for error message
+            width: 100%;
+            @include flex(flex-start, center);
+            margin-bottom: -1rem;
+
+            .auth-error-message {
+                color: #ff4d4d;
+                font-size: 0.85rem;
+                text-align: left;
+                animation: fadeInDown 0.3s ease forwards;
+                padding-block: 0.5rem;
+            }
+        }
+
         .auth-footer {
             text-align: center;
             font-size: 0.95rem;
             color: var(--text-muted);
+
+            a{
+            color: var(--primary-hover);
+            }
         }
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

@@ -1,0 +1,81 @@
+@use '../../shared/styles/mixins' as *;
+
+.registration-success {
+    @include flex(center, center, column, $gap: 1.5rem);
+    text-align: center;
+    animation: fadeIn 0.4s ease-out;
+
+    .success-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        @include flex(center, center);
+        margin-bottom: 0.5rem;
+
+        .success-icon {
+            color: var(--primary-hover);
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .success-message {
+        color: var(--text-muted);
+        font-size: 1rem;
+        line-height: 1.5;
+        margin: 0;
+
+        strong {
+            color: var(--text-main);
+            word-break: break-all;
+        }
+    }
+
+    .instructions {
+        @include flex(center, center, column, $gap: 0.5rem);
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    }
+
+    .login-btn {
+        width: 100%;
+        text-decoration: none;
+        @include flex(center, center);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

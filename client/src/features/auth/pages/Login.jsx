@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import FormGroup from '../components/FormGroup';
 import '../../shared/styles/button.scss';
 import '../styles/_auth.scss';
 import { useAuth } from '../hooks/useAuth';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setError } from '../auth.slice';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -17,10 +18,19 @@ const Login = () => {
     const errorMsg = useSelector((state) => state.auth.error);
 
     const { handleLogin } = useAuth();
-
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    // Clear error when navigating away
+    useEffect(() => {
+        return () => {
+            dispatch(setError(null));
+        };
+    }, [dispatch]);
+
     const handleChange = (e) => {
+        // Clear error as soon as user starts typing
+        if (errorMsg) dispatch(setError(null));
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -48,7 +58,10 @@ const Login = () => {
                     <p>Log in to your account</p>
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
+                    <div className="auth-error-container">
+                        {errorMsg && <p className="auth-error-message">{errorMsg}</p>}
+                    </div>
                     <FormGroup
                         label="Email Address"
                         id="email"
@@ -56,6 +69,7 @@ const Login = () => {
                         placeholder="Enter your email"
                         value={formData.email}
                         onChange={handleChange}
+                        hasError={!!errorMsg && (errorMsg.toLowerCase().includes('email') || errorMsg.toLowerCase().includes('credentials'))}
                     />
                     <FormGroup
                         label="Password"
@@ -64,13 +78,13 @@ const Login = () => {
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleChange}
+                        hasError={!!errorMsg && errorMsg.toLowerCase().includes('credentials')}
                     />
 
                     <div className="forgot-password-link">
                         <Link to="/forgot-password">Forgot your password?</Link>
                     </div>
 
-                    {errorMsg && <p className="auth-error-message">{errorMsg}</p>}
 
                     <button type="submit" className="btn btn-primary">
                         Log In

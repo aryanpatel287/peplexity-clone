@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import { capitalize } from '../../shared/utils/format';
 
 import {
     register,
@@ -20,20 +22,25 @@ export function useAuth() {
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
-            const data = await register({ username, email, password });
+            await register({ username, email, password });
+            return true;
         } catch (error) {
             console.log(error);
-            dispatch(
-                setError(
-                    error.response?.data?.message || 'Registration failed',
-                ),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Registration failed');
+            dispatch(setError(msg));
+            return false;
         } finally {
             dispatch(setLoading(false));
         }
     }, [dispatch]);
 
     const handleLogin = useCallback(async ({ email, password }) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            dispatch(setError(capitalize('please enter a valid email address')));
+            return null;
+        }
+
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
@@ -41,7 +48,7 @@ export function useAuth() {
             dispatch(setUser(data.user));
             return data.user;
         } catch (error) {
-            dispatch(setError(error.response?.data?.message || 'Login failed'));
+            dispatch(setError(capitalize(error.response?.data?.message || 'Login failed')));
             return null;
         } finally {
             dispatch(setLoading(false));
@@ -54,12 +61,8 @@ export function useAuth() {
             dispatch(setError(null));
             const data = await resendVerificationEmail({ email });
         } catch (error) {
-            dispatch(
-                setError(
-                    error.response?.data?.message ||
-                        'Failed to resend verification email',
-                ),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Failed to resend verification email');
+            dispatch(setError(msg));
         } finally {
             dispatch(setLoading(false));
         }
@@ -72,11 +75,9 @@ export function useAuth() {
             const data = await getMe();
             dispatch(setUser(data.user));
         } catch (error) {
-            dispatch(
-                setError(
-                    error.response?.data?.message || 'Failed to fetch user',
-                ),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Failed to fetch user');
+            dispatch(setError(msg));
+            toast.error(msg);
         } finally {
             dispatch(setLoading(false));
         }
@@ -86,12 +87,12 @@ export function useAuth() {
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
-            const data = await logout();
+            await logout();
             dispatch(setUser(null));
         } catch (error) {
-            dispatch(
-                setError(error.response?.data?.message || 'Logout failed'),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Logout failed');
+            dispatch(setError(msg));
+            toast.error(msg);
         } finally {
             dispatch(setLoading(false));
         }
@@ -101,11 +102,12 @@ export function useAuth() {
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
-            const data = await forgotPasswordEmail({ email });
+            await forgotPasswordEmail({ email });
+            toast.success('Reset email sent! Please check your inbox.');
         } catch (error) {
-            dispatch(
-                setError(error.response?.data?.message || 'Logout failed'),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Failed to send reset email');
+            dispatch(setError(msg));
+            toast.error(msg);
         } finally {
             dispatch(setLoading(false));
         }
@@ -115,11 +117,12 @@ export function useAuth() {
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
-            const data = await updatePassword({ password, token });
+            await updatePassword({ password, token });
+            toast.success('Password updated successfully!');
         } catch (error) {
-            dispatch(
-                setError(error.response?.data?.message || 'Logout failed'),
-            );
+            const msg = capitalize(error.response?.data?.message || 'Failed to update password');
+            dispatch(setError(msg));
+            toast.error(msg);
         } finally {
             dispatch(setLoading(false));
         }

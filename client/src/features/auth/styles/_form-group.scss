@@ -57,4 +57,20 @@
     .form-input:not(:focus):not(:placeholder-shown) ~ .form-label {
         color: var(--text-muted);
     }
+
+    &.error {
+        .form-input {
+            border-color: #ff4d4d;
+            box-shadow: 0 0 0 1px rgba(255, 77, 77, 0.2);
+            
+            &:focus {
+                border-color: #ff4d4d;
+                box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+            }
+        }
+
+        .form-label {
+            color: #ff4d4d !important;
+        }
+    }
 }
