@@ -10,6 +10,10 @@ import {
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
+const serverBaseUrl = (
+    process.env.SERVER_URL || `http://localhost:${process.env.SERVER_PORT}`
+).replace(/\/$/, '');
+
 /**
  * @description Register a user
  * @route POST /api/auth/register
@@ -72,7 +76,7 @@ async function registerController(req, res) {
             process.env.JWT_SECRET,
         );
 
-        const emailVerificationLink = ` http://localhost:${process.env.SERVER_PORT}/api/auth/verify-email?token=${emailVerificationToken}`;
+        const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
 
         await sendEmail({
             to: normalizedEmail,
@@ -240,7 +244,7 @@ async function resendVerificationEmail(req, res) {
         process.env.JWT_SECRET,
     );
 
-    const emailVerificationLink = `http://localhost:${process.env.SERVER_PORT}/api/auth/verify-email?token=${emailVerificationToken}`;
+    const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
 
     await sendEmail({
         to: normalizedEmail,
