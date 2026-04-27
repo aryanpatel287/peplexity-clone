@@ -13,7 +13,7 @@ import {
     updatePassword,
 } from '../services/auth.api';
 
-import { setUser, setError, setLoading } from '../auth.slice';
+import { setUser, setError, setLoading, setIsUpdatingPassword } from '../auth.slice';
 
 export function useAuth() {
     const dispatch = useDispatch();
@@ -104,10 +104,12 @@ export function useAuth() {
             dispatch(setError(null));
             await forgotPasswordEmail({ email });
             toast.success('Reset email sent! Please check your inbox.');
+            return true;
         } catch (error) {
             const msg = capitalize(error.response?.data?.message || 'Failed to send reset email');
             dispatch(setError(msg));
             toast.error(msg);
+            return false;
         } finally {
             dispatch(setLoading(false));
         }
@@ -115,16 +117,18 @@ export function useAuth() {
 
     const handleUpdatePassword = useCallback(async ({ password, token }) => {
         try {
-            dispatch(setLoading(true));
+            dispatch(setIsUpdatingPassword(true));
             dispatch(setError(null));
             await updatePassword({ password, token });
             toast.success('Password updated successfully!');
+            return true;
         } catch (error) {
             const msg = capitalize(error.response?.data?.message || 'Failed to update password');
             dispatch(setError(msg));
             toast.error(msg);
+            return false;
         } finally {
-            dispatch(setLoading(false));
+            dispatch(setIsUpdatingPassword(false));
         }
     }, [dispatch]);
 

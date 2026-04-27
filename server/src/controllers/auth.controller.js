@@ -1,6 +1,12 @@
 import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
 import { sendEmail } from '../services/mail.service.js';
+import {
+    getVerificationEmailTemplate,
+    getForgotPasswordEmailTemplate,
+    getVerificationSuccessPage,
+    getAlreadyVerifiedPage,
+} from '../utils/emailTemplates.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
@@ -70,19 +76,8 @@ async function registerController(req, res) {
 
         await sendEmail({
             to: normalizedEmail,
-            subject: 'Welcome to Perplexity',
-            html: ` <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-                        <h2 style="color:#4B6EF5;">Verify your email for Perplexity</h2>
-                        <p>Hi <b>${username}</b>,</p>
-                        <p>Thank you for registering on Perplexity! Please verify your email address to activate your account.</p>
-                        <div style="text-align:center; margin:32px 0;">
-                        <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                            Verify Email
-                        </a>
-                        </div>
-                        <p>If you did not sign up, you can ignore this email.</p>
-                        <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-                    </div>`,
+            subject: 'Welcome to Perplexity - Verify Your Email',
+            html: getVerificationEmailTemplate(username, emailVerificationLink),
         });
 
         return res.status(200).json({
@@ -121,42 +116,15 @@ async function verifyEmail(req, res) {
     }
 
     if (user.verified) {
-        const html = `
-            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-                <h2 style="color:#4B6EF5;">Email Already Verified</h2>
-                <p>Hi <b>${user.username}</b>,</p>
-                <p>Your email is already verified. You can log in to your account.</p>
-                <div style="text-align:center; margin:32px 0;">
-                    <a href="http://localhost:${process.env.SERVER_PORT}/login" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                        Go to Login
-                    </a>
-                </div>
-                <p>If you did not request this, you can ignore this email.</p>
-                <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-            </div>
-        `;
-        return res.send(html);
+        const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+        return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
     user.verified = true;
     await user.save();
 
-    const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-            <h2 style="color:#4B6EF5;">Email Verified Successfully!</h2>
-            <p>Hi <b>${user.username}</b>,</p>
-            <p>Your email has been successfully verified. You can now log in to your account.</p>
-            <div style="text-align:center; margin:32px 0;">
-                <a href="http://localhost:${process.env.SERVER_PORT}/login" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                    Go to Login
-                </a>
-            </div>
-            <p>If you did not request this, you can ignore this email.</p>
-            <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-        </div>
-    `;
-
-    res.send(html);
+    const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+    res.send(getVerificationSuccessPage(user.username, loginLink));
 }
 
 /**
@@ -261,21 +229,8 @@ async function resendVerificationEmail(req, res) {
     }
 
     if (user.verified) {
-        const html = `
-            <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-                <h2 style="color:#4B6EF5;">Email Already Verified</h2>
-                <p>Hi <b>${user.username}</b>,</p>
-                <p>Your email is already verified. You can log in to your account.</p>
-                <div style="text-align:center; margin:32px 0;">
-                    <a href="http://localhost:${process.env.SERVER_PORT}/login" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                        Go to Login
-                    </a>
-                </div>
-                <p>If you did not request this, you can ignore this email.</p>
-                <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-            </div>
-        `;
-        return res.send(html);
+        const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+        return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
     const emailVerificationToken = jwt.sign(
@@ -289,19 +244,8 @@ async function resendVerificationEmail(req, res) {
 
     await sendEmail({
         to: normalizedEmail,
-        subject: 'Welcome to Perplexity',
-        html: ` <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-                        <h2 style="color:#4B6EF5;">Verify your email for Perplexity</h2>
-                        <p>Hi <b>${user.username}</b>,</p>
-                        <p>Thank you for registering on Perplexity! Please verify your email address to activate your account.</p>
-                        <div style="text-align:center; margin:32px 0;">
-                        <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                            Verify Email
-                        </a>
-                        </div>
-                        <p>If you did not sign up, you can ignore this email.</p>
-                        <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-                    </div>`,
+        subject: 'Verify Your Email - Perplexity',
+        html: getVerificationEmailTemplate(user.username, emailVerificationLink),
     });
 
     return res.status(200).json({
@@ -410,24 +354,7 @@ async function forgotPasswordEmail(req, res) {
 
     const emailVerificationLink = `${process.env.CLIENT_ORIGINS}/update-password?token=${emailVerificationToken}`;
 
-    const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border:1px solid #eee; border-radius:8px; padding:24px;">
-            <h2 style="color:#4B6EF5;">Reset Your Password</h2>
-            <p>Hi <b>${user.username}</b>,</p>
-            <p>We received a request to reset your password. Click the button below to set a new password:</p>
-            <div style="text-align:center; margin:32px 0;">
-                <a href="${emailVerificationLink}" style="background:#4B6EF5; color:#fff; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
-                    Reset Password
-                </a>
-            </div>
-            <p>If the button above does not work, click the following link:</p>
-            <div style="word-break:break-all; background:#f5f5f5; padding:10px; border-radius:4px; margin-bottom:16px;">
-                <a href="${emailVerificationLink}" style="color:#4B6EF5;">${emailVerificationLink}</a>
-            </div>
-            <p>If you did not request a password reset, you can ignore this email.</p>
-            <p style="margin-top:32px; color:#888; font-size:13px;">— The Perplexity Team</p>
-        </div>
-    `;
+    const html = getForgotPasswordEmailTemplate(user.username, emailVerificationLink);
 
     await sendEmail({
         to: normalizedEmail,
