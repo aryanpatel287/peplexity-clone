@@ -8,6 +8,9 @@ import UserDetailCard from '../../auth/components/UserDetailCard';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 
 const Sidebar = ({ onSelectChat }) => {
+    const repoUrl =
+        'https://github.com/aryanpatel287/Cohort2.0-Backend/tree/main/Perplexity';
+
     const chats = useSelector((state) => state.chat.chats);
     const loading = useSelector((state) => state.chat.loading);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
@@ -18,13 +21,26 @@ const Sidebar = ({ onSelectChat }) => {
     return (
         <div className="chat-sidebar">
             <div className="sidebar-header">
-                <button
-                    className="new-chat-btn"
-                    onClick={() => onSelectChat(null)}
-                >
-                    <SquarePen size={15} />
-                    New Chat
-                </button>
+                <div className="sidebar-header-actions">
+                    <button
+                        className="new-chat-btn"
+                        onClick={() => onSelectChat(null)}
+                    >
+                        <SquarePen size={15} />
+                        New Chat
+                    </button>
+
+                    <a
+                        href={repoUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="github-link-btn"
+                        aria-label="Open project GitHub repository"
+                        title="Open GitHub Repository"
+                    >
+                        <i className="ri-github-fill github-icon" />
+                    </a>
+                </div>
             </div>
 
             <div className="chat-list">
