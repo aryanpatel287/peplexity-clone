@@ -5,9 +5,25 @@ import {
     getChats,
     getMessages,
     sendMessage,
+    uploadImageController,
 } from '../controllers/chat.controller.js';
+import multer from 'multer';
 
 const chatRouter = Router();
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 2 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (
+            file.mimetype.startsWith('image/') ||
+            file.mimetype === 'application/pdf'
+        ) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only images and PDFs are allowed!'), false);
+        }
+    },
+});
 
 /**
  * @route /api/chats/message
@@ -40,5 +56,12 @@ chatRouter.get('/:chatId/messages', authUser, getMessages);
  * @body none
  */
 chatRouter.delete('/delete/:chatId', authUser, deleteChat);
+
+chatRouter.post(
+    '/uploads',
+    authUser,
+    upload.array('files'),
+    uploadImageController,
+);
 
 export default chatRouter;

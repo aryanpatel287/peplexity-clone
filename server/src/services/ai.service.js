@@ -87,12 +87,44 @@ export async function generateChatTitle(message) {
  */
 export async function streamAiReponse(
     messageHistory,
+    userFiles,
     { onThinking, onToolCall } = {},
 ) {
-    const mappedMessages = messageHistory.map((message) => {
-        if (message.role === 'user') return new HumanMessage(message.content);
-        if (message.role === 'ai') return new AIMessage(message.content);
-    });
+    const lastIndex = messageHistory.length - 1;
+
+    const mappedMessages = messageHistory
+        .map((message, index) => {
+            if (message.role === 'user') {
+                const content = [{ type: 'text', text: message.content }];
+
+                if (index === lastIndex && userFiles?.length) {
+                    for (const file of userFiles) {
+                        if (file.mimetype?.startsWith('image/')) {
+                            content.push({ type: 'image', url: file.url });
+                            continue;
+                        }
+                
+                        if (file.mimetype === 'application/pdf') {
+                            content.push({
+                                type: 'file',
+                                url: file.url,
+                                mimeType: file.mimetype,
+                                name: file.name,
+                            });
+                        }
+                    }
+                }
+
+                return new HumanMessage({ role: 'user', content });
+            }
+
+            if (message.role === 'ai') {
+                return new AIMessage(message.content);
+            }
+
+            return null;
+        })
+        .filter(Boolean);
 
     const stream = await geminiAgent.stream(
         {

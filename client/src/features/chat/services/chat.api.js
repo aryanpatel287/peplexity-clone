@@ -5,12 +5,11 @@ const api = axios.create({
     withCredentials: true,
 });
 
-export async function sendMessage({ message, chatId }) {
-    console.log('api layer: ', chatId);
-
+export async function sendMessage({ message, chatId, uploadedFiles }) {
     const response = await api.post('/message', {
         message,
         chat: chatId,
+        uploadedFiles,
     });
 
     return response.data;
@@ -31,5 +30,13 @@ export async function getMessages({ chatId }) {
 export async function deleteChat({ chatId }) {
     const response = await api.delete(`/delete/${chatId}`);
 
+    return response.data;
+}
+
+export async function uploadFiles({ files }) {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+
+    const response = await api.post('/uploads', formData);
     return response.data;
 }

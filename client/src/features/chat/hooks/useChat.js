@@ -1,4 +1,8 @@
-import { initializeSocketConnection, getSocket, registerSocketListeners } from '../services/chat.socket';
+import {
+    initializeSocketConnection,
+    getSocket,
+    registerSocketListeners,
+} from '../services/chat.socket';
 import { useDispatch } from 'react-redux';
 import {
     setChats,
@@ -10,18 +14,18 @@ import {
     addNewMessage,
     setAllMessages,
     setDeleteChat,
+    setisUploading,
 } from '../chat.slice';
 import {
     sendMessage,
     getChats,
     getMessages,
     deleteChat,
+    uploadFiles,
 } from '../services/chat.api';
 
 export const useChat = () => {
     const dispatch = useDispatch();
-
-    // ─── HTTP handlers (unchanged) ────────────────────────────────────────────
 
     async function handleSendMessage({ message, chatId }) {
         dispatch(setSending(true));
@@ -100,22 +104,31 @@ export const useChat = () => {
         }
     }
 
-    // ─── Socket handler (NEW) ─────────────────────────────────────────────────
+    async function handleUploadFiles({ files }) {
+        dispatch(setisUploading(true));
+        try {
+            const data = await uploadFiles({ files });
+            return data.uploadedFiles;
+        } catch (err) {
+            dispatch(setError(err?.message ?? 'File upload failed'));
+            return null;
+        } finally {
+            dispatch(setisUploading(false));
+        }
+    }
 
-    function handleSendMessageSocket({ message, chatId }) {
+    function handleSendMessageSocket({ message, chatId, uploadedFiles }) {
         const socket = getSocket();
         if (!socket?.connected) return;
 
         dispatch(setSending(true));
 
         if (chatId) {
-            // Existing chat: optimistically show user bubble + empty AI bubble immediately
             dispatch(addNewMessage({ chatId, content: message, role: 'user' }));
             dispatch(addNewMessage({ chatId, content: '', role: 'ai' }));
         }
-        // New chat: chat:chat_created listener will add both bubbles once chatId is known
 
-        socket.emit('chat:send', { message, chatId });
+        socket.emit('chat:send', { message, chatId, uploadedFiles });
     }
 
     return {
@@ -127,5 +140,6 @@ export const useChat = () => {
         handleGetMessages,
         handleDeleteChat,
         handleCurrentChatId,
+        handleUploadFiles,
     };
 };

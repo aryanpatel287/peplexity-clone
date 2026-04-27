@@ -1,4 +1,6 @@
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+
 import {
     register,
     login,
@@ -10,14 +12,14 @@ import {
 } from '../services/auth.api';
 
 import { setUser, setError, setLoading } from '../auth.slice';
-import { useEffect } from 'react';
 
 export function useAuth() {
     const dispatch = useDispatch();
 
-    async function handleRegister({ username, email, password }) {
+    const handleRegister = useCallback(async ({ username, email, password }) => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await register({ username, email, password });
         } catch (error) {
             console.log(error);
@@ -29,23 +31,27 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleLogin({ email, password }) {
+    const handleLogin = useCallback(async ({ email, password }) => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await login({ email, password });
             dispatch(setUser(data.user));
+            return data.user;
         } catch (error) {
             dispatch(setError(error.response?.data?.message || 'Login failed'));
+            return null;
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleResendVerificationEmail({ email }) {
+    const handleResendVerificationEmail = useCallback(async ({ email }) => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await resendVerificationEmail({ email });
         } catch (error) {
             dispatch(
@@ -57,11 +63,12 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleGetMe() {
+    const handleGetMe = useCallback(async () => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await getMe();
             dispatch(setUser(data.user));
         } catch (error) {
@@ -73,11 +80,12 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleLogout() {
+    const handleLogout = useCallback(async () => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await logout();
             dispatch(setUser(null));
         } catch (error) {
@@ -87,11 +95,12 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleForgotPassword({ email }) {
+    const handleForgotPassword = useCallback(async ({ email }) => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await forgotPasswordEmail({ email });
         } catch (error) {
             dispatch(
@@ -100,11 +109,12 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    async function handleUpdatePassword({ password, token }) {
+    const handleUpdatePassword = useCallback(async ({ password, token }) => {
         try {
             dispatch(setLoading(true));
+            dispatch(setError(null));
             const data = await updatePassword({ password, token });
         } catch (error) {
             dispatch(
@@ -113,7 +123,7 @@ export function useAuth() {
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
     return {
         handleRegister,

@@ -1,40 +1,43 @@
-import React, { useState } from 'react'
-import { Link, Navigate, replace, useNavigate } from 'react-router'
-import FormGroup from '../components/FormGroup'
-import '../../shared/styles/button.scss'
-import '../styles/_auth.scss'
-import { useAuth } from '../hooks/useAuth'
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router';
+import FormGroup from '../components/FormGroup';
+import '../../shared/styles/button.scss';
+import '../styles/_auth.scss';
+import { useAuth } from '../hooks/useAuth';
+import { useSelector } from 'react-redux';
 
 const Login = () => {
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
-    })
+        password: '',
+    });
 
-    const user = useSelector(state => state.auth.user)
-    const loading = useSelector(state => state.auth.loading)
+    const user = useSelector((state) => state.auth.user);
+    const loading = useSelector((state) => state.auth.loading);
+    const errorMsg = useSelector((state) => state.auth.error);
 
-    const { handleLogin } = useAuth()
+    const { handleLogin } = useAuth();
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
-        })
-    }
+            [e.target.name]: e.target.value,
+        });
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+        const loggedInUser = await handleLogin(formData);
 
-        await handleLogin(formData)
-        navigate('/')
-    }
+        if (loggedInUser) {
+            navigate('/');
+        }
+    };
 
     if (!loading && user) {
-        return <Navigate to='/' replace />
+        return <Navigate to="/" replace />;
     }
 
     return (
@@ -67,6 +70,8 @@ const Login = () => {
                         <Link to="/forgot-password">Forgot your password?</Link>
                     </div>
 
+                    {errorMsg && <p className="auth-error-message">{errorMsg}</p>}
+
                     <button type="submit" className="btn btn-primary">
                         Log In
                     </button>
@@ -77,7 +82,7 @@ const Login = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Login
+export default Login;

@@ -1,23 +1,28 @@
-import React from 'react'
-import { Navigate } from 'react-router'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react';
+import { Navigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import { useAuth } from '../hooks/useAuth';
 
 const ProtectedPage = ({ children }) => {
+    const user = useSelector((state) => state.auth.user);
+    const loading = useSelector((state) => state.auth.loading);
+    const { handleGetMe } = useAuth();
 
-    const user = useSelector(state => state.auth.user)
-    const loading = useSelector(state => state.auth.loading)
+    useEffect(() => {
+        if (!user) {
+            handleGetMe();
+        }
+    }, []);
 
-    if (loading) {
-        return <h1>Loading</h1>
+    if (loading && !user) {
+        return <h1>Loading</h1>;
     }
 
-    if (!user) {
-        return <Navigate to={'/login'} replace />
+    if (!loading && !user) {
+        return <Navigate to={'/login'} replace />;
     }
 
-    return (
-        children
-    )
-}
+    return children;
+};
 
-export default ProtectedPage
+export default ProtectedPage;

@@ -1,9 +1,15 @@
 import chatModel from '../models/chat.model.js';
+import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
-import { generateChatTitle, generateResponse } from '../services/ai.service.js';
+import {
+    generateChatTitle,
+    generateResponse,
+    streamAiReponse,
+} from '../services/ai.service.js';
+import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
 
 async function sendMessage(req, res) {
-    const { message, chat: chatId } = req.body;
+    const { message, chat: chatId, uploadedFiles } = req.body;
 
     console.log('chatId: ', chatId);
 
@@ -25,13 +31,27 @@ async function sendMessage(req, res) {
         role: 'user',
     });
 
+    let userFiles;
+    if (uploadedFiles) {
+        files = await Promise.all(
+            uploadedFiles.map(async (file) => {
+                const result = await fileModel.create({
+                    ...file,
+                    message: userMessage._id,
+                });
+                return result;
+            }),
+        );
+    }
+
     const messageHistory = await messageModel.find({
         chat: chatId || chat._id,
     });
 
     console.log('messageHistory: ', messageHistory);
 
-    const aiResponse = await generateResponse(messageHistory);
+    // const aiResponse = await generateResponse(messageHistory);
+    const aiResponse = await streamAiReponse(messageHistory, userFiles);
 
     const aiMessage = await messageModel.create({
         chat: chatId || chat._id,
@@ -69,14 +89,17 @@ async function getMessages(req, res) {
     });
 
     if (!chat) {
-        res.status(404).json({
+        return res.status(404).json({
             message: 'Chat not found',
             success: false,
             error: 'Chat not found',
         });
     }
 
-    const messages = await messageModel.find({ chat: chatId });
+    const messages = await messageModel
+        .find({ chat: chatId })
+        .sort({ createdAt: 1 })
+        .populate('files');
 
     res.status(200).json({
         message: 'messages fetched successfully',
@@ -102,7 +125,33 @@ async function deleteChat(req, res) {
     });
 }
 
-export { sendMessage, getChats, getMessages, deleteChat };
+async function uploadImageController(req, res) {
+    console.log('req.files: ', req.files);
+    try {
+        const uploadedFiles = await uploadMultipleImagesOnImageKit(req.files);
+
+        res.status(200).json({
+            message: 'Files uploaded successfully',
+            success: true,
+            uploadedFiles,
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: 'File upload failed',
+            success: false,
+            error: 'File upload failed',
+        });
+    }
+}
+
+export {
+    sendMessage,
+    getChats,
+    getMessages,
+    deleteChat,
+    uploadImageController,
+};
 
 // // Success response:
 // {

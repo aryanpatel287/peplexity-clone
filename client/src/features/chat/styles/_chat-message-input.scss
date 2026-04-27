@@ -35,7 +35,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
-            @include flex(flex-start, stretch, column, 12px);
+            @include flex(flex-start, stretch, column, 1rem);
 
             .chat-textarea {
                 background: transparent;
@@ -54,7 +54,7 @@
             }
 
             .input-footer {
-                @include flex(flex-end, center, row);
+                @include flex(space-between, center, row);
 
                 .send-btn {
                     background-color: var(--btn-send);

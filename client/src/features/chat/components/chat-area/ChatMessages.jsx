@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import ThinkingBubble from './helpers/ThinkingBubble';
 import ToolStatus from './helpers/ToolStatus';
 import AnimatedText from './helpers/AnimatedText';
+import MessageFiles from './helpers/MessageFiles';
 import { TOOL_LABELS } from './helpers/chat.constants';
 
 const ChatMessages = () => {
@@ -50,6 +51,7 @@ const ChatMessages = () => {
                         key={index}
                         className={`message ${message.role === 'user' ? 'user-message' : 'ai-message'}`}
                     >
+                        {message.files && <MessageFiles files={message.files} />}
                         <div className="message-content">
                             {message.role === 'ai' ? (
                                 <>

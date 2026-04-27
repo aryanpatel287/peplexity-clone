@@ -8,6 +8,7 @@ const chatSlice = createSlice({
         loading: false,
         isSending: false,
         error: null,
+        isUploading: false,
     },
     reducers: {
         createNewChat: (state, action) => {
@@ -17,6 +18,7 @@ const chatSlice = createSlice({
                 title,
                 messages: [],
                 lastUpdated: new Date().toDateString(),
+                messagesLoaded: true,
             };
         },
 
@@ -28,6 +30,7 @@ const chatSlice = createSlice({
         setAllMessages: (state, action) => {
             const { chatId, messages } = action.payload;
             state.chats[chatId].messages = messages;
+            state.chats[chatId].messagesLoaded = true;
         },
 
         setChats: (state, action) => {
@@ -49,6 +52,14 @@ const chatSlice = createSlice({
 
         setSending: (state, action) => {
             state.isSending = action.payload;
+        },
+
+        setUploadFiles: (state, action) => {
+            const { files, chatId } = action.payload;
+            state.chats[chatId].uploads = files;
+        },
+        setisUploading: (state, action) => {
+            state.isUploading = action.payload;
         },
 
         // Sets AI reasoning/thinking text on the last (streaming) AI message
@@ -106,6 +117,8 @@ export const {
     setCurrentChatId,
     setLoading,
     setSending,
+    setUploadFiles,
+    setisUploading,
     setThinking,
     setToolCall,
     setError,
