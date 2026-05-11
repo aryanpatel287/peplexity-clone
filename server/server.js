@@ -1,10 +1,10 @@
-import 'dotenv/config';
 import app from './src/app.js';
 import http from 'http';
 import connectToDb from './src/config/database.js';
 import { initSocket } from './src/sockets/server.socket.js';
+import envConfig from './src/config/envconfig.js';
 
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = envConfig.SERVER_PORT || 3000;
 
 const httpServer = http.createServer(app);
 
@@ -16,5 +16,5 @@ connectToDb().catch((err) => {
 });
 
 httpServer.listen(PORT, () => {
-    console.log('server is running on port ', process.env.SERVER_PORT);
+    console.log('server is running on port ', envConfig.SERVER_PORT);
 });

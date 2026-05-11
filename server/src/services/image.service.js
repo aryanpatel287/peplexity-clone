@@ -1,9 +1,10 @@
 import ImageKit, { toFile } from '@imagekit/nodejs';
 
 import fs from 'fs';
+import envConfig from '../config/envconfig.js';
 
 const imagekit = new ImageKit({
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    privateKey: envConfig.IMAGEKIT_PRIVATE_KEY,
 });
 
 export async function uploadImageOnImageKit({ image }) {
@@ -22,8 +23,8 @@ export async function uploadMultipleImagesOnImageKit(files) {
             folder: file.mimetype.startsWith('image/')
                 ? '/cohort2-genAi/images'
                 : file.mimetype === 'application/pdf'
-                    ? '/cohort2-genAi/pdfs'
-                    : '/cohort2-genAi/others',
+                  ? '/cohort2-genAi/pdfs'
+                  : '/cohort2-genAi/others',
             customMetadata: {
                 mimetype: file.mimetype,
             },

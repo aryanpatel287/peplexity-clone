@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import appRouter from './routes/app.routes.js';
+import envConfig from './config/envconfig.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +19,7 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(
     cors({
-        origin: process.env.CLIENT_ORIGINS,
+        origin: envConfig.CLIENT_ORIGINS,
         credentials: true,
     }),
 );

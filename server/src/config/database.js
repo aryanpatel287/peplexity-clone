@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import envConfig from './envconfig.js';
 
 async function connectToDb() {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(envConfig.MONGO_URI);
         console.log('connected to database');
     } catch (error) {
         throw error;

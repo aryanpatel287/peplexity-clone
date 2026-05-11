@@ -2,13 +2,14 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { streamAiReponse } from '../services/ai.service.js';
 import { handleChatSend } from '../controllers/chat.socket.controller.js';
+import envConfig from '../config/envconfig.js';
 
 let io;
 
 export function initSocket(httpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: process.env.CLIENT_ORIGINS,
+            origin: envConfig.CLIENT_ORIGINS,
             credentials: true,
         },
         pingTimeout: 120000, // 2 minutes
@@ -26,7 +27,7 @@ export function initSocket(httpServer) {
 
             if (!token) return next(new Error('Authentication required'));
 
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, envConfig.JWT_SECRET);
             socket.user = decoded;
             next();
         } catch {

@@ -6,6 +6,7 @@ import {
     getCurrentDateTimeTool,
     searchInternetTool,
 } from './ai.tools.js';
+import envConfig from '../config/envconfig.js';
 
 const toolAgentSystemPrompt = `You are an AI assistant that can use tools when needed.
 
@@ -29,7 +30,7 @@ If unsure → use tools, not reasoning.
 
 const geminiModel = new ChatGoogleGenerativeAI({
     model: 'gemma-4-31b-it',
-    apiKey: process.env.GEMINI_API_KEY,
+    apiKey: envConfig.GEMINI_API_KEY,
 });
 
 export const geminiAgent = createAgent({
@@ -40,7 +41,7 @@ export const geminiAgent = createAgent({
 
 const mistralModel = new ChatMistralAI({
     model: 'mistral-medium-latest',
-    apiKey: process.env.MISTRAL_API_KEY,
+    apiKey: envConfig.MISTRAL_API_KEY,
 });
 
 export const mistralAgent = createAgent({
@@ -103,7 +104,7 @@ export async function streamAiReponse(
                             content.push({ type: 'image', url: file.url });
                             continue;
                         }
-                
+
                         if (file.mimetype === 'application/pdf') {
                             content.push({
                                 type: 'file',

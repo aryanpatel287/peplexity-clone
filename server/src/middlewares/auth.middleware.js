@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import userModel from '../models/user.model.js';
+import envConfig from '../config/envconfig.js';
 
 async function authUser(req, res, next) {
     const token = req.cookies.token;
@@ -13,7 +14,7 @@ async function authUser(req, res, next) {
     }
 
     try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const decodedToken = jwt.verify(token, envConfig.JWT_SECRET);
 
         req.user = decodedToken;
 
@@ -24,7 +25,7 @@ async function authUser(req, res, next) {
         return res.status(401).json({
             message: 'Unauthorized',
             success: false,
-            error: 'Inavlid token',
+            error: 'Invalid token',
         });
     }
 }

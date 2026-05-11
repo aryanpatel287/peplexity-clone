@@ -9,9 +9,10 @@ import {
 } from '../utils/emailTemplates.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import envConfig from '../config/envconfig.js';
 
 const serverBaseUrl = (
-    process.env.SERVER_URL || `http://localhost:${process.env.SERVER_PORT}`
+    envConfig.SERVER_URL || `http://localhost:${envConfig.SERVER_PORT}`
 ).replace(/\/$/, '');
 
 /**
@@ -73,7 +74,7 @@ async function registerController(req, res) {
             {
                 email: normalizedEmail,
             },
-            process.env.JWT_SECRET,
+            envConfig.JWT_SECRET,
         );
 
         const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
@@ -107,7 +108,7 @@ async function registerController(req, res) {
 async function verifyEmail(req, res) {
     const { token } = req.query;
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decodedToken = jwt.verify(token, envConfig.JWT_SECRET);
 
     const user = await userModel.findOne({ email: decodedToken.email });
 
@@ -120,14 +121,14 @@ async function verifyEmail(req, res) {
     }
 
     if (user.verified) {
-        const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+        const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
         return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
     user.verified = true;
     await user.save();
 
-    const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+    const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
     res.send(getVerificationSuccessPage(user.username, loginLink));
 }
 
@@ -187,7 +188,7 @@ async function loginController(req, res) {
             id: user._id,
             username: user.username,
         },
-        process.env.JWT_SECRET,
+        envConfig.JWT_SECRET,
         { expiresIn: '7d' },
     );
 
@@ -233,7 +234,7 @@ async function resendVerificationEmail(req, res) {
     }
 
     if (user.verified) {
-        const loginLink = `${process.env.CLIENT_ORIGINS}/login`;
+        const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
         return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
@@ -241,7 +242,7 @@ async function resendVerificationEmail(req, res) {
         {
             email: normalizedEmail,
         },
-        process.env.JWT_SECRET,
+        envConfig.JWT_SECRET,
     );
 
     const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
@@ -249,7 +250,10 @@ async function resendVerificationEmail(req, res) {
     await sendEmail({
         to: normalizedEmail,
         subject: 'Verify Your Email - Perplexity',
-        html: getVerificationEmailTemplate(user.username, emailVerificationLink),
+        html: getVerificationEmailTemplate(
+            user.username,
+            emailVerificationLink,
+        ),
     });
 
     return res.status(200).json({
@@ -352,13 +356,16 @@ async function forgotPasswordEmail(req, res) {
             id: user._id,
             email: user.email,
         },
-        process.env.JWT_SECRET,
+        envConfig.JWT_SECRET,
         { expiresIn: '1d' },
     );
 
-    const emailVerificationLink = `${process.env.CLIENT_ORIGINS}/update-password?token=${emailVerificationToken}`;
+    const emailVerificationLink = `${envConfig.CLIENT_ORIGINS}/update-password?token=${emailVerificationToken}`;
 
-    const html = getForgotPasswordEmailTemplate(user.username, emailVerificationLink);
+    const html = getForgotPasswordEmailTemplate(
+        user.username,
+        emailVerificationLink,
+    );
 
     await sendEmail({
         to: normalizedEmail,
@@ -392,7 +399,7 @@ async function updatePasswordControlller(req, res) {
 
     let decodedToken = '';
     try {
-        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        decodedToken = jwt.verify(token, envConfig.JWT_SECRET);
     } catch (error) {
         return res.status(401).json({
             message: 'Invalid token',

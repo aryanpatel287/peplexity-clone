@@ -1,9 +1,10 @@
 import { Redis } from 'ioredis';
+import envConfig from './envconfig.js';
 
 const redis = new Redis({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
+    host: envConfig.REDIS_HOST,
+    port: envConfig.REDIS_PORT,
+    password: envConfig.REDIS_PASSWORD,
 });
 
 redis.on('connect', () => {
