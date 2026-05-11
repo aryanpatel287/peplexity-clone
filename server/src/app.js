@@ -25,7 +25,6 @@ app.use(
 );
 
 const clientBuildPath = path.join(__dirname, '../', 'public');
-console.log(path.join(__dirname, '../', 'public'));
 app.use(express.static(clientBuildPath));
 
 app.use('/api/auth', authRouter);

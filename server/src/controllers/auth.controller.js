@@ -367,11 +367,19 @@ async function forgotPasswordEmail(req, res) {
         emailVerificationLink,
     );
 
-    await sendEmail({
-        to: normalizedEmail,
-        subject: 'Reset Password',
-        html: html,
-    });
+    try {
+        await sendEmail({
+            to: normalizedEmail,
+            subject: 'Reset Password',
+            html: html,
+        });
+    } catch (error) {
+        console.error('Error sending forgot password email: ', error);
+        return res.status(500).json({
+            message: 'Failed to send reset password email',
+            success: false,
+        });
+    }
 
     return res.status(200).json({
         message: 'Reset Password link sent to email',

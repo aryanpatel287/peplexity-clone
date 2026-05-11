@@ -13,14 +13,14 @@ if (!process.env.CLIENT_ORIGINS) {
     throw new Error('MISSING ENVIRONMENT VARIABLE: CLIENT_ORIGINS');
 }
 
-// if (
-//     !process.env.GOOGLE_CLIENT_ID ||
-//     !process.env.GOOGLE_CLIENT_SECRET ||
-//     !process.env.GOOGLE_REFRESH_TOKEN ||
-//     !process.env.GOOGLE_USER
-// ) {
-//     throw new Error('MISSING ENVIRONMENT VARIABLES FOR GOOGLE API');
-// }
+if (
+    !process.env.GOOGLE_CLIENT_ID ||
+    !process.env.GOOGLE_CLIENT_SECRET ||
+    !process.env.GOOGLE_REFRESH_TOKEN ||
+    !process.env.GOOGLE_SENDER_EMAIL
+) {
+    throw new Error('MISSING ENVIRONMENT VARIABLES FOR GOOGLE API');
+}
 
 if (
     !process.env.REDIS_HOST ||
@@ -63,10 +63,11 @@ const envConfig = {
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 
-    // //  Google Api keys
-    // GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    // GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    // GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
+    //  Google Api keys
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
+    GOOGLE_SENDER_EMAIL: process.env.GOOGLE_SENDER_EMAIL,
 
     //  Mailjet Api keys
     MJ_APIKEY_PUBLIC: process.env.MJ_APIKEY_PUBLIC,
