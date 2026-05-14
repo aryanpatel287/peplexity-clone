@@ -51,7 +51,9 @@ const ChatMessages = () => {
                         key={index}
                         className={`message ${message.role === 'user' ? 'user-message' : 'ai-message'}`}
                     >
-                        {message.files && <MessageFiles files={message.files} />}
+                        {message.files && (
+                            <MessageFiles files={message.files} />
+                        )}
                         <div className="message-content">
                             {message.role === 'ai' ? (
                                 <>
@@ -65,6 +67,7 @@ const ChatMessages = () => {
                                             />
                                         )}
 
+                                    {/* //FIXME: THE TOOL CALLS WERE RENDERED TWICE  */}
                                     {/* Tool status chips */}
                                     {message.toolCalls?.map((tool, i) => (
                                         <ToolStatus

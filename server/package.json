@@ -15,6 +15,9 @@
     "@imagekit/nodejs": "^7.5.0",
     "@langchain/google-genai": "^2.1.27",
     "@langchain/mistralai": "^1.0.7",
+    "@langchain/textsplitters": "^1.0.1",
+    "@llamaindex/llama-cloud": "^2.4.1",
+    "@pinecone-database/pinecone": "^7.2.0",
     "@tavily/core": "^0.7.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -31,7 +34,9 @@
     "multer": "^2.1.1",
     "node-mailjet": "^6.0.11",
     "nodemailer": "^8.0.5",
+    "pdf-parse": "^2.4.5",
     "socket.io": "^4.8.3",
+    "unpdf": "^1.6.2",
     "zod": "^4.3.6"
   }
 }

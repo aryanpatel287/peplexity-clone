@@ -46,8 +46,8 @@ async function sendMessage(req, res) {
         chat: chatId || chat._id,
     });
 
-    // const aiResponse = await generateResponse(messageHistory);
-    const aiResponse = await streamAiReponse(messageHistory, userFiles);
+    const aiResponse = await generateResponse(messageHistory);
+    // const aiResponse = await streamAiReponse(messageHistory, userFiles);
 
     const aiMessage = await messageModel.create({
         chat: chatId || chat._id,

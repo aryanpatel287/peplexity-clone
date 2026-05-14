@@ -17,7 +17,8 @@ const ChatArea = () => {
     const isUploading = useSelector((state) => state.chat.isUploading);
     const chats = useSelector((state) => state.chat.chats);
 
-    const { handleSendMessageSocket, handleGetMessages, handleUploadFiles } = useChat();
+    const { handleSendMessageSocket, handleGetMessages, handleUploadFiles } =
+        useChat();
 
     const [messageInput, setMessageInput] = useState('');
     const [pendingFiles, setPendingFiles] = useState([]);
@@ -49,6 +50,7 @@ const ChatArea = () => {
 
         const uploaded = await handleUploadFiles({ files: fileArray });
         if (uploaded) {
+            console.log('uploaded: ', uploaded);
             setPendingFiles((prev) => [...prev, ...uploaded]);
         } else {
             setFilePreviews([]);
@@ -68,7 +70,8 @@ const ChatArea = () => {
         textarea.style.transition = 'none';
         textarea.style.height = '0px';
         const newHeight = Math.min(textarea.scrollHeight, 200);
-        textarea.style.overflowY = textarea.scrollHeight > 200 ? 'auto' : 'hidden';
+        textarea.style.overflowY =
+            textarea.scrollHeight > 200 ? 'auto' : 'hidden';
         textarea.style.height = currentHeight || '';
         void textarea.offsetHeight;
         textarea.style.transition = 'height 0.2s ease-out';
@@ -84,7 +87,12 @@ const ChatArea = () => {
 
     const handleSend = (e) => {
         e.preventDefault();
-        if ((!messageInput.trim() && !pendingFiles.length) || isSending || isUploading) return;
+        if (
+            (!messageInput.trim() && !pendingFiles.length) ||
+            isSending ||
+            isUploading
+        )
+            return;
 
         const msg = messageInput;
         const files = pendingFiles;
@@ -94,7 +102,13 @@ const ChatArea = () => {
         setFilePreviews([]);
         if (textareaRef.current) textareaRef.current.style.height = '';
 
-        handleSendMessageSocket({ message: msg, chatId: currentChatId, uploadedFiles: files });
+        handleSendMessageSocket({
+            message: msg,
+            chatId: currentChatId,
+            uploadedFiles: files,
+        });
+
+        console.log('files: ', files);
     };
 
     const handleDragEnter = useCallback((e) => {

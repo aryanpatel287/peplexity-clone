@@ -2,15 +2,16 @@ import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
 import { generateChatTitle, streamAiReponse } from '../services/ai.service.js';
-// FIXME: The Response was not stored in the Database so fix that
-// BUG: The Response was not stored in the Database
-export async function handleChatSend(socket, { message, chatId, uploadedFiles }) {
+
+export async function handleChatSend(
+    socket,
+    { message, chatId, uploadedFiles },
+) {
     const userId = socket.user?.id;
 
     let resolvedChatId = chatId;
 
     try {
-
         if (!chatId) {
             const title = await generateChatTitle(message);
             const chat = await chatModel.create({ user: userId, title });
@@ -28,6 +29,8 @@ export async function handleChatSend(socket, { message, chatId, uploadedFiles })
             content: message,
             role: 'user',
         });
+
+        console.log('uploadedFiles: ', uploadedFiles);
 
         let userFiles = [];
         if (uploadedFiles?.length) {
@@ -47,6 +50,8 @@ export async function handleChatSend(socket, { message, chatId, uploadedFiles })
                 ),
             );
         }
+
+        console.log('userFiles: ', userFiles);
 
         const history = await messageModel.find({ chat: resolvedChatId });
 

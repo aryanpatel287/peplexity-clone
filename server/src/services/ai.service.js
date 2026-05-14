@@ -1,6 +1,12 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatMistralAI } from '@langchain/mistralai';
-import { AIMessage, createAgent, HumanMessage, SystemMessage } from 'langchain';
+import {
+    AIMessage,
+    createAgent,
+    HumanMessage,
+    modelCallLimitMiddleware,
+    SystemMessage,
+} from 'langchain';
 import {
     emailTool,
     getCurrentDateTimeTool,
@@ -37,6 +43,12 @@ export const geminiAgent = createAgent({
     model: geminiModel,
     systemPrompt: toolAgentSystemPrompt,
     tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
+    middleware: [
+        modelCallLimitMiddleware({
+            runLimit: 5,
+            exitBehavior: 'end',
+        }),
+    ],
 });
 
 const mistralModel = new ChatMistralAI({
@@ -47,6 +59,12 @@ const mistralModel = new ChatMistralAI({
 export const mistralAgent = createAgent({
     model: mistralModel,
     tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
+    middleware: [
+        modelCallLimitMiddleware({
+            runLimit: 5,
+            exitBehavior: 'end',
+        }),
+    ],
 });
 
 export async function generateResponse(messages) {
@@ -112,6 +130,8 @@ export async function streamAiReponse(
                                 mimeType: file.mimetype,
                                 name: file.name,
                             });
+
+                            console.log(file.url);
                         }
                     }
                 }

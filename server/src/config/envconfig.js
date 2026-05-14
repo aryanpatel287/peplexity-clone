@@ -42,8 +42,16 @@ if (!process.env.GEMINI_API_KEY || !process.env.MISTRAL_API_KEY) {
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR AI MODELS');
 }
 
-if (!process.env.TAVILY_API_KEY || !process.env.IMAGEKIT_PRIVATE_KEY) {
+if (
+    !process.env.TAVILY_API_KEY ||
+    !process.env.IMAGEKIT_PRIVATE_KEY ||
+    !process.env.LLAMA_CLOUD_API_KEY
+) {
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR AI TOOLS');
+}
+
+if (!process.env.PINECONE_API_KEY || !process.env.PINECONE_INDEX) {
+    throw new Error('MISSING ENVIRONMENT VARIABLES FOR PINECONE');
 }
 
 const envConfig = {
@@ -57,6 +65,8 @@ const envConfig = {
 
     //  Database configuration keys
     MONGO_URI: process.env.MONGO_URI,
+    PINECONE_API_KEY: process.env.PINECONE_API_KEY,
+    PINECONE_INDEX: process.env.PINECONE_INDEX,
 
     //  Redis configuration keys
     REDIS_HOST: process.env.REDIS_HOST,
@@ -81,6 +91,7 @@ const envConfig = {
     //  Ai Tools Keys
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
+    LLAMA_CLOUD_API_KEY: process.env.LLAMA_CLOUD_API_KEY,
 };
 
 export default envConfig;
