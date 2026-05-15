@@ -1,16 +1,35 @@
 import LlamaCloud from '@llamaindex/llama-cloud';
 import envConfig from '../config/envconfig.js';
+import fs from 'fs';
+import { Readable } from 'stream';
 
 //filePath can be a local path or a URL
 
-async function parsePdfByLlama(filePath) {
+export default async function parsePdfByLlama(filePath) {
     const client = new LlamaCloud({
         apiKey: envConfig.LLAMA_CLOUD_API_KEY,
     });
 
-    // Upload and parse a document
+    let fileStream;
+
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+        // Fetch the file from the internet
+        const response = await fetch(filePath);
+        if (!response.ok)
+            throw new Error(
+                `Failed to fetch remote file: ${response.statusText}`,
+            );
+
+        // Convert the response arrayBuffer into a Node.js Readable stream
+        const arrayBuffer = await response.arrayBuffer();
+        fileStream = Readable.from(Buffer.from(arrayBuffer));
+    } else {
+        // Standard handling for local paths
+        fileStream = fs.createReadStream(filePath);
+    }
+
     const file = await client.files.create({
-        file: fs.createReadStream(filePath),
+        file: fileStream,
         purpose: 'parse',
     });
 
@@ -20,9 +39,6 @@ async function parsePdfByLlama(filePath) {
         version: 'latest',
         expand: ['markdown'],
     });
-
-    console.log('Result: ', result);
-    console.log(result.markdown.pages[0].markdown);
 
     return result.markdown.pages;
 }

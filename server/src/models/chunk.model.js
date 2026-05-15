@@ -54,6 +54,8 @@ const chunkSchema = new mongoose.Schema(
     },
 );
 
-const Chunk = mongoose.model('Chunk', chunkSchema);
+// chunkSchema.index({ file: 1, 'metadata.chunkIndex': 1 });
 
-export default Chunk;
+const ChunkModel = mongoose.model('Chunks', chunkSchema);
+
+export default ChunkModel;

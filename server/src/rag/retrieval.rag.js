@@ -2,6 +2,8 @@ import 'dotenv/config';
 
 import { MistralAIEmbeddings } from '@langchain/mistralai';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { retrieveChunksFromDb } from '../controllers/chunk.controller.js';
+import connectToDb from '../config/database.js';
 
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 
@@ -24,5 +26,20 @@ export async function retrieveRelevantContext(prompt) {
     console.log('Query result: ', queryResult);
     console.log('Query matches: ', queryResult.matches);
 
-    return JSON.stringify(queryResult.matches);
+    console.log(
+        'Query matches IDs: ',
+        queryResult.matches.map((match) => match.id),
+    );
+
+    const retrievedChunks = await retrieveChunksFromDb(
+        queryResult.matches.map((match) => match.id),
+    );
+
+    return JSON.stringify(retrievedChunks);
 }
+
+console.log(
+    await retrieveRelevantContext(
+        'AI Java Developer skills and job responsibilities (OOPS, SDLC, data structures, automation framework)',
+    ),
+);
