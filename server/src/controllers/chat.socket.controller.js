@@ -1,7 +1,7 @@
 import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
-import { generateChatTitle, streamAiReponse } from '../services/ai.service.js';
+import { generateChatTitle, streamAiReponse } from '../services/ai/response.ai.service.js';
 
 export async function handleChatSend(
     socket,

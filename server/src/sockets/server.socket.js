@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { streamAiReponse } from '../services/ai.service.js';
+import { streamAiReponse } from '../services/ai/response.ai.service.js';
 import { handleChatSend } from '../controllers/chat.socket.controller.js';
 import envConfig from '../config/envconfig.js';
 

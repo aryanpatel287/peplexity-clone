@@ -5,7 +5,7 @@ import {
     generateChatTitle,
     generateResponse,
     streamAiReponse,
-} from '../services/ai.service.js';
+} from '../services/ai/response.ai.service.js';
 import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
 
 async function sendMessage(req, res) {
