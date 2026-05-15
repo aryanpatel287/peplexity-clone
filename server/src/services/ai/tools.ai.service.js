@@ -1,6 +1,6 @@
 import { tool } from 'langchain';
 import * as z from 'zod';
-import { sendEmail } from '../mail.service.js';
+import { sendEmail } from '../mail/mail.service.js';
 import { searchWeb } from '../internet.service.js';
 
 const emailTool = tool(sendEmail, {

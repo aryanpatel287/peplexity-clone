@@ -1,6 +1,6 @@
 import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
-import { sendEmail } from '../services/mail.service.js';
+import { sendEmail } from '../services/mail/mail.service.js';
 import {
     getVerificationEmailTemplate,
     getForgotPasswordEmailTemplate,

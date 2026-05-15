@@ -1,22 +1,35 @@
 import { google } from 'googleapis';
-import envConfig from '../config/envconfig.js';
+import envConfig from '../../config/envconfig.js';
 
-const oauth2Client = new google.auth.OAuth2(
-    envConfig.GOOGLE_CLIENT_ID,
-    envConfig.GOOGLE_CLIENT_SECRET,
-);
+let gmail;
 
-oauth2Client.setCredentials({
-    refresh_token: envConfig.GOOGLE_REFRESH_TOKEN,
-});
+try {
+    const oauth2Client = new google.auth.OAuth2(
+        envConfig.GOOGLE_CLIENT_ID,
+        envConfig.GOOGLE_CLIENT_SECRET,
+    );
 
-const gmail = google.gmail({
-    version: 'v1',
-    auth: oauth2Client,
-});
+    oauth2Client.setCredentials({
+        refresh_token: envConfig.GOOGLE_REFRESH_TOKEN,
+    });
+
+    gmail = google.gmail({
+        version: 'v1',
+        auth: oauth2Client,
+    });
+
+    console.log('Gmail API client initialized');
+} catch (error) {
+    console.error('Error initializing Gmail API client: ', error);
+    throw error;
+}
 
 export const sendEmailUsingGmailAPI = async ({ to, subject, html, text }) => {
     try {
+        if (!gmail) {
+            throw new Error('Gmail API client is not initialized');
+        }
+
         const messageParts = [
             `From: ${envConfig.GOOGLE_SENDER_EMAIL}`,
             `To: ${to}`,
