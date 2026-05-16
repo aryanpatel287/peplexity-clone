@@ -19,7 +19,9 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(
     cors({
-        origin: envConfig.CLIENT_ORIGINS,
+        origin(origin, callback) {
+            callback(null, envConfig.isAllowedClientOrigin(origin));
+        },
         credentials: true,
     }),
 );

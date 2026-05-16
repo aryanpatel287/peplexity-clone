@@ -16,6 +16,15 @@ import { randomUUID } from 'crypto';
 const serverBaseUrl = (
     envConfig.SERVER_URL || `http://localhost:${envConfig.SERVER_PORT}`
 ).replace(/\/$/, '');
+const USER_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const GUEST_TOKEN_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function getAuthCookieOptions(maxAge) {
+    return {
+        ...envConfig.AUTH_COOKIE_OPTIONS,
+        maxAge,
+    };
+}
 
 /**
  * @description Register a user
@@ -123,14 +132,14 @@ async function verifyEmail(req, res) {
     }
 
     if (user.verified) {
-        const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
+        const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
         return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
     user.verified = true;
     await user.save();
 
-    const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
+    const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
     res.send(getVerificationSuccessPage(user.username, loginLink));
 }
 
@@ -194,7 +203,7 @@ async function loginController(req, res) {
         { expiresIn: '7d' },
     );
 
-    res.cookie('token', token);
+    res.cookie('token', token, getAuthCookieOptions(USER_TOKEN_MAX_AGE_MS));
     return res.status(200).json({
         message: 'logged in successfully',
         success: true,
@@ -239,7 +248,11 @@ async function createGuestSession(req, res) {
         { expiresIn: '1d' },
     );
 
-    res.cookie('guest_token', guestToken);
+    res.cookie(
+        'guest_token',
+        guestToken,
+        getAuthCookieOptions(GUEST_TOKEN_MAX_AGE_MS),
+    );
 
     return res.status(201).json({
         message: 'guest session created',
@@ -277,7 +290,7 @@ async function resendVerificationEmail(req, res) {
     }
 
     if (user.verified) {
-        const loginLink = `${envConfig.CLIENT_ORIGINS}/login`;
+        const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
         return res.send(getAlreadyVerifiedPage(user.username, loginLink));
     }
 
@@ -356,7 +369,7 @@ async function logoutController(req, res) {
         });
     }
 
-    res.clearCookie('token');
+    res.clearCookie('token', envConfig.AUTH_COOKIE_OPTIONS);
 
     await redis.set(token, Date.now().toString(), 'EX', 3600 * 24);
 
@@ -418,7 +431,7 @@ async function claimGuestChats(req, res) {
         },
     );
 
-    res.clearCookie('guest_token');
+    res.clearCookie('guest_token', envConfig.AUTH_COOKIE_OPTIONS);
 
     return res.status(200).json({
         message: 'Guest chats claimed successfully',
@@ -464,7 +477,7 @@ async function forgotPasswordEmail(req, res) {
         { expiresIn: '1d' },
     );
 
-    const emailVerificationLink = `${envConfig.CLIENT_ORIGINS}/update-password?token=${emailVerificationToken}`;
+    const emailVerificationLink = `${envConfig.CLIENT_ORIGIN}/update-password?token=${emailVerificationToken}`;
 
     const html = getForgotPasswordEmailTemplate(
         user.username,

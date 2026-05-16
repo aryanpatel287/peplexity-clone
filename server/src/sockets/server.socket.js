@@ -9,7 +9,9 @@ let io;
 export function initSocket(httpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: envConfig.CLIENT_ORIGINS,
+            origin(origin, callback) {
+                callback(null, envConfig.isAllowedClientOrigin(origin));
+            },
             credentials: true,
         },
         pingTimeout: 120000, // 2 minutes

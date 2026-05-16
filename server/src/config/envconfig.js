@@ -1,6 +1,17 @@
 import { config } from 'dotenv';
 config();
 
+function normalizeOrigin(origin = '') {
+    return origin.trim().replace(/\/$/, '');
+}
+
+const clientOrigins = (process.env.CLIENT_ORIGINS || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+const isProduction = process.env.NODE_ENV == 'production';
+
 if (!process.env.MONGO_URI) {
     throw new Error('MISSING ENVIRONMENT VARIABLE: MONGO_URI');
 }
@@ -11,6 +22,10 @@ if (!process.env.JWT_SECRET) {
 
 if (!process.env.CLIENT_ORIGINS) {
     throw new Error('MISSING ENVIRONMENT VARIABLE: CLIENT_ORIGINS');
+}
+
+if (!clientOrigins.length) {
+    throw new Error('MISSING VALID CLIENT_ORIGINS VALUES');
 }
 
 if (
@@ -58,7 +73,15 @@ const envConfig = {
     //  Server configuration keys
     SERVER_PORT: process.env.SERVER_PORT || 3000,
     SERVER_URL: process.env.SERVER_URL || 'http://localhost:3000',
-    CLIENT_ORIGINS: process.env.CLIENT_ORIGINS,
+    CLIENT_ORIGINS: clientOrigins,
+    CLIENT_ORIGIN: clientOrigins[0],
+    IS_PRODUCTION: isProduction,
+    AUTH_COOKIE_OPTIONS: {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/',
+    },
 
     //  JWT configuration keys
     JWT_SECRET: process.env.JWT_SECRET,
@@ -92,6 +115,10 @@ const envConfig = {
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
     LLAMA_CLOUD_API_KEY: process.env.LLAMA_CLOUD_API_KEY,
+    isAllowedClientOrigin(origin) {
+        if (!origin) return true;
+        return clientOrigins.includes(normalizeOrigin(origin));
+    },
 };
 
 export default envConfig;
