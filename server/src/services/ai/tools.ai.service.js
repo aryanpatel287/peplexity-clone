@@ -2,7 +2,7 @@ import { tool } from 'langchain';
 import * as z from 'zod';
 import { sendEmail } from '../mail/mail.service.js';
 import { searchWeb } from '../internet.service.js';
-import { retrieveRelevantContext } from '../../rag/Retrieval.rag.js';
+import { retrieveRelevantContext } from '../../rag/retrieval.rag.js';
 
 const emailTool = tool(sendEmail, {
     name: 'emailTool',
