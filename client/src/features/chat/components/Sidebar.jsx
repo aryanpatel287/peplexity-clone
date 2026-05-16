@@ -16,7 +16,6 @@ const Sidebar = ({ onSelectChat }) => {
     const loading = useSelector((state) => state.chat.loading);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
     const isGuest = useSelector((state) => state.auth.isGuest);
-    const isGuest = useSelector((state) => state.auth.isGuest);
     const { handleDeleteChat } = useChat();
 
     const [chatToDelete, setChatToDelete] = useState(null);
