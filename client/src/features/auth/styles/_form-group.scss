@@ -58,11 +58,50 @@
         color: var(--text-muted);
     }
 
+    &.has-password {
+        .form-input {
+            padding-right: 48px;
+        }
+    }
+
+    .password-toggle-btn {
+        position: absolute;
+        right: 12px;
+        top: 24px;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border-radius: 4px;
+        transition:
+            color 0.2s ease,
+            background-color 0.2s ease;
+        z-index: 2;
+
+        &:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        svg {
+            display: block;
+        }
+    }
+
     &.error {
         .form-input {
             border-color: #ff4d4d;
             box-shadow: 0 0 0 1px rgba(255, 77, 77, 0.2);
-            
+
             &:focus {
                 border-color: #ff4d4d;
                 box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
