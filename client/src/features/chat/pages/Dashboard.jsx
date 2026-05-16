@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu, SquarePen } from 'lucide-react';
+import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useChat } from '../hooks/useChat';
 import Sidebar from '../components/Sidebar';
+import { clearGuestLimit } from '../chat.slice';
 import '../styles/_dashboard.scss';
-import { Outlet, useNavigate, useLocation } from 'react-router';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
@@ -12,17 +13,22 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const currentChatId = useSelector((state) => state.chat.currentChatId);
+    const isGuest = useSelector((state) => state.auth.isGuest);
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
+        const sessionType = isGuest ? 'guest' : 'user';
+
+        dispatch(clearGuestLimit());
+
         // Initialize socket connection first, then register Redux listeners
-        chat.initializeSocketConnection();
+        chat.initializeSocketConnection(sessionType);
         chat.registerSocketListeners(dispatch);
 
         // Fetch existing chats via HTTP
         chat.handleGetChats();
-    }, []);
+    }, [isGuest]);
 
     useEffect(() => {
         if (currentChatId && location.pathname !== `/c/${currentChatId}`) {

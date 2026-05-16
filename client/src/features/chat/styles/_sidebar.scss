@@ -176,6 +176,10 @@
             font-size: 0.85rem;
             gap: 6px;
         }
+
+        .guest-auth-actions {
+            @include flex(flex-start, stretch, column, 8px);
+        }
     }
 }
 

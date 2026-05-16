@@ -20,15 +20,31 @@ export function initSocket(httpServer) {
     io.use((socket, next) => {
         try {
             const cookieHeader = socket.handshake.headers.cookie || '';
-            const token = cookieHeader
+            const cookies = cookieHeader
                 .split('; ')
-                .find((c) => c.startsWith('token='))
-                ?.split('=')[1];
+                .reduce((acc, item) => {
+                    const [key, ...rest] = item.split('=');
+                    if (!key) return acc;
+                    acc[key] = rest.join('=');
+                    return acc;
+                }, {});
+
+            const token = cookies.token || cookies.guest_token;
 
             if (!token) return next(new Error('Authentication required'));
 
             const decoded = jwt.verify(token, envConfig.JWT_SECRET);
-            socket.user = decoded;
+            if (decoded?.isGuest) {
+                socket.user = {
+                    isGuest: true,
+                    guestId: decoded.guestId,
+                };
+            } else {
+                socket.user = {
+                    ...decoded,
+                    isGuest: false,
+                };
+            }
             next();
         } catch {
             next(new Error('Invalid token'));

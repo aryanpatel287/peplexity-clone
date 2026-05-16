@@ -1,5 +1,6 @@
 import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
+import chatModel from '../models/chat.model.js';
 import { sendEmail } from '../services/mail/mail.service.js';
 import {
     getVerificationEmailTemplate,
@@ -10,6 +11,7 @@ import {
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import envConfig from '../config/envconfig.js';
+import { randomUUID } from 'crypto';
 
 const serverBaseUrl = (
     envConfig.SERVER_URL || `http://localhost:${envConfig.SERVER_PORT}`
@@ -206,6 +208,47 @@ async function loginController(req, res) {
 }
 
 /**
+ * @description Create or reuse a guest session
+ * @route POST /api/auth/guest-session
+ * @access Public
+ */
+async function createGuestSession(req, res) {
+    const existingToken = req.cookies.guest_token;
+
+    if (existingToken) {
+        try {
+            const decoded = jwt.verify(existingToken, envConfig.JWT_SECRET);
+            if (decoded?.guestId && decoded?.isGuest) {
+                return res.status(200).json({
+                    message: 'guest session active',
+                    success: true,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const guestId = randomUUID();
+    const guestToken = jwt.sign(
+        {
+            guestId,
+            isGuest: true,
+        },
+        envConfig.JWT_SECRET,
+        { expiresIn: '1d' },
+    );
+
+    res.cookie('guest_token', guestToken);
+
+    return res.status(201).json({
+        message: 'guest session created',
+        success: true,
+        guestId,
+    });
+}
+
+/**
  * @description resend the email verification link to the registered user
  * @route GET /api/auth/resend-verify-email
  * @access Public
@@ -320,6 +363,67 @@ async function logoutController(req, res) {
     return res.status(200).json({
         message: 'Logged out successfully',
         success: true,
+    });
+}
+
+/**
+ * @description Claim guest chats after login
+ * @route POST /api/auth/claim-guest-chats
+ * @access Private
+ */
+async function claimGuestChats(req, res) {
+    const guestToken = req.cookies.guest_token;
+
+    if (!guestToken) {
+        return res.status(400).json({
+            message: 'guest session not found',
+            success: false,
+            error: 'guest token missing',
+        });
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify(guestToken, envConfig.JWT_SECRET);
+    } catch (error) {
+        return res.status(401).json({
+            message: 'Invalid guest token',
+            success: false,
+            error: 'Invalid guest token',
+        });
+    }
+
+    if (!decoded?.guestId || !decoded?.isGuest) {
+        return res.status(400).json({
+            message: 'Invalid guest session',
+            success: false,
+            error: 'Invalid guest session',
+        });
+    }
+
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({
+            message: 'unauthorized access',
+            success: false,
+            error: 'user details not attached in the req',
+        });
+    }
+
+    const result = await chatModel.updateMany(
+        { guestId: decoded.guestId },
+        {
+            $set: { user: userId },
+            $unset: { guestId: '' },
+        },
+    );
+
+    res.clearCookie('guest_token');
+
+    return res.status(200).json({
+        message: 'Guest chats claimed successfully',
+        success: true,
+        claimedCount: result.modifiedCount ?? 0,
     });
 }
 
@@ -450,9 +554,11 @@ export {
     registerController,
     verifyEmail,
     loginController,
+    createGuestSession,
     getMeController,
     resendVerificationEmail,
     logoutController,
+    claimGuestChats,
     forgotPasswordEmail,
     updatePasswordControlller,
 };

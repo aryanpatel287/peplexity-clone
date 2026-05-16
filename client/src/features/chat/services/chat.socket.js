@@ -11,18 +11,27 @@ import {
     removeLastMessage,
     setSending,
     setError,
+    setGuestLimitReached,
 } from '../chat.slice';
 
 // --- Singleton socket instance ---
 let socket = null;
 let listenersRegistered = false;
+let currentSessionType = null;
 
-export function initializeSocketConnection() {
-    if (socket) return socket;
+export function initializeSocketConnection(sessionType = 'user') {
+    if (socket && currentSessionType === sessionType) return socket;
+
+    if (socket && currentSessionType !== sessionType) {
+        socket.disconnect();
+        socket = null;
+        listenersRegistered = false;
+    }
 
     socket = io(import.meta.env.VITE_SOCKET_URL, {
         withCredentials: true,
     });
+    currentSessionType = sessionType;
 
     socket.on('connect', () => {
         console.log('Connected to Socket.IO server:', socket.id);
@@ -86,11 +95,22 @@ export function registerSocketListeners(dispatch) {
     });
 
     // Error — clean up
-    socket.on('chat:error', ({ chatId, error }) => {
+    socket.on('chat:error', ({ chatId, error, code }) => {
         const msg = capitalize(error);
         dispatch(setError(msg));
-        toast.error(msg);
         dispatch(setSending(false));
+
+        if (code === 'AUTH_REQUIRED') {
+            dispatch(setGuestLimitReached({ reached: true, chatId }));
+            toast.info('Create an account to continue');
+            if (chatId) {
+                dispatch(removeLastMessage({ chatId }));
+                dispatch(removeLastMessage({ chatId }));
+            }
+            return;
+        }
+
+        toast.error(msg);
         if (chatId) dispatch(removeLastMessage({ chatId }));
     });
 }

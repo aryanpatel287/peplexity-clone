@@ -8,12 +8,21 @@ import {
     login,
     logout,
     getMe,
+    createGuestSession,
+    claimGuestChats,
     resendVerificationEmail,
     forgotPasswordEmail,
     updatePassword,
 } from '../services/auth.api';
 
-import { setUser, setError, setLoading, setIsUpdatingPassword } from '../auth.slice';
+import {
+    setUser,
+    setError,
+    setLoading,
+    setIsUpdatingPassword,
+    setIsGuest,
+    setSessionReady,
+} from '../auth.slice';
 
 export function useAuth() {
     const dispatch = useDispatch();
@@ -46,6 +55,8 @@ export function useAuth() {
             dispatch(setError(null));
             const data = await login({ email, password });
             dispatch(setUser(data.user));
+            dispatch(setIsGuest(false));
+            dispatch(setSessionReady(true));
             return data.user;
         } catch (error) {
             dispatch(setError(capitalize(error.response?.data?.message || 'Login failed')));
@@ -74,6 +85,7 @@ export function useAuth() {
             dispatch(setError(null));
             const data = await getMe();
             dispatch(setUser(data.user));
+            dispatch(setIsGuest(false));
         } catch (error) {
             const msg = capitalize(error.response?.data?.message || 'Failed to fetch user');
             dispatch(setError(msg));
@@ -83,12 +95,47 @@ export function useAuth() {
         }
     }, [dispatch]);
 
+    const handleEnsureSession = useCallback(async () => {
+        try {
+            dispatch(setLoading(true));
+            dispatch(setError(null));
+            const data = await getMe();
+            dispatch(setUser(data.user));
+            dispatch(setIsGuest(false));
+        } catch (error) {
+            const status = error.response?.status;
+            if (status === 400 || status === 401) {
+                try {
+                    await createGuestSession();
+                    dispatch(setUser(null));
+                    dispatch(setIsGuest(true));
+                } catch (guestError) {
+                    const msg = capitalize(
+                        guestError.response?.data?.message ||
+                            'Failed to create guest session',
+                    );
+                    dispatch(setError(msg));
+                }
+            } else {
+                const msg = capitalize(
+                    error.response?.data?.message || 'Failed to fetch user',
+                );
+                dispatch(setError(msg));
+            }
+        } finally {
+            dispatch(setLoading(false));
+            dispatch(setSessionReady(true));
+        }
+    }, [dispatch]);
+
     const handleLogout = useCallback(async () => {
         try {
             dispatch(setLoading(true));
             dispatch(setError(null));
             await logout();
             dispatch(setUser(null));
+            dispatch(setIsGuest(false));
+            dispatch(setSessionReady(false));
         } catch (error) {
             const msg = capitalize(error.response?.data?.message || 'Logout failed');
             dispatch(setError(msg));
@@ -97,6 +144,15 @@ export function useAuth() {
             dispatch(setLoading(false));
         }
     }, [dispatch]);
+
+    const handleClaimGuestChats = useCallback(async () => {
+        try {
+            const data = await claimGuestChats();
+            return data;
+        } catch (error) {
+            return null;
+        }
+    }, []);
 
     const handleForgotPassword = useCallback(async ({ email }) => {
         try {
@@ -136,8 +192,10 @@ export function useAuth() {
         handleRegister,
         handleLogin,
         handleGetMe,
+        handleEnsureSession,
         handleResendVerificationEmail,
         handleLogout,
+        handleClaimGuestChats,
         handleForgotPassword,
         handleUpdatePassword,
     };

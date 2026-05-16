@@ -7,6 +7,8 @@ const authSlice = createSlice({
         loading: true,
         error: null,
         isUpdatingPassword: false,
+        isGuest: false,
+        sessionReady: false,
     },
     reducers: {
         setUser: (state, action) => {
@@ -21,9 +23,21 @@ const authSlice = createSlice({
         setIsUpdatingPassword: (state, action) => {
             state.isUpdatingPassword = action.payload;
         },
+        setIsGuest: (state, action) => {
+            state.isGuest = action.payload;
+        },
+        setSessionReady: (state, action) => {
+            state.sessionReady = action.payload;
+        },
     },
 });
 
-export const { setUser, setLoading, setError, setIsUpdatingPassword } =
-    authSlice.actions;
+export const {
+    setUser,
+    setLoading,
+    setError,
+    setIsUpdatingPassword,
+    setIsGuest,
+    setSessionReady,
+} = authSlice.actions;
 export default authSlice.reducer;

@@ -6,19 +6,21 @@ import { useAuth } from '../hooks/useAuth';
 const ProtectedPage = ({ children }) => {
     const user = useSelector((state) => state.auth.user);
     const loading = useSelector((state) => state.auth.loading);
-    const { handleGetMe } = useAuth();
+    const isGuest = useSelector((state) => state.auth.isGuest);
+    const sessionReady = useSelector((state) => state.auth.sessionReady);
+    const { handleEnsureSession } = useAuth();
 
     useEffect(() => {
-        if (!user) {
-            handleGetMe();
+        if (!sessionReady) {
+            handleEnsureSession();
         }
-    }, []);
+    }, [sessionReady, handleEnsureSession]);
 
-    if (loading && !user) {
+    if (loading && !sessionReady) {
         return <h1>Loading</h1>;
     }
 
-    if (!loading && !user) {
+    if (sessionReady && !user && !isGuest) {
         return <Navigate to={'/login'} replace />;
     }
 

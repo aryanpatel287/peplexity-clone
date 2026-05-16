@@ -5,7 +5,16 @@ const chatSchema = new mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'users',
-            requried: true,
+            required: [function () {
+                return !this.guestId;
+            }, 'user is required'],
+        },
+        guestId: {
+            type: String,
+            required: [function () {
+                return !this.user;
+            }, 'guestId is required'],
+            index: true,
         },
         title: {
             type: String,

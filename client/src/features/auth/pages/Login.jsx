@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import FormGroup from '../components/FormGroup';
-import '../../shared/styles/button.scss';
-import '../styles/_auth.scss';
 import { useAuth } from '../hooks/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { setError } from '../auth.slice';
+import '../../shared/styles/button.scss';
+import '../styles/_auth.scss';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -17,9 +17,10 @@ const Login = () => {
     const loading = useSelector((state) => state.auth.loading);
     const errorMsg = useSelector((state) => state.auth.error);
 
-    const { handleLogin } = useAuth();
+    const { handleLogin, handleClaimGuestChats } = useAuth();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // Clear error when navigating away
     useEffect(() => {
@@ -42,6 +43,12 @@ const Login = () => {
         const loggedInUser = await handleLogin(formData);
 
         if (loggedInUser) {
+            await handleClaimGuestChats();
+            const nextChatId = searchParams.get('nextChatId');
+            if (nextChatId) {
+                navigate(`/c/${nextChatId}`);
+                return;
+            }
             navigate('/');
         }
     };
