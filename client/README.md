@@ -6,10 +6,11 @@ Frontend app for authentication and AI chat experience.
 
 - User authentication screens
   - register, login, forgot password, update password
-- Protected dashboard chat interface
+- Protected dashboard chat interface with nested chat routes
 - Chat sidebar with chat list and deletion
 - Real-time AI response rendering with socket events
-- Support for file upload in chat flow (images and PDFs)
+- File attachments for images and PDFs with preview and lightbox
+- Markdown rendering and toast notifications for status/errors
 
 ## Stack
 
@@ -22,6 +23,7 @@ Frontend app for authentication and AI chat experience.
 - Sass
 - React Markdown + remark-gfm
 - React Toastify
+- Lucide React
 
 ## Routing
 
@@ -29,13 +31,15 @@ Frontend app for authentication and AI chat experience.
   - Protected route, renders dashboard and chat area
 - /c/:chatId
   - Opens a specific chat inside dashboard
+- /dashboard
+  - Redirects to /
 - /login
 - /register
 - /forgot-password
 - /update-password
 - /forbidden
-- *
-	- Not found page
+- '*'
+- Not found page
 
 ## State Management
 
@@ -44,7 +48,7 @@ Redux slices:
 - auth
   - user, loading, error, isUpdatingPassword
 - chat
-  - chat map, currentChatId, loading, sending/uploading states, socket streaming states
+  - chat map, currentChatId, loading, isUploading, socket streaming states
 
 ## API Integration
 
@@ -87,6 +91,7 @@ It also displays backend tool activity emitted during streaming:
 - emailTool
 - searchInternetTool
 - getCurrentDateTime
+- contextRetrieverTool
 
 ## Environment Variables
 
@@ -126,8 +131,27 @@ Default dev URL:
 client/
   src/
     app/
+      App.jsx
+      app.routes.jsx
+      app.store.js
     features/
       auth/
+        components/
+        hooks/
+        pages/
+        services/
+        styles/
       chat/
+        components/
+          chat-area/
+            helpers/
+        hooks/
+        pages/
+        services/
+        styles/
       shared/
+        components/
+        pages/
+        styles/
+        utils/
 ```

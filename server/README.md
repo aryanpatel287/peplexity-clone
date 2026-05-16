@@ -19,6 +19,8 @@ Backend API and socket server for the Perplexity clone application.
   - tool-calling through LangChain
 - File upload support
   - image and PDF upload through ImageKit
+- RAG ingestion and retrieval
+  - PDF to markdown parsing, chunking, embeddings, and Pinecone indexing
 
 ## Stack
 
@@ -30,12 +32,14 @@ Backend API and socket server for the Perplexity clone application.
 - Realtime: Socket.IO
 - Validation: express-validator, zod
 - Uploads: multer + ImageKit
-- Mail: Nodemailer OAuth2 (Gmail)
+- Mail: Gmail API, Nodemailer OAuth2 (dev), Mailjet fallback
 - AI orchestration: LangChain
+- Vector DB: Pinecone
+- PDF parsing: Llama Cloud, UnPDF, pdf-parse
 
 ## AI Models Used
 
-The code configures two model clients:
+The code configures these model clients:
 
 - gemma-4-31b-it
   - Provider package: @langchain/google-genai
@@ -43,6 +47,8 @@ The code configures two model clients:
 - mistral-medium-latest
   - Provider package: @langchain/mistralai
   - Used for chat title generation and standard invoke flow.
+- Mistral embeddings
+  - Used for chunk embeddings in the RAG pipeline.
 
 ## AI Tools Used
 
@@ -57,6 +63,16 @@ The agent can call the following tools:
 - getCurrentDateTime
   - Purpose: return current date/time payload.
   - Timezone: Asia/Kolkata.
+- contextRetrieverTool
+  - Purpose: retrieve relevant context from ingested documents.
+  - Backed by: Pinecone + MongoDB chunk storage.
+
+## RAG Pipeline (High Level)
+
+- Parse PDFs to markdown via Llama Cloud.
+- Chunk markdown into structured sections and plain text.
+- Store chunks in MongoDB and embed with Mistral embeddings.
+- Upsert vectors into Pinecone and retrieve relevant chunks at query time.
 
 ## Data Models
 
@@ -69,6 +85,8 @@ The agent can call the following tools:
   - Virtual relation: files
 - files
   - Stores upload metadata linked to messages
+- chunks
+  - Stores parsed document chunks and metadata
 
 ## API Routes
 
@@ -97,6 +115,7 @@ Upload constraints:
 
 - Allowed mimetypes: image/*, application/pdf
 - Max size: 2 MB per file
+- Max files per request: 5
 
 ## Socket Events
 
@@ -114,27 +133,7 @@ Server emits:
 
 ## Environment Variables
 
-Create server/.env with values for:
-
-- SERVER_PORT
-- MONGO_URI
-- JWT_SECRET
-- CLIENT_ORIGINS
-
-- REDIS_HOST
-- REDIS_PORT
-- REDIS_PASSWORD
-
-- GOOGLE_USER
-- GOOGLE_CLIENT_ID
-- GOOGLE_CLIENT_SECRET
-- GOOGLE_REFRESH_TOKEN
-
-- GEMINI_API_KEY
-- MISTRAL_API_KEY
-
-- TAVILY_API_KEY
-- IMAGEKIT_PRIVATE_KEY
+Copy server/.env.example to server/.env and fill in the values.
 
 ## Run Locally
 
@@ -158,8 +157,11 @@ server/
     controllers/
     middlewares/
     models/
+    rag/
     routes/
     services/
+      ai/
+      mail/
     sockets/
     utils/
     validators/
