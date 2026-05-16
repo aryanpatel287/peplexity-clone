@@ -28,7 +28,11 @@ a {
     }
 }
 
-// Global scrollbar — themed to match the dark UI
+::selection {
+    background-color: #1d2323;
+    color: var(--primary-hover);
+}
+
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
