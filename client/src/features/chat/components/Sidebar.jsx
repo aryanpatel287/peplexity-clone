@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Trash, SquarePen } from 'lucide-react';
+import { Link } from 'react-router';
+import { Trash, SquarePen, User, ChevronRight } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
 import LogoutButton from '../../auth/components/LogoutButton';
@@ -14,6 +15,7 @@ const Sidebar = ({ onSelectChat }) => {
     const chats = useSelector((state) => state.chat.chats);
     const loading = useSelector((state) => state.chat.loading);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
+    const isGuest = useSelector((state) => state.auth.isGuest);
     const { handleDeleteChat } = useChat();
 
     const [chatToDelete, setChatToDelete] = useState(null);
@@ -80,8 +82,20 @@ const Sidebar = ({ onSelectChat }) => {
             </div>
 
             <div className="sidebar-footer">
-                <UserDetailCard />
-                <LogoutButton />
+                {isGuest ? (
+                    <Link to="/login" className="sidebar-signin">
+                        <span className="signin-icon">
+                            <User size={16} />
+                        </span>
+                        <span className="signin-text">Sign In</span>
+                        <ChevronRight size={16} className="signin-chevron" />
+                    </Link>
+                ) : (
+                    <>
+                        <UserDetailCard />
+                        <LogoutButton />
+                    </>
+                )}
             </div>
 
             <ConfirmModal

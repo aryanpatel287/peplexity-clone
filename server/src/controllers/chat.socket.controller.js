@@ -1,6 +1,7 @@
 import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
+import redis from '../config/cache.js';
 import { dataIngestion } from '../rag/DataIngestion.rag.js';
 import {
     generateChatTitle,
@@ -12,13 +13,36 @@ export async function handleChatSend(
     { message, chatId, uploadedFiles },
 ) {
     const userId = socket.user?.id;
+    const isGuest = socket.user?.isGuest;
+    const guestId = socket.user?.guestId;
 
     let resolvedChatId = chatId;
 
     try {
+        if (isGuest && guestId) {
+            const counterKey = `guest_msg_count:${guestId}`;
+            const count = await redis.incr(counterKey);
+
+            if (count > 2) {
+                await redis.decr(counterKey);
+                socket.emit('chat:error', {
+                    chatId: resolvedChatId ?? chatId,
+                    error: 'Please sign up to continue',
+                    code: 'AUTH_REQUIRED',
+                });
+                return;
+            }
+
+            await redis.expire(counterKey, 60 * 60 * 24);
+        }
+
         if (!chatId) {
             const title = await generateChatTitle(message);
-            const chat = await chatModel.create({ user: userId, title });
+            const chat = await chatModel.create(
+                isGuest
+                    ? { guestId, title }
+                    : { user: userId, title },
+            );
             resolvedChatId = chat._id.toString();
 
             socket.emit('chat:chat_created', {

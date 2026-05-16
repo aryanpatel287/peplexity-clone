@@ -5,6 +5,8 @@ import {
     getMeController,
     loginController,
     logoutController,
+    createGuestSession,
+    claimGuestChats,
     registerController,
     resendVerificationEmail,
     updatePasswordControlller,
@@ -46,6 +48,13 @@ authRouter.get('/verify-email', verifyEmail);
 authRouter.post('/login', loginValidator, loginController);
 
 /**
+ * @route POST /api/auth/guest-session
+ * @description Create or reuse a guest session
+ * @access Public
+ */
+authRouter.post('/guest-session', createGuestSession);
+
+/**
  * @route GET /api/auth/get-me
  * @description get the user details using token
  * @access Public
@@ -68,6 +77,13 @@ authRouter.post('/resend-verify-email', resendVerificationEmail);
  * @body none
  */
 authRouter.post('/logout', authUser, logoutController);
+
+/**
+ * @route POST /api/auth/claim-guest-chats
+ * @description Claim guest chats after login
+ * @access Private
+ */
+authRouter.post('/claim-guest-chats', authUser, claimGuestChats);
 
 /**
  * @route POST /api/auth/forgot-password

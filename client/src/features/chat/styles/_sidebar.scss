@@ -176,6 +176,39 @@
             font-size: 0.85rem;
             gap: 6px;
         }
+
+        .sidebar-signin {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--primary);
+            @include flex(flex-start, center, row, 10px);
+            transition: background-color 0.2s ease;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.06);
+            }
+
+            .signin-icon {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background-color: rgba(70, 138, 147, 0.12);
+                color: var(--primary);
+                @include flex(center, center, row);
+            }
+
+            .signin-text {
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .signin-chevron {
+                margin-left: auto;
+                color: var(--primary);
+            }
+        }
     }
 }
 

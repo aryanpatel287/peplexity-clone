@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import '../../styles/_chat-area.scss';
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { useChat } from '../../hooks/useChat';
 import ChatMessages from './ChatMessages';
 import ChatMessageInput from './ChatMessageInput';
 import DragOverlay from './helpers/DragOverlay';
 import { setCurrentChatId } from '../../chat.slice';
+import '../../styles/_chat-area.scss';
+
+//TODO: the chat is not getting continued when user logs in after being blocked as guest. 
 
 const ChatArea = () => {
     const { chatId: urlChatId } = useParams();
@@ -16,6 +18,11 @@ const ChatArea = () => {
     const isSending = useSelector((state) => state.chat.isSending);
     const isUploading = useSelector((state) => state.chat.isUploading);
     const chats = useSelector((state) => state.chat.chats);
+    const isGuest = useSelector((state) => state.auth.isGuest);
+    const guestLimitReached = useSelector(
+        (state) => state.chat.guestLimitReached,
+    );
+    const blockedChatId = useSelector((state) => state.chat.blockedChatId);
 
     const { handleSendMessageSocket, handleGetMessages, handleUploadFiles } =
         useChat();
@@ -26,6 +33,7 @@ const ChatArea = () => {
     const [isDragging, setIsDragging] = useState(false);
     const textareaRef = useRef(null);
     const dragCounterRef = useRef(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (urlChatId) {
@@ -85,12 +93,23 @@ const ChatArea = () => {
         }
     }, [messageInput]);
 
+    useEffect(() => {
+        if (guestLimitReached && isGuest) {
+            const targetChatId = blockedChatId || currentChatId;
+            const nextParam = targetChatId
+                ? `?nextChatId=${targetChatId}`
+                : '';
+            navigate(`/login${nextParam}`);
+        }
+    }, [guestLimitReached, isGuest, blockedChatId, currentChatId, navigate]);
+
     const handleSend = (e) => {
         e.preventDefault();
         if (
             (!messageInput.trim() && !pendingFiles.length) ||
             isSending ||
-            isUploading
+            isUploading ||
+            (guestLimitReached && isGuest)
         )
             return;
 
@@ -158,6 +177,7 @@ const ChatArea = () => {
                 handleSend={handleSend}
                 isAwaitingAI={isSending}
                 isUploading={isUploading}
+                isBlocked={guestLimitReached && isGuest}
                 filePreviews={filePreviews}
                 onFileSelect={handleFileSelect}
                 onRemoveFile={handleRemoveFile}

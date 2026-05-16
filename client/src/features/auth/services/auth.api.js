@@ -15,6 +15,11 @@ export async function login({ email, password }) {
     return response.data;
 }
 
+export async function createGuestSession() {
+    const response = await api.post('/guest-session');
+    return response.data;
+}
+
 export async function getMe() {
     const response = await api.get('/get-me');
     return response.data;
@@ -22,6 +27,11 @@ export async function getMe() {
 
 export async function logout() {
     const response = await api.post('/logout');
+    return response.data;
+}
+
+export async function claimGuestChats() {
+    const response = await api.post('/claim-guest-chats');
     return response.data;
 }
 

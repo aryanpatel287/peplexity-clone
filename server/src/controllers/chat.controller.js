@@ -1,6 +1,7 @@
 import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
+import redis from '../config/cache.js';
 import {
     generateChatTitle,
     generateResponse,
@@ -10,17 +11,34 @@ import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
 
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
-
+    const isGuest = req.user?.isGuest;
+    const guestId = req.user?.guestId;
+    const userId = req.user?.id;
 
     let chatTitle = null,
         chat = null;
 
+    if (isGuest && guestId) {
+        const counterKey = `guest_msg_count:${guestId}`;
+        const count = await redis.incr(counterKey);
+        if (count > 2) {
+            await redis.decr(counterKey);
+            return res.status(401).json({
+                message: 'Please sign up to continue',
+                success: false,
+                error: 'Guest limit reached',
+                code: 'AUTH_REQUIRED',
+            });
+        }
+        await redis.expire(counterKey, 60 * 60 * 24);
+    }
+
     if (!chatId) {
         chatTitle = await generateChatTitle(message);
-        chat = await chatModel.create({
-            user: req.user.id,
-            title: chatTitle,
-        });
+        const chatPayload = isGuest
+            ? { guestId, title: chatTitle }
+            : { user: userId, title: chatTitle };
+        chat = await chatModel.create(chatPayload);
     }
 
     const userMessage = await messageModel.create({
@@ -31,7 +49,7 @@ async function sendMessage(req, res) {
 
     let userFiles;
     if (uploadedFiles) {
-        files = await Promise.all(
+        userFiles = await Promise.all(
             uploadedFiles.map(async (file) => {
                 const result = await fileModel.create({
                     ...file,
@@ -64,9 +82,15 @@ async function sendMessage(req, res) {
 }
 
 async function getChats(req, res) {
-    const userId = req.user.id;
+    const isGuest = req.user?.isGuest;
+    const guestId = req.user?.guestId;
+    const userId = req.user?.id;
 
-    const chats = await chatModel.find({ user: userId });
+    const query = isGuest
+        ? { guestId }
+        : { user: userId };
+
+    const chats = await chatModel.find(query);
 
     res.status(200).json({
         message: 'chats fetched successfully',
@@ -77,12 +101,15 @@ async function getChats(req, res) {
 
 async function getMessages(req, res) {
     const { chatId } = req.params;
-    const userId = req.user.id;
+    const isGuest = req.user?.isGuest;
+    const guestId = req.user?.guestId;
+    const userId = req.user?.id;
 
-    const chat = await chatModel.findOne({
-        _id: chatId,
-        user: userId,
-    });
+    const chat = await chatModel.findOne(
+        isGuest
+            ? { _id: chatId, guestId }
+            : { _id: chatId, user: userId },
+    );
 
     if (!chat) {
         return res.status(404).json({
@@ -106,12 +133,15 @@ async function getMessages(req, res) {
 
 async function deleteChat(req, res) {
     const { chatId } = req.params;
-    const userId = req.user.id;
+    const isGuest = req.user?.isGuest;
+    const guestId = req.user?.guestId;
+    const userId = req.user?.id;
 
-    const chat = await chatModel.findOneAndDelete({
-        _id: chatId,
-        user: userId,
-    });
+    const chat = await chatModel.findOneAndDelete(
+        isGuest
+            ? { _id: chatId, guestId }
+            : { _id: chatId, user: userId },
+    );
 
     const message = await messageModel.deleteMany({ chat: chatId });
 

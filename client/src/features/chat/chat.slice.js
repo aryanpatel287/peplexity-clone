@@ -9,6 +9,8 @@ const chatSlice = createSlice({
         isSending: false,
         error: null,
         isUploading: false,
+        guestLimitReached: false,
+        blockedChatId: null,
     },
     reducers: {
         createNewChat: (state, action) => {
@@ -85,6 +87,16 @@ const chatSlice = createSlice({
             state.error = action.payload;
         },
 
+        setGuestLimitReached: (state, action) => {
+            const { reached, chatId } = action.payload;
+            state.guestLimitReached = reached;
+            state.blockedChatId = reached ? chatId || null : null;
+        },
+        clearGuestLimit: (state) => {
+            state.guestLimitReached = false;
+            state.blockedChatId = null;
+        },
+
         // --- Socket streaming reducers ---
 
         // streamAiReponse gives FULL accumulated text each time → REPLACE not append
@@ -123,6 +135,8 @@ export const {
     setThinking,
     setToolCall,
     setError,
+    setGuestLimitReached,
+    clearGuestLimit,
     setAllMessages,
     createNewChat,
     addNewMessage,

@@ -11,11 +11,12 @@ const ChatMessageInput = ({
     handleSend,
     isAwaitingAI,
     isUploading,
+    isBlocked,
     filePreviews,
     onFileSelect,
     onRemoveFile,
 }) => {
-    const isDisabled = isAwaitingAI || isUploading;
+    const isDisabled = isAwaitingAI || isUploading || isBlocked;
     const canSend = (messageInput.trim() || filePreviews?.length > 0) && !isDisabled;
 
     const handleKeyDown = (e) => {
@@ -38,7 +39,13 @@ const ChatMessageInput = ({
                         ref={textareaRef}
                         className="chat-textarea"
                         rows={1}
-                        placeholder={hasChat ? 'Ask anything...' : "What's on your mind today?"}
+                        placeholder={
+                            isBlocked
+                                ? 'Sign up to continue chatting'
+                                : hasChat
+                                    ? 'Ask anything...'
+                                    : "What's on your mind today?"
+                        }
                         value={messageInput}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
