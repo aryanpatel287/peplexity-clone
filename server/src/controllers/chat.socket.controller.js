@@ -2,7 +2,7 @@ import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
 import redis from '../config/cache.js';
-import { dataIngestion } from '../rag/DataIngestion.rag.js';
+import { dataIngestion } from '../rag/dataIngestion.rag.js';
 import {
     generateChatTitle,
     streamAiReponse,
