@@ -187,6 +187,11 @@ async function chunkSection(section, globalChunkIndex) {
 // MAIN PROCESSOR
 
 export async function processMarkdownPages(pages) {
+    if (!pages || pages?.length === 0) {
+        console.error('No markdown pages to process');
+        throw new Error('No markdown pages to process');
+    }
+
     // MERGE DOCUMENT
 
     const mergedMarkdown = mergeMarkdownPages(pages);

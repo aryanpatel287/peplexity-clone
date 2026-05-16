@@ -18,9 +18,6 @@ export async function retrieveRelevantContext(prompt) {
         includeMetadata: true,
     });
 
-    console.log('Query result: ', queryResult);
-    console.log('Query matches: ', queryResult.matches);
-
     console.log(
         'Query matches IDs: ',
         queryResult.matches.map((match) => match.id),
@@ -33,8 +30,8 @@ export async function retrieveRelevantContext(prompt) {
     return JSON.stringify(retrievedChunks);
 }
 
-console.log(
-    await retrieveRelevantContext(
-        'AI Java Developer skills and job responsibilities (OOPS, SDLC, data structures, automation framework)',
-    ),
-);
+// console.log(
+//     await retrieveRelevantContext(
+//         'AI Java Developer skills and job responsibilities (OOPS, SDLC, data structures, automation framework)',
+//     ),
+// );

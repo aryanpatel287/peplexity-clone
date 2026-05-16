@@ -36,16 +36,34 @@ export const useChat = () => {
             const { chat, aiMessage } = data;
 
             if (!chatId) {
-                dispatch(createNewChat({ chatId: chat._id, title: chat.title }));
+                dispatch(
+                    createNewChat({ chatId: chat._id, title: chat.title }),
+                );
             }
 
-            dispatch(addNewMessage({ chatId: chatId || chat._id, content: message, role: 'user' }));
-            dispatch(addNewMessage({ chatId: chatId || chat._id, content: aiMessage.content, role: aiMessage.role }));
+            dispatch(
+                addNewMessage({
+                    chatId: chatId || chat._id,
+                    content: message,
+                    role: 'user',
+                }),
+            );
+            dispatch(
+                addNewMessage({
+                    chatId: chatId || chat._id,
+                    content: aiMessage.content,
+                    role: aiMessage.role,
+                }),
+            );
             dispatch(setCurrentChatId(chat._id));
 
             return chat._id;
         } catch (err) {
-            const msg = capitalize(err.response?.data?.message || err.message || 'Failed to send message');
+            const msg = capitalize(
+                err.response?.data?.message ||
+                    err.message ||
+                    'Failed to send message',
+            );
             dispatch(setError(msg));
             toast.error(msg);
         } finally {
@@ -73,7 +91,11 @@ export const useChat = () => {
                 ),
             );
         } catch (err) {
-            const msg = capitalize(err.response?.data?.message || err.message || 'Failed to load chats');
+            const msg = capitalize(
+                err.response?.data?.message ||
+                    err.message ||
+                    'Failed to load chats',
+            );
             dispatch(setError(msg));
             toast.error(msg);
         } finally {
@@ -88,7 +110,11 @@ export const useChat = () => {
             const { messages } = data;
             dispatch(setAllMessages({ chatId, messages }));
         } catch (err) {
-            const msg = capitalize(err.response?.data?.message || err.message || 'Failed to load messages');
+            const msg = capitalize(
+                err.response?.data?.message ||
+                    err.message ||
+                    'Failed to load messages',
+            );
             dispatch(setError(msg));
             toast.error(msg);
         } finally {
@@ -106,7 +132,11 @@ export const useChat = () => {
             await deleteChat({ chatId });
             dispatch(setDeleteChat({ chatId }));
         } catch (err) {
-            const msg = capitalize(err.response?.data?.message || err.message || 'Failed to delete chat');
+            const msg = capitalize(
+                err.response?.data?.message ||
+                    err.message ||
+                    'Failed to delete chat',
+            );
             dispatch(setError(msg));
             toast.error(msg);
         } finally {
@@ -120,7 +150,11 @@ export const useChat = () => {
             const data = await uploadFiles({ files });
             return data.uploadedFiles;
         } catch (err) {
-            const msg = capitalize(err.response?.data?.message || err.message || 'File upload failed');
+            const msg = capitalize(
+                err.response?.data?.message ||
+                    err.message ||
+                    'File upload failed',
+            );
             dispatch(setError(msg));
             toast.error(msg);
             return null;
@@ -136,7 +170,15 @@ export const useChat = () => {
         dispatch(setSending(true));
 
         if (chatId) {
-            dispatch(addNewMessage({ chatId, content: message, role: 'user' }));
+            console.log('uploadedFiles: ', uploadedFiles);
+            dispatch(
+                addNewMessage({
+                    chatId,
+                    files: uploadedFiles,
+                    content: message,
+                    role: 'user',
+                }),
+            );
             dispatch(addNewMessage({ chatId, content: '', role: 'ai' }));
         }
 

@@ -52,12 +52,22 @@ export function registerSocketListeners(dispatch) {
     });
 
     // New chat created server-side — add both message bubbles now
-    socket.on('chat:chat_created', ({ chatId, title, userMessage }) => {
+    socket.on(
+        'chat:chat_created',
+        ({ chatId, title, userMessage, uploadedFiles }) => {
         dispatch(createNewChat({ chatId, title }));
         dispatch(setCurrentChatId(chatId));
-        dispatch(addNewMessage({ chatId, content: userMessage, role: 'user' }));
+        dispatch(
+            addNewMessage({
+                chatId,
+                content: userMessage,
+                role: 'user',
+                files: uploadedFiles,
+            }),
+        );
         dispatch(addNewMessage({ chatId, content: '', role: 'ai' }));
-    });
+        },
+    );
 
     // AI thinking/reasoning text — stored on the AI bubble
     socket.on('chat:thinking', ({ chatId, thinking }) => {

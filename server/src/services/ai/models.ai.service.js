@@ -2,9 +2,10 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatMistralAI, MistralAIEmbeddings } from '@langchain/mistralai';
 import { createAgent, modelCallLimitMiddleware } from 'langchain';
 import {
-	emailTool,
-	getCurrentDateTimeTool,
-	searchInternetTool,
+    contextRetrieverTool,
+    emailTool,
+    getCurrentDateTimeTool,
+    searchInternetTool,
 } from './tools.ai.service.js';
 import envConfig from '../../config/envconfig.js';
 
@@ -29,41 +30,54 @@ If unsure → use tools, not reasoning.
 `;
 
 const geminiModel = new ChatGoogleGenerativeAI({
-	model: 'gemma-4-31b-it',
-	apiKey: envConfig.GEMINI_API_KEY,
+    model: 'gemma-4-31b-it',
+    apiKey: envConfig.GEMINI_API_KEY,
+    maxConcurrency: 3,
 });
 
 export const geminiAgent = createAgent({
-	model: geminiModel,
-	systemPrompt: toolAgentSystemPrompt,
-	tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
-	middleware: [
-		modelCallLimitMiddleware({
-			runLimit: 5,
-			exitBehavior: 'end',
-		}),
-	],
+    model: geminiModel,
+    systemPrompt: toolAgentSystemPrompt,
+    tools: [
+        emailTool,
+        searchInternetTool,
+        getCurrentDateTimeTool,
+        contextRetrieverTool,
+    ],
+    middleware: [
+        modelCallLimitMiddleware({
+            runLimit: 5,
+            exitBehavior: 'end',
+        }),
+    ],
 });
 
 const mistralModel = new ChatMistralAI({
-	model: 'mistral-medium-latest',
-	apiKey: envConfig.MISTRAL_API_KEY,
+    model: 'mistral-medium-latest',
+    apiKey: envConfig.MISTRAL_API_KEY,
+    maxConcurrency: 3,
 });
 
 const mistralEmbeddingModel = new MistralAIEmbeddings({
-	apiKey: envConfig.MISTRAL_API_KEY,
-	model: 'mistral-embed',
+    apiKey: envConfig.MISTRAL_API_KEY,
+    model: 'mistral-embed',
 });
 
 export const mistralAgent = createAgent({
-	model: mistralModel,
-	tools: [emailTool, searchInternetTool, getCurrentDateTimeTool],
-	middleware: [
-		modelCallLimitMiddleware({
-			runLimit: 5,
-			exitBehavior: 'end',
-		}),
-	],
+    model: mistralModel,
+    systemPrompt: toolAgentSystemPrompt,
+    tools: [
+        emailTool,
+        searchInternetTool,
+        getCurrentDateTimeTool,
+        contextRetrieverTool,
+    ],
+    middleware: [
+        modelCallLimitMiddleware({
+            runLimit: 5,
+            exitBehavior: 'end',
+        }),
+    ],
 });
 
 export { geminiModel, mistralModel, mistralEmbeddingModel };

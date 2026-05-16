@@ -1,10 +1,13 @@
 import ChunkModel from '../models/chunk.model.js';
 
+//TODO: Add file validation - the ai should receive the context of the file which is in the current chat only.
+//TODO: how will the ai will pass the chatid when it calls the tool?
 async function saveChunksToDb({
     chunks,
-    fileId = '69ef97b75c7cd75eb86b61ad',
-    chatId = '69ef72e239d02d472918785c',
+    file,
+    chat,
     documentType,
+    source = 'unknown',
 }) {
     if (chunks.length === 0) {
         console.error('No chunks to save to MongoDB.');
@@ -12,11 +15,11 @@ async function saveChunksToDb({
     }
 
     const docsToInsert = chunks.map((chunk) => ({
-        file: fileId,
-        chat: chatId,
+        file,
+        chat,
         text: chunk.text,
         markdown: chunk.markdown,
-        source: chunk.source,
+        source: source,
         metadata: chunk.metadata,
         documentType,
     }));
@@ -36,7 +39,7 @@ async function saveChunksToDb({
     }
 
     const chunksToReturn = insertedChunks.map((savedChunk) => ({
-        _id: savedChunk._id,
+        _id: savedChunk._id.toString(),
         file: savedChunk.file,
         chat: savedChunk.chat,
         text: savedChunk.text,

@@ -12,7 +12,7 @@ import multer from 'multer';
 const chatRouter = Router();
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 2 * 1024 * 1024 },
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
     fileFilter: (req, file, cb) => {
         if (
             file.mimetype.startsWith('image/') ||
@@ -66,8 +66,10 @@ chatRouter.delete('/delete/:chatId', authUser, deleteChat);
 chatRouter.post(
     '/uploads',
     authUser,
-    upload.array('files'),
+    upload.array('files', 5),
     uploadFileController,
 );
+
+//TODO: add validation for upload files size and the number of files that can be uploaded at once on client side
 
 export default chatRouter;

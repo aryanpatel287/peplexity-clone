@@ -16,6 +16,7 @@ async function EmbedTheDocumentChunks(chunks) {
         throw new Error('No chunks to embed');
         return;
     }
+    console.log('chunk', chunks[0]);
 
     const docs = await Promise.all(
         chunks.map(async (chunk, idx) => {
@@ -50,12 +51,18 @@ async function deleteAllTheVectors() {
     console.log('Delete result: ', deleteResult);
 }
 
-export async function dataIngestion({ filePath, file, chat, documentType }) {
+export async function dataIngestion({
+    fileUrl,
+    file,
+    chat,
+    documentType,
+    source,
+}) {
     let stage = 'init';
 
     try {
         stage = 'parse_pdf';
-        const pages = await parsePdfByLlama(filePath);
+        const pages = await parsePdfByLlama(fileUrl);
 
         stage = 'chunk_markdown';
         const chunks = await processMarkdownPages(pages);
@@ -65,6 +72,7 @@ export async function dataIngestion({ filePath, file, chat, documentType }) {
             file,
             chat,
             documentType,
+            source,
         });
 
         stage = 'embed_chunks';
@@ -84,6 +92,6 @@ export async function dataIngestion({ filePath, file, chat, documentType }) {
 
 // For testing the data ingestion function
 // await dataIngestion({
-//     filePath:
+//     fileUrl:
 //         'https://ik.imagekit.io/ji8wynr3i/cohort2-genAi/pdfs/Campus%20Job%20Description%20-%202027-1-5.pdf',
 // });

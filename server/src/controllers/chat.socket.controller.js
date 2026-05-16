@@ -1,7 +1,11 @@
 import chatModel from '../models/chat.model.js';
 import fileModel from '../models/file.model.js';
 import messageModel from '../models/message.model.js';
-import { generateChatTitle, streamAiReponse } from '../services/ai/response.ai.service.js';
+import { dataIngestion } from '../rag/DataIngestion.rag.js';
+import {
+    generateChatTitle,
+    streamAiReponse,
+} from '../services/ai/response.ai.service.js';
 
 export async function handleChatSend(
     socket,
@@ -21,6 +25,7 @@ export async function handleChatSend(
                 chatId: resolvedChatId,
                 title,
                 userMessage: message,
+                uploadedFiles,
             });
         }
 
@@ -29,8 +34,6 @@ export async function handleChatSend(
             content: message,
             role: 'user',
         });
-
-        console.log('uploadedFiles: ', uploadedFiles);
 
         let userFiles = [];
         if (uploadedFiles?.length) {
@@ -51,7 +54,19 @@ export async function handleChatSend(
             );
         }
 
-        console.log('userFiles: ', userFiles);
+        if (userFiles?.length > 0) {
+            void Promise.all(
+                userFiles.map((file) =>
+                    dataIngestion({
+                        fileUrl: file.url,
+                        file: file._id,
+                        chat: resolvedChatId,
+                        documentType: file.mimetype,
+                        source: file.name,
+                    }),
+                ),
+            );
+        }
 
         const history = await messageModel.find({ chat: resolvedChatId });
 

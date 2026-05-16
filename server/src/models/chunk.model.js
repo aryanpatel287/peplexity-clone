@@ -54,7 +54,7 @@ const chunkSchema = new mongoose.Schema(
     },
 );
 
-// chunkSchema.index({ file: 1, 'metadata.chunkIndex': 1 });
+chunkSchema.index({ file: 1, 'metadata.chunkIndex': 1 });
 
 const ChunkModel = mongoose.model('Chunks', chunkSchema);
 

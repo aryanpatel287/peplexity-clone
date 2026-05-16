@@ -23,8 +23,8 @@ const chatSlice = createSlice({
         },
 
         addNewMessage: (state, action) => {
-            const { chatId, content, role } = action.payload;
-            state.chats[chatId].messages.push({ content, role });
+            const { chatId, files, content, role } = action.payload;
+            state.chats[chatId].messages.push({ content, files, role });
         },
 
         setAllMessages: (state, action) => {
@@ -77,6 +77,7 @@ const chatSlice = createSlice({
             if (!msgs?.length) return;
             const last = msgs[msgs.length - 1];
             if (!last.toolCalls) last.toolCalls = [];
+            if (last.toolCalls.includes(toolName)) return;
             last.toolCalls.push(toolName);
         },
 
