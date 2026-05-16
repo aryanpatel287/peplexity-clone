@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 import { capitalize } from '../../shared/utils/format';
+import { SOCKET_URL } from '../../../app/runtime.config';
 import {
     createNewChat,
     setCurrentChatId,
@@ -28,7 +29,7 @@ export function initializeSocketConnection(sessionType = 'user') {
         listenersRegistered = false;
     }
 
-    socket = io(import.meta.env.VITE_SOCKET_URL, {
+    socket = io(SOCKET_URL, {
         withCredentials: true,
     });
     currentSessionType = sessionType;
