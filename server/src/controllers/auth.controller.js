@@ -371,7 +371,12 @@ async function logoutController(req, res) {
 
     res.clearCookie('token', envConfig.AUTH_COOKIE_OPTIONS);
 
-    await redis.set(token, Date.now().toString(), 'EX', 3600 * 24);
+    await redis.set(
+        `perplexity-blacklist:${token}`,
+        'true',
+        'EX',
+        24 * 60 * 60,
+    ); // TTL: 1day
 
     return res.status(200).json({
         message: 'Logged out successfully',
@@ -432,6 +437,13 @@ async function claimGuestChats(req, res) {
     );
 
     res.clearCookie('guest_token', envConfig.AUTH_COOKIE_OPTIONS);
+
+    await redis.set(
+        `perplexity-blacklist:${guestToken}`,
+        'true',
+        'EX',
+        24 * 60 * 60,
+    );
 
     return res.status(200).json({
         message: 'Guest chats claimed successfully',
