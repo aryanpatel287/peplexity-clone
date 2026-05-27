@@ -1,7 +1,6 @@
 import crypto from 'crypto';
 import redis from '../config/cache.js';
 import { sendEmail } from '../services/mail/mail.service.js';
-import { getMagicLinkEmailTemplate } from './emailTemplates.js';
 
 const OTP_CHARS =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -81,7 +80,6 @@ export async function issueOtp({
     const otpHash = hashOtpValue(otp);
 
     if (subject && buildHtml && sendEmailFn) {
-        //FIXME: buildhtml should be universal but here in case of registration i have to pass username and magicLink as well due to template , either move template here or find a  scalable solution for this
         const html = buildHtml(otp);
         await sendEmailFn({
             to: normalizedEmail,

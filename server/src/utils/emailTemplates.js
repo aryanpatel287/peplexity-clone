@@ -57,7 +57,7 @@ const footerStyles = `
 /**
  * Verification Email Template
  */
-export const getVerificationEmailTemplate = (username, link) => `
+export const getVerificationEmailTemplate = ({ username, link }) => `
     <div style="${baseStyles}">
         <div style="${cardStyles}">
             <h1 style="${titleStyles}">Verify your account</h1>
@@ -68,12 +68,10 @@ export const getVerificationEmailTemplate = (username, link) => `
     </div>
 `;
 
-//FIXME: All templates should accept the object instead the parameters 
-
 /**
  * Password Reset Email Template
  */
-export const getForgotPasswordEmailTemplate = (username, link) => `
+export const getForgotPasswordEmailTemplate = ({ username, link }) => `
     <div style="${baseStyles}">
         <div style="${cardStyles}">
             <h1 style="${titleStyles}">Reset your password</h1>
@@ -91,7 +89,7 @@ export const getForgotPasswordEmailTemplate = (username, link) => `
 /**
  * HTML Response for Verification Page in Browser
  */
-export const getVerificationSuccessPage = (username, loginLink) => `
+export const getVerificationSuccessPage = ({ username, loginLink }) => `
     <!DOCTYPE html>
     <html>
     <head>
@@ -147,7 +145,7 @@ export const getVerificationSuccessPage = (username, loginLink) => `
  * Accepts a sign-in link and a one-time OTP code.
  * The button is the primary CTA; the OTP is shown as a fallback.
  */
-export const getMagicLinkEmailTemplate = (username, link, otp) => `
+export const getMagicLinkEmailTemplate = ({ username, link, otp }) => `
     <div style="${baseStyles}">
         <div style="${cardStyles}">
             <h1 style="${titleStyles}">Sign in to Perplexity</h1>
@@ -192,7 +190,7 @@ export const getMagicLinkEmailTemplate = (username, link, otp) => `
     </div>
 `;
 
-export const getAlreadyVerifiedPage = (username, loginLink) => `
+export const getAlreadyVerifiedPage = ({ username, loginLink }) => `
     <!DOCTYPE html>
     <html>
     <head>

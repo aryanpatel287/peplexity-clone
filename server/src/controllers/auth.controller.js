@@ -62,15 +62,14 @@ async function sendSignUpEmailController(req, res) {
 
         await issueOtp({
             email: normalizedEmail,
-            username: normalizedUsername,
             purpose: OTP_PURPOSES.SIGN_UP,
             subject: 'Sign in to Perplexity Ai',
             buildHtml: (otp) =>
-                getMagicLinkEmailTemplate(
-                    normalizedUsername,
-                    registerLink,
+                getMagicLinkEmailTemplate({
+                    username: normalizedUsername,
+                    link: registerLink,
                     otp,
-                ),
+                }),
         });
 
         return sendResponse({
@@ -200,7 +199,7 @@ async function verifySignUpEmailController(req, res) {
     }
 
     const redirectLink = `${envConfig.CLIENT_ORIGIN}/`;
-    res.send(getVerificationSuccessPage(username, redirectLink));
+    res.send(getVerificationSuccessPage({ username, loginLink: redirectLink }));
 }
 
 /**
