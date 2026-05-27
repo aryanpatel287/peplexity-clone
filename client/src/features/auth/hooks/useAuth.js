@@ -10,6 +10,7 @@ import {
     getMe,
     createGuestSession,
     claimGuestChats,
+    googleAuth,
 } from '../services/auth.api';
 
 import {
@@ -77,6 +78,10 @@ export function useAuth() {
         },
         [dispatch],
     );
+
+    const handleGoogleAuth = useCallback(() => {
+        googleAuth();
+    }, []);
 
     const handleGetMe = useCallback(async () => {
         try {
@@ -178,5 +183,6 @@ export function useAuth() {
         handleLogout,
         handleClaimGuestChats,
         handleCheckSessionSilent,
+        handleGoogleAuth,
     };
 }

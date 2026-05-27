@@ -230,6 +230,29 @@ async function verifySignUpEmailController(req, res) {
     res.redirect(redirectLink);
 }
 
+async function googleAuthCallbackController(req, res) {
+    const { emails, displayName, id } = req.user;
+
+    const email = emails?.[0]?.value;
+    const username = email.split('@')[0];
+
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+        user = await userModel.create({
+            email,
+            username,
+            fullName: displayName,
+            googleId: id,
+        });
+    }
+
+    await setTokenCookie(res, user);
+
+    const redirectLink = `${envConfig.CLIENT_ORIGIN}/`;
+    res.redirect(redirectLink);
+}
+
 /**
  * @description Create or reuse a guest session
  * @route POST /api/auth/guest-session
@@ -415,6 +438,7 @@ async function claimGuestChats(req, res) {
 export {
     sendSignUpEmailController,
     verifySignUpEmailController,
+    googleAuthCallbackController,
     createGuestSession,
     getMeController,
     logoutController,

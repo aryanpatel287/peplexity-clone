@@ -1,6 +1,8 @@
 :root {
     --primary: #468a93;
     --primary-hover: #3a7178;
+    --secondary: #24211f;
+    --secondary-hover: #2c2826;
 
     --bg-dark: #171615;
     --bg-sidebar: #1e1d1b;
@@ -10,13 +12,14 @@
     --bg-card: #1e1e1e;
 
     --text-main: #ffffff;
-    --text-muted: #a0a0a0;
+    --text-muted: #b7ada5;
     --text-primary: var(--primary);
 
     --btn-send: #7a7978;
-    --icon-color: #969593;
+    --icon-color: var(--text-muted);
 
     --border-color: #333333;
+    --input-focus-border: #494949;
     --border-radius: 8px;
 
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;

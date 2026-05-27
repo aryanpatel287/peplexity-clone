@@ -7,11 +7,13 @@ import {
     claimGuestChats,
     sendSignUpEmailController,
     verifySignUpEmailController,
+    googleAuthCallbackController,
 } from '../controllers/auth.controller.js';
 
 import { SignUpEmailValidator } from '../validators/auth.validator.js';
-
 import { authUser } from '../middlewares/auth.middleware.js';
+import passport from 'passport';
+import envConfig from '../config/envconfig.js';
 
 const authRouter = Router();
 
@@ -28,7 +30,32 @@ authRouter.post(
  * @body none
  */
 authRouter.get('/verify-email', verifySignUpEmailController);
+
+/**
+ * @route POST /api/auth/verify-signup-email
+ * @description Verify the OTP sent to email during sign-up
+ * @access Public
+ * @body { email, otp }
+ * @query { register (optional, user can use the magicLink and otp both to signup) }
+ */
 authRouter.post('/verify-signup-email', verifySignUpEmailController);
+
+authRouter.get(
+    '/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] }),
+);
+
+authRouter.get(
+    '/google/callback',
+    passport.authenticate('google', {
+        session: false,
+        failureRedirect:
+            envConfig.NODE_ENV === 'development'
+                ? `${envConfig.CLIENT_URL}/`
+                : '/',
+    }),
+    googleAuthCallbackController,
+);
 
 /**
  * @route POST /api/auth/guest-session

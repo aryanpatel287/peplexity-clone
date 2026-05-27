@@ -83,6 +83,8 @@ const envConfig = {
         path: '/',
     },
 
+    NODE_ENV: process.env.NODE_ENV || 'development',
+
     //  JWT configuration keys
     JWT_SECRET: process.env.JWT_SECRET,
 

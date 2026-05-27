@@ -16,6 +16,10 @@ export async function verifySignUpOtp({ email, otp }) {
     return response.data;
 }
 
+export function googleAuth() {
+    window.location.assign('/api/auth/google');
+}
+
 export async function createGuestSession() {
     const response = await api.post('/guest-session');
     return response.data;
