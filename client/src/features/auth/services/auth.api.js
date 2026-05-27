@@ -6,13 +6,13 @@ const api = axios.create({
     withCredentials: true,
 });
 
-export async function register({ username, email, password }) {
-    const response = await api.post('/register', { username, email, password });
+export async function sendSignUpEmail({ email }) {
+    const response = await api.post('/send-signup-email', { email });
     return response.data;
 }
 
-export async function login({ email, password }) {
-    const response = await api.post('/login', { email, password });
+export async function verifySignUpOtp({ email, otp }) {
+    const response = await api.post('/verify-signup-email', { email, otp });
     return response.data;
 }
 
@@ -33,24 +33,5 @@ export async function logout() {
 
 export async function claimGuestChats() {
     const response = await api.post('/claim-guest-chats');
-    return response.data;
-}
-
-export async function resendVerificationEmail({ email }) {
-    const response = await api.post('/resend-verfiy-email');
-    return response.data;
-}
-
-export async function forgotPasswordEmail({ email }) {
-    const response = await api.post('/forgot-password', {
-        email,
-    });
-    return response.data;
-}
-
-export async function updatePassword({ password, token }) {
-    const response = await api.patch('/update-password?token=' + token, {
-        password,
-    });
     return response.data;
 }

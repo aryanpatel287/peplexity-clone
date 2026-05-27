@@ -6,9 +6,9 @@ const authSlice = createSlice({
         user: null,
         loading: true,
         error: null,
-        isUpdatingPassword: false,
         isGuest: false,
         sessionReady: false,
+        showSignUpModal: false,
     },
     reducers: {
         setUser: (state, action) => {
@@ -20,14 +20,17 @@ const authSlice = createSlice({
         setError: (state, action) => {
             state.error = action.payload;
         },
-        setIsUpdatingPassword: (state, action) => {
-            state.isUpdatingPassword = action.payload;
-        },
         setIsGuest: (state, action) => {
             state.isGuest = action.payload;
         },
         setSessionReady: (state, action) => {
             state.sessionReady = action.payload;
+        },
+        openSignUpModal: (state) => {
+            state.showSignUpModal = true;
+        },
+        closeSignUpModal: (state) => {
+            state.showSignUpModal = false;
         },
     },
 });
@@ -36,8 +39,9 @@ export const {
     setUser,
     setLoading,
     setError,
-    setIsUpdatingPassword,
     setIsGuest,
     setSessionReady,
+    openSignUpModal,
+    closeSignUpModal,
 } = authSlice.actions;
 export default authSlice.reducer;

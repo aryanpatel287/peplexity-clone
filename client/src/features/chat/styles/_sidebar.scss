@@ -78,6 +78,7 @@
             border: none;
             transition: background-color 0.2s ease;
             @include flex(flex-start, center, row, 12px);
+            min-width: 0;
 
             &:hover {
                 background-color: rgba(255, 255, 255, 0.05);
@@ -175,9 +176,15 @@
             padding: 6px 10px;
             font-size: 0.85rem;
             gap: 6px;
+            flex-shrink: 0;
         }
 
         .sidebar-signin {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
             width: 100%;
             padding: 10px 12px;
             border-radius: 12px;

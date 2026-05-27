@@ -31,10 +31,6 @@ const emailValidator = body('email')
     .withMessage('email must be valid')
     .normalizeEmail();
 
-const SignUpEmailValidator = [
-    usernameValidator,
-    emailValidator,
-    validateRequest,
-];
+const SignUpEmailValidator = [emailValidator, validateRequest];
 
 export { SignUpEmailValidator };

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import envConfig from '../config/envConfig.js';
+import envConfig from '../config/envconfig.js';
 
 export async function sendResponse({
     res,
@@ -18,9 +18,9 @@ export async function sendResponse({
 }
 
 /**
- * Helper function to generate JWT token, set cookie, and send response
+ * Helper to generate JWT token and set the 'token' cookie
  */
-export async function sendTokenResponse({ res, user, message }) {
+export function setTokenCookie(res, user) {
     const token = jwt.sign(
         { id: user._id, email: user.email },
         envConfig.JWT_SECRET,
@@ -28,8 +28,15 @@ export async function sendTokenResponse({ res, user, message }) {
             expiresIn: '1d',
         },
     );
-
     res.cookie('token', token);
+    return token;
+}
+
+/**
+ * Helper function to generate JWT token, set cookie, and send response
+ */
+export async function sendTokenResponse({ res, user, message }) {
+    setTokenCookie(res, user);
 
     return sendResponse({
         res,

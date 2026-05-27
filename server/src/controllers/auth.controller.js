@@ -13,7 +13,11 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import envConfig from '../config/envconfig.js';
 import { randomUUID } from 'crypto';
-import { sendResponse, sendTokenResponse } from '../utils/response.utlis.js';
+import {
+    sendResponse,
+    sendTokenResponse,
+    setTokenCookie,
+} from '../utils/response.utlis.js';
 import {
     deleteOtp,
     generateOtp,
@@ -38,17 +42,19 @@ function getAuthCookieOptions(maxAge) {
 
 async function sendSignUpEmailController(req, res) {
     try {
-        const { email, username } = req.body;
+        const { email } = req.body;
         const normalizedEmail = email.trim().toLowerCase();
-        const normalizedUsername = username.trim();
 
-        if (!normalizedEmail || !normalizedUsername) {
+        if (!normalizedEmail) {
             return res.status(400).json({
-                message: 'email and username are required',
+                message: 'email is required',
                 success: false,
-                error: 'email and username are required',
+                error: 'email is required',
             });
         }
+
+        const username = email.split('@')[0]; // Default username is the local part of the email
+        const normalizedUsername = username.trim();
 
         const registerToken = jwt.sign(
             {
@@ -93,21 +99,21 @@ async function verifySignUpEmailController(req, res) {
     const { register } = req.query;
 
     let email,
-        otp,
         username,
+        otp,
         switchCase = 'tokenSignUp';
 
     if (!register) {
         switchCase = 'otpSignUp';
-        ({ otp, email, username } = req.body);
+        ({ otp, email } = req.body);
 
-        if (!otp || !email || !username) {
+        if (!otp || !email.trim()) {
             return sendResponse({
                 res,
                 statusCode: 400,
-                message: 'email, username and otp are required',
+                message: 'email and otp are required',
                 success: false,
-                error: 'email, username and otp are required',
+                error: 'email and otp are required',
             });
         }
     }
@@ -175,11 +181,11 @@ async function verifySignUpEmailController(req, res) {
         }
     }
 
-    const user = await userModel.findOne({ email });
+    let user = await userModel.findOne({ email });
 
     if (!user) {
         try {
-            await userModel.create({
+            user = await userModel.create({
                 username,
                 email,
             });
@@ -198,8 +204,30 @@ async function verifySignUpEmailController(req, res) {
         }
     }
 
+    // Automatically claim guest chats if a guest session exists in cookies
+    const guestToken = req.cookies.guest_token;
+    if (guestToken) {
+        const claimResult = await claimGuestChatsHelper(guestToken, user._id);
+        if (claimResult.success) {
+            res.clearCookie('guest_token', envConfig.AUTH_COOKIE_OPTIONS);
+        }
+    }
+
+    if (switchCase === 'otpSignUp') {
+        return sendTokenResponse({
+            res,
+            user,
+            message: 'Email verified successfully',
+        });
+    }
+
+    // For tokenSignUp (magic link GET request):
+    // Set the token cookie so they are logged in when they redirect back to the client
+    setTokenCookie(res, user);
+
+    // Redirect directly to the client home page
     const redirectLink = `${envConfig.CLIENT_ORIGIN}/`;
-    res.send(getVerificationSuccessPage({ username, loginLink: redirectLink }));
+    res.redirect(redirectLink);
 }
 
 /**
@@ -314,39 +342,48 @@ async function logoutController(req, res) {
 }
 
 /**
+ * Helper to claim guest chats and blacklist the guest token
+ */
+async function claimGuestChatsHelper(guestToken, userId) {
+    if (!guestToken) return { success: false, error: 'guest token missing' };
+    try {
+        const decoded = jwt.verify(guestToken, envConfig.JWT_SECRET);
+        if (!decoded?.guestId || !decoded?.isGuest) {
+            return { success: false, error: 'Invalid guest session' };
+        }
+
+        const result = await chatModel.updateMany(
+            { guestId: decoded.guestId },
+            {
+                $set: { user: userId },
+                $unset: { guestId: '' },
+            },
+        );
+
+        await redis.set(
+            `perplexity-blacklist:${guestToken}`,
+            'true',
+            'EX',
+            24 * 60 * 60,
+        );
+
+        return { success: true, claimedCount: result.modifiedCount ?? 0 };
+    } catch (error) {
+        console.error('Error in claimGuestChatsHelper:', error);
+        return {
+            success: false,
+            error: error.message || 'Verification failed',
+        };
+    }
+}
+
+/**
  * @description Claim guest chats after login
  * @route POST /api/auth/claim-guest-chats
  * @access Private
  */
 async function claimGuestChats(req, res) {
     const guestToken = req.cookies.guest_token;
-
-    if (!guestToken) {
-        return res.status(400).json({
-            message: 'guest session not found',
-            success: false,
-            error: 'guest token missing',
-        });
-    }
-
-    let decoded;
-    try {
-        decoded = jwt.verify(guestToken, envConfig.JWT_SECRET);
-    } catch (error) {
-        return res.status(401).json({
-            message: 'Invalid guest token',
-            success: false,
-            error: 'Invalid guest token',
-        });
-    }
-
-    if (!decoded?.guestId || !decoded?.isGuest) {
-        return res.status(400).json({
-            message: 'Invalid guest session',
-            success: false,
-            error: 'Invalid guest session',
-        });
-    }
 
     const userId = req.user?.id;
     if (!userId) {
@@ -357,27 +394,21 @@ async function claimGuestChats(req, res) {
         });
     }
 
-    const result = await chatModel.updateMany(
-        { guestId: decoded.guestId },
-        {
-            $set: { user: userId },
-            $unset: { guestId: '' },
-        },
-    );
+    const result = await claimGuestChatsHelper(guestToken, userId);
+    if (!result.success) {
+        return res.status(400).json({
+            message: result.error || 'Failed to claim guest chats',
+            success: false,
+            error: result.error || 'Failed to claim guest chats',
+        });
+    }
 
     res.clearCookie('guest_token', envConfig.AUTH_COOKIE_OPTIONS);
-
-    await redis.set(
-        `perplexity-blacklist:${guestToken}`,
-        'true',
-        'EX',
-        24 * 60 * 60,
-    );
 
     return res.status(200).json({
         message: 'Guest chats claimed successfully',
         success: true,
-        claimedCount: result.modifiedCount ?? 0,
+        claimedCount: result.claimedCount,
     });
 }
 

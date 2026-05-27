@@ -17,6 +17,9 @@
   }
 
   .dashboard-sidebar {
+    width: 240px;
+    min-width: 240px;
+    flex-shrink: 0;
     border-right: 1px solid var(--border-color);
     background-color: var(--bg-sidebar);
     @include flex(flex-start, stretch, column);

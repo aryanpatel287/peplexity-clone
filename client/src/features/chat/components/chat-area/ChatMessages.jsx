@@ -51,7 +51,6 @@ const ChatMessages = () => {
                         key={index}
                         className={`message ${message.role === 'user' ? 'user-message' : 'ai-message'}`}
                     >
-                        {console.log('message: ', message)}
                         {message.files && (
                             <MessageFiles files={message.files} />
                         )}

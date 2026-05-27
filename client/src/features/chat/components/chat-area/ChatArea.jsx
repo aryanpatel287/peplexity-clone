@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { useChat } from '../../hooks/useChat';
+import { useAuth } from '../../../auth/hooks/useAuth';
 import ChatMessages from './ChatMessages';
 import ChatMessageInput from './ChatMessageInput';
 import DragOverlay from './helpers/DragOverlay';
@@ -26,6 +27,7 @@ const ChatArea = () => {
 
     const { handleSendMessageSocket, handleGetMessages, handleUploadFiles } =
         useChat();
+    const { handleOpenSignUpModal } = useAuth();
 
     const [messageInput, setMessageInput] = useState('');
     const [pendingFiles, setPendingFiles] = useState([]);
@@ -33,7 +35,6 @@ const ChatArea = () => {
     const [isDragging, setIsDragging] = useState(false);
     const textareaRef = useRef(null);
     const dragCounterRef = useRef(0);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (urlChatId) {
@@ -58,7 +59,6 @@ const ChatArea = () => {
 
         const uploaded = await handleUploadFiles({ files: fileArray });
         if (uploaded) {
-            console.log('uploaded: ', uploaded);
             setPendingFiles((prev) => [...prev, ...uploaded]);
         } else {
             setFilePreviews([]);
@@ -95,13 +95,9 @@ const ChatArea = () => {
 
     useEffect(() => {
         if (guestLimitReached && isGuest) {
-            const targetChatId = blockedChatId || currentChatId;
-            const nextParam = targetChatId
-                ? `?nextChatId=${targetChatId}`
-                : '';
-            navigate(`/login${nextParam}`);
+            handleOpenSignUpModal();
         }
-    }, [guestLimitReached, isGuest, blockedChatId, currentChatId, navigate]);
+    }, [guestLimitReached, isGuest, handleOpenSignUpModal]);
 
     const handleSend = (e) => {
         e.preventDefault();
@@ -126,8 +122,6 @@ const ChatArea = () => {
             chatId: currentChatId,
             uploadedFiles: files,
         });
-
-        console.log('files: ', files);
     };
 
     const handleDragEnter = useCallback((e) => {

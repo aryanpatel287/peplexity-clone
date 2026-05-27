@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,10 +17,6 @@ const ProtectedPage = ({ children }) => {
 
     if (loading && !sessionReady) {
         return <h1>Loading</h1>;
-    }
-
-    if (sessionReady && !user && !isGuest) {
-        return <Navigate to={'/login'} replace />;
     }
 
     return children;

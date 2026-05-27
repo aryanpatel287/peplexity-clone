@@ -16,7 +16,7 @@ import { authUser } from '../middlewares/auth.middleware.js';
 const authRouter = Router();
 
 authRouter.post(
-    '/signup-email',
+    '/send-signup-email',
     SignUpEmailValidator,
     sendSignUpEmailController,
 );
@@ -28,6 +28,7 @@ authRouter.post(
  * @body none
  */
 authRouter.get('/verify-email', verifySignUpEmailController);
+authRouter.post('/verify-signup-email', verifySignUpEmailController);
 
 /**
  * @route POST /api/auth/guest-session

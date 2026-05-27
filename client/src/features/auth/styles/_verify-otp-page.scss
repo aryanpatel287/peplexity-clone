@@ -1,0 +1,129 @@
+@use '../../shared/styles/mixins' as *;
+
+// ─── Verify OTP Page ────────────────────────────────────────────────────────
+
+.verify-otp-page {
+    @include flex(center, center);
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    padding: 24px;
+}
+
+.verify-otp-card {
+    @include flex(flex-start, center, column, 24px);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+}
+
+.verify-otp-icon {
+    @include flex(center, center);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.verify-otp-heading {
+    @include flex(center, center, column, 10px);
+
+    h1 {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    p {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.5;
+
+        strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+    }
+}
+
+.verify-spam-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-top: -8px;
+}
+
+// ─── OTP Input ──────────────────────────────────────────────────────────────
+
+.otp-input-group {
+    @include flex(center, center, row, 10px);
+    width: 100%;
+}
+
+.otp-box {
+    width: 52px;
+    height: 60px;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--text-main);
+    text-align: center;
+    caret-color: var(--primary);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+
+    &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(70, 138, 147, 0.25);
+    }
+
+    &--filled {
+        border-color: var(--primary);
+    }
+
+    &--error {
+        border-color: #ff4d4d;
+        box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+    }
+}
+
+.verify-otp-error {
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    min-height: 20px;
+    animation: otpFadeIn 0.2s ease;
+}
+
+.verify-otp-confirm-btn {
+    width: 100%;
+    padding: 13px 16px;
+    background-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-main);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s, opacity 0.2s;
+
+    &:hover:not(:disabled) {
+        background-color: rgba(255, 255, 255, 0.18);
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+@keyframes otpFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
