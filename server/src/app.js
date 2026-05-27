@@ -8,6 +8,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import appRouter from './routes/app.routes.js';
 import envConfig from './config/envconfig.js';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
+app.use(helmet());
 app.use(
     cors({
         origin(origin, callback) {

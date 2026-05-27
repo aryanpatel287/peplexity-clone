@@ -68,6 +68,8 @@ export const getVerificationEmailTemplate = (username, link) => `
     </div>
 `;
 
+//FIXME: All templates should accept the object instead the parameters 
+
 /**
  * Password Reset Email Template
  */
@@ -138,6 +140,56 @@ export const getVerificationSuccessPage = (username, loginLink) => `
         </div>
     </body>
     </html>
+`;
+
+/**
+ * Magic Link + OTP Sign-In Email Template
+ * Accepts a sign-in link and a one-time OTP code.
+ * The button is the primary CTA; the OTP is shown as a fallback.
+ */
+export const getMagicLinkEmailTemplate = (username, link, otp) => `
+    <div style="${baseStyles}">
+        <div style="${cardStyles}">
+            <h1 style="${titleStyles}">Sign in to Perplexity</h1>
+            <p style="${textStyles}">Hi ${username}, use the button below to sign in instantly. This link is valid for 15 minutes.</p>
+
+            <!-- Primary CTA: magic-link button -->
+            <a href="${link}" style="${buttonStyles}">Sign In to Perplexity</a>
+
+            <!-- Divider -->
+            <div style="margin: 32px 0; display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; height: 1px; background-color: #333333;"></div>
+                <span style="color: #666666; font-size: 13px; white-space: nowrap;">or use the code below</span>
+                <div style="flex: 1; height: 1px; background-color: #333333;"></div>
+            </div>
+
+            <!-- OTP fallback -->
+            <p style="font-size: 14px; color: #a0a0a0; margin-bottom: 16px;">
+                If the button doesn't work, enter this one-time code on the sign-in page:
+            </p>
+            <div style="
+                display: inline-block;
+                background-color: #252421;
+                border: 1px solid #333333;
+                border-radius: 12px;
+                padding: 20px 40px;
+                margin-bottom: 24px;
+            ">
+                <span style="
+                    font-size: 36px;
+                    font-weight: 700;
+                    letter-spacing: 10px;
+                    color: #ffffff;
+                    font-family: 'Courier New', Courier, monospace;
+                ">${otp}</span>
+            </div>
+            <p style="font-size: 13px; color: #666666; margin-bottom: 0;">
+                This code expires in <strong style="color: #a0a0a0;">15 minutes</strong> and can only be used once.
+            </p>
+
+            <p style="${footerStyles}">If you didn't request this, you can safely ignore this email. Your account remains secure.</p>
+        </div>
+    </div>
 `;
 
 export const getAlreadyVerifiedPage = (username, loginLink) => `

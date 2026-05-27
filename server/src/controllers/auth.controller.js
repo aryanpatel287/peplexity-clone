@@ -7,11 +7,21 @@ import {
     getForgotPasswordEmailTemplate,
     getVerificationSuccessPage,
     getAlreadyVerifiedPage,
+    getMagicLinkEmailTemplate,
 } from '../utils/emailTemplates.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import envConfig from '../config/envconfig.js';
 import { randomUUID } from 'crypto';
+import { sendResponse, sendTokenResponse } from '../utils/response.utlis.js';
+import {
+    deleteOtp,
+    generateOtp,
+    issueOtp,
+    OTP_PURPOSES,
+    resendOtp,
+    verifyOtp,
+} from '../utils/otp.utils.js';
 
 const serverBaseUrl = (
     envConfig.SERVER_URL || `http://localhost:${envConfig.SERVER_PORT}`
@@ -26,81 +36,51 @@ function getAuthCookieOptions(maxAge) {
     };
 }
 
-/**
- * @description Register a user
- * @route POST /api/auth/register
- * @access Public
- * @body {username,email,password}
- */
-async function registerController(req, res) {
+async function sendSignUpEmailController(req, res) {
     try {
-        const { username, email, password } = req.body;
-
-        if (!username || !email || !password) {
-            return res.status(400).json({
-                message: 'username, email and password are required',
-                success: false,
-                error: 'username, email and password are required',
-            });
-        }
-
+        const { email, username } = req.body;
         const normalizedEmail = email.trim().toLowerCase();
         const normalizedUsername = username.trim();
 
-        if (!normalizedUsername || !normalizedEmail) {
+        if (!normalizedEmail || !normalizedUsername) {
             return res.status(400).json({
-                message: 'username, email and password are required',
+                message: 'email and username are required',
                 success: false,
-                error: 'username, email and password are required',
+                error: 'email and username are required',
             });
         }
 
-        const existingUser = await userModel.findOne({
-            $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
-        });
-
-        if (existingUser) {
-            if (existingUser.email === normalizedEmail) {
-                return res.status(409).json({
-                    message: 'email already exists',
-                    success: false,
-                    error: 'email already exists',
-                });
-            }
-
-            return res.status(409).json({
-                message: 'username already exists',
-                success: false,
-                error: 'username already exists',
-            });
-        }
-
-        const user = await userModel.create({
-            username: normalizedUsername,
-            email: normalizedEmail,
-            password,
-        });
-
-        const emailVerificationToken = jwt.sign(
+        const registerToken = jwt.sign(
             {
                 email: normalizedEmail,
+                username: normalizedUsername,
             },
             envConfig.JWT_SECRET,
         );
 
-        const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
+        const registerLink = `${serverBaseUrl}/api/auth/verify-email?register=${registerToken}`;
 
-        await sendEmail({
-            to: normalizedEmail,
-            subject: 'Welcome to Perplexity - Verify Your Email',
-            html: getVerificationEmailTemplate(username, emailVerificationLink),
+        await issueOtp({
+            email: normalizedEmail,
+            username: normalizedUsername,
+            purpose: OTP_PURPOSES.SIGN_UP,
+            subject: 'Sign in to Perplexity Ai',
+            buildHtml: (otp) =>
+                getMagicLinkEmailTemplate(
+                    normalizedUsername,
+                    registerLink,
+                    otp,
+                ),
         });
 
-        return res.status(200).json({
-            message: 'user registered successfully',
+        return sendResponse({
+            res,
+            statusCode: 200,
+            message: 'Registration email sent successfully',
+            success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.log('Error in registerEmailController:', error);
 
         return res.status(500).json({
             message: 'failed to register user',
@@ -110,110 +90,117 @@ async function registerController(req, res) {
     }
 }
 
-/**
- * @description Verify the registered email
- * @route POST /api/auth/verifiy-email?token={verificationToken}
- * @access Public
- * @body none
- */
-async function verifyEmail(req, res) {
-    const { token } = req.query;
+async function verifySignUpEmailController(req, res) {
+    const { register } = req.query;
 
-    const decodedToken = jwt.verify(token, envConfig.JWT_SECRET);
+    let email,
+        otp,
+        username,
+        switchCase = 'tokenSignUp';
 
-    const user = await userModel.findOne({ email: decodedToken.email });
+    if (!register) {
+        switchCase = 'otpSignUp';
+        ({ otp, email, username } = req.body);
+
+        if (!otp || !email || !username) {
+            return sendResponse({
+                res,
+                statusCode: 400,
+                message: 'email, username and otp are required',
+                success: false,
+                error: 'email, username and otp are required',
+            });
+        }
+    }
+
+    if (!register && !otp) {
+        return sendResponse({
+            res,
+            statusCode: 400,
+            message: 'Invalid request',
+            success: false,
+            error: 'register token and otp are required here',
+        });
+    }
+
+    switch (switchCase) {
+        case 'tokenSignUp': {
+            let decodedToken;
+            try {
+                decodedToken = jwt.verify(register, envConfig.JWT_SECRET);
+            } catch (error) {
+                return sendResponse({
+                    res,
+                    statusCode: 400,
+                    message: 'Invalid or expired registration token',
+                    success: false,
+                    error: 'Invalid or expired registration token',
+                });
+            }
+
+            if (!decodedToken?.email.trim() || !decodedToken?.username) {
+                return sendResponse({
+                    res,
+                    statusCode: 400,
+                    message: 'Invalid registration token',
+                    success: false,
+                    error: 'Invalid registration token',
+                });
+            }
+
+            email = decodedToken.email.trim().toLowerCase();
+            username = decodedToken.username.trim();
+            await deleteOtp({ email, purpose: OTP_PURPOSES.SIGN_UP });
+
+            break;
+        }
+
+        case 'otpSignUp': {
+            const isOtpValid = await verifyOtp({
+                email: email.trim().toLowerCase(),
+                purpose: OTP_PURPOSES.SIGN_UP,
+                otp,
+            });
+
+            if (!isOtpValid.ok) {
+                return sendResponse({
+                    res,
+                    statusCode: 400,
+                    message: 'Invalid or expired OTP',
+                    success: false,
+                    error: isOtpValid.reason,
+                });
+            }
+
+            break;
+        }
+    }
+
+    const user = await userModel.findOne({ email });
 
     if (!user) {
-        res.status(404).json({
-            message: 'Invalid token',
-            success: false,
-            error: 'user not found',
-        });
+        try {
+            await userModel.create({
+                username,
+                email,
+            });
+        } catch (error) {
+            console.log(
+                'Error creating user in verifySignUpEmailController:',
+                error,
+            );
+            return sendResponse({
+                res,
+                statusCode: 500,
+                message: 'Failed to create user',
+                success: false,
+                error: 'Failed to create user',
+            });
+        }
     }
 
-    if (user.verified) {
-        const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
-        return res.send(getAlreadyVerifiedPage(user.username, loginLink));
-    }
-
-    user.verified = true;
-    await user.save();
-
-    const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
-    res.send(getVerificationSuccessPage(user.username, loginLink));
-}
-
-/**
- * @description login a user
- * @route POST /api/auth/login
- * @access Public
- * @body {username,email,password}
- */
-async function loginController(req, res) {
-    const { username, email, password } = req.body;
-
-    const normalizedEmail = email?.trim().toLowerCase();
-    const normalizedUsername = username?.trim();
-
-    if (!normalizedUsername && !normalizedEmail) {
-        return res.status(400).json({
-            message: 'username, email and password are required',
-            success: false,
-            error: 'username, email and password are required',
-        });
-    }
-
-    const user = await userModel
-        .findOne({
-            $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
-        })
-        .select('+password');
-
-    if (!user) {
-        return res.status(404).json({
-            message: 'Invalid credentials',
-            success: false,
-            error: 'user not found',
-        });
-    }
-
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-        return res.status(401).json({
-            message: 'Invalid credentials',
-            success: false,
-            error: 'Invalid password',
-        });
-    }
-
-    if (!user.verified) {
-        return res.status(401).json({
-            message: 'Please verify your registered email',
-            success: false,
-            error: 'user email not verified',
-        });
-    }
-
-    const token = jwt.sign(
-        {
-            id: user._id,
-            username: user.username,
-        },
-        envConfig.JWT_SECRET,
-        { expiresIn: '7d' },
-    );
-
-    res.cookie('token', token, getAuthCookieOptions(USER_TOKEN_MAX_AGE_MS));
-    return res.status(200).json({
-        message: 'logged in successfully',
-        success: true,
-        user: {
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            verified: user.verified,
-        },
-    });
+    const redirectLink = `${envConfig.CLIENT_ORIGIN}/`;
+    res.send(getVerificationSuccessPage(username, redirectLink));
 }
 
 /**
@@ -258,63 +245,6 @@ async function createGuestSession(req, res) {
         message: 'guest session created',
         success: true,
         guestId,
-    });
-}
-
-/**
- * @description resend the email verification link to the registered user
- * @route GET /api/auth/resend-verify-email
- * @access Public
- * @body {email}
- */
-async function resendVerificationEmail(req, res) {
-    const { email } = req.body;
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!email) {
-        return res.status(400).json({
-            message: 'Registered email is required',
-            success: false,
-            error: 'no email provided',
-        });
-    }
-
-    const user = await userModel.findOne({ email: normalizedEmail });
-    if (!user) {
-        return res.status(404).json({
-            message: 'Invalid credentials',
-            success: false,
-            error: 'user not found',
-        });
-    }
-
-    if (user.verified) {
-        const loginLink = `${envConfig.CLIENT_ORIGIN}/login`;
-        return res.send(getAlreadyVerifiedPage(user.username, loginLink));
-    }
-
-    const emailVerificationToken = jwt.sign(
-        {
-            email: normalizedEmail,
-        },
-        envConfig.JWT_SECRET,
-    );
-
-    const emailVerificationLink = `${serverBaseUrl}/api/auth/verify-email?token=${emailVerificationToken}`;
-
-    await sendEmail({
-        to: normalizedEmail,
-        subject: 'Verify Your Email - Perplexity',
-        html: getVerificationEmailTemplate(
-            user.username,
-            emailVerificationLink,
-        ),
-    });
-
-    return res.status(200).json({
-        message: 'Verification link sent registered email successfully',
-        success: true,
     });
 }
 
@@ -452,138 +382,11 @@ async function claimGuestChats(req, res) {
     });
 }
 
-/**
- * @route POST /api/auth/forgot-password
- * @description send an email to reset the password
- * @access Public
- * @body email
- */
-async function forgotPasswordEmail(req, res) {
-    const { email } = req.body;
-    const normalizedEmail = email.trim();
-
-    if (!email) {
-        return res.status(400).json({
-            message: 'Email is required',
-            success: false,
-            error: 'Email is required',
-        });
-    }
-
-    const user = await userModel.findOne({ email: normalizedEmail });
-
-    if (!user) {
-        return res.status(404).json({
-            message: 'Invalid credentials',
-            success: false,
-            error: 'user not found',
-        });
-    }
-
-    const emailVerificationToken = jwt.sign(
-        {
-            id: user._id,
-            email: user.email,
-        },
-        envConfig.JWT_SECRET,
-        { expiresIn: '1d' },
-    );
-
-    const emailVerificationLink = `${envConfig.CLIENT_ORIGIN}/update-password?token=${emailVerificationToken}`;
-
-    const html = getForgotPasswordEmailTemplate(
-        user.username,
-        emailVerificationLink,
-    );
-
-    try {
-        await sendEmail({
-            to: normalizedEmail,
-            subject: 'Reset Password',
-            html: html,
-        });
-    } catch (error) {
-        console.error('Error sending forgot password email: ', error);
-        return res.status(500).json({
-            message: 'Failed to send reset password email',
-            success: false,
-        });
-    }
-
-    return res.status(200).json({
-        message: 'Reset Password link sent to email',
-        success: true,
-    });
-}
-
-/**
- * @route PATCH /api/auth/update-password?token={token-sent-on-email}
- * @description reset password of registered email
- * @access Private
- * @body password
- */
-async function updatePasswordControlller(req, res) {
-    const { token } = req.query;
-    const { password } = req.body;
-
-    if (!token) {
-        return res.status(401).json({
-            message: 'Invalid token',
-            success: false,
-            error: 'No token provided',
-        });
-    }
-
-    let decodedToken = '';
-    try {
-        decodedToken = jwt.verify(token, envConfig.JWT_SECRET);
-    } catch (error) {
-        return res.status(401).json({
-            message: 'Invalid token',
-            success: false,
-            error: 'No token provided',
-        });
-    }
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const user = await userModel.findByIdAndUpdate(
-            decodedToken.id,
-            { password: hashedPassword },
-            { new: true, runValidators: true },
-        );
-
-        if (!user) {
-            return res.status(404).json({
-                message: 'User not found',
-                success: false,
-                error: 'user not found',
-            });
-        }
-
-        return res.status(204).json({
-            message: 'Password reset successfull',
-            success: true,
-        });
-    } catch (error) {
-        return res.status(401).json({
-            message: 'Reset password failed',
-            success: false,
-            error: 'Reset password failed',
-        });
-    }
-}
-
 export {
-    registerController,
-    verifyEmail,
-    loginController,
+    sendSignUpEmailController,
+    verifySignUpEmailController,
     createGuestSession,
     getMeController,
-    resendVerificationEmail,
     logoutController,
     claimGuestChats,
-    forgotPasswordEmail,
-    updatePasswordControlller,
 };

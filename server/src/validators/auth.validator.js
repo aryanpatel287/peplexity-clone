@@ -16,65 +16,25 @@ function validateRequest(req, res, next) {
     });
 }
 
-const registerValidator = [
-    body('username')
-        .trim()
-        .notEmpty()
-        .withMessage('username is required')
-        .isLength({ min: 3 })
-        .withMessage('username must be at least 3 characters long'),
-    body('email')
-        .trim()
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('email must be valid')
-        .normalizeEmail(),
-    body('password')
-        .trim()
-        .notEmpty()
-        .withMessage('password is required')
-        .isLength({ min: 6 })
-        .withMessage('password must be at least 6 characters long'),
+const usernameValidator = body('username')
+    .trim()
+    .notEmpty()
+    .withMessage('username is required')
+    .isLength({ min: 3 })
+    .withMessage('username must be at least 3 characters long');
 
+const emailValidator = body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('email is required')
+    .isEmail()
+    .withMessage('email must be valid')
+    .normalizeEmail();
+
+const SignUpEmailValidator = [
+    usernameValidator,
+    emailValidator,
     validateRequest,
 ];
 
-const loginValidator = [
-    body('username')
-        .optional()
-        .trim()
-        .isLength({ min: 3 })
-        .withMessage('username must be at least 3 characters long'),
-    body('email')
-        .trim()
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('email must be valid')
-        .normalizeEmail(),
-    body('password')
-        .trim()
-        .notEmpty()
-        .withMessage('password is required')
-        .isLength({ min: 6 })
-        .withMessage('password must be at least 6 characters long'),
-
-    validateRequest,
-];
-
-const forgotPasswordValidator = [
-    body('email')
-        .trim()
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('email must be valid'),
-];
-
-export {
-    registerValidator,
-    loginValidator,
-    forgotPasswordValidator,
-    validateRequest,
-};
+export { SignUpEmailValidator };

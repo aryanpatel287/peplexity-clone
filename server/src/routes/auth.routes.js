@@ -1,35 +1,25 @@
 import { Router } from 'express';
 
 import {
-    forgotPasswordEmail,
     getMeController,
-    loginController,
     logoutController,
     createGuestSession,
     claimGuestChats,
-    registerController,
-    resendVerificationEmail,
-    updatePasswordControlller,
-    verifyEmail,
+    sendSignUpEmailController,
+    verifySignUpEmailController,
 } from '../controllers/auth.controller.js';
 
-import {
-    forgotPasswordValidator,
-    loginValidator,
-    registerValidator,
-} from '../validators/auth.validator.js';
+import { SignUpEmailValidator } from '../validators/auth.validator.js';
 
 import { authUser } from '../middlewares/auth.middleware.js';
 
 const authRouter = Router();
 
-/**
- * @route POST /api/auth/register
- * @description Register a user
- * @access Public
- * @body {username,email,password}
- */
-authRouter.post('/register', registerValidator, registerController);
+authRouter.post(
+    '/signup-email',
+    SignUpEmailValidator,
+    sendSignUpEmailController,
+);
 
 /**
  * @route POST /api/auth/verifiy-email?token={verificationToken}
@@ -37,15 +27,7 @@ authRouter.post('/register', registerValidator, registerController);
  * @access Public
  * @body none
  */
-authRouter.get('/verify-email', verifyEmail);
-
-/**
- * @route POST /api/auth/login
- * @description login a user
- * @access Public
- * @body {username,email,password}
- */
-authRouter.post('/login', loginValidator, loginController);
+authRouter.get('/verify-email', verifySignUpEmailController);
 
 /**
  * @route POST /api/auth/guest-session
@@ -63,14 +45,6 @@ authRouter.post('/guest-session', createGuestSession);
 authRouter.get('/get-me', authUser, getMeController);
 
 /**
- * @route GET /api/auth/resend-verify-email
- * @description resend the email verification link to the registered user
- * @access Public
- * @body {email}
- */
-authRouter.post('/resend-verify-email', resendVerificationEmail);
-
-/**
  * @route POST /api/auth/logout
  * @description logout a user
  * @access Public
@@ -84,25 +58,5 @@ authRouter.post('/logout', authUser, logoutController);
  * @access Private
  */
 authRouter.post('/claim-guest-chats', authUser, claimGuestChats);
-
-/**
- * @route POST /api/auth/forgot-password
- * @description send an email to reset the password
- * @access Public
- * @body email
- */
-authRouter.post(
-    '/forgot-password',
-    forgotPasswordValidator,
-    forgotPasswordEmail,
-);
-
-/**
- * @route PATCH /api/auth/update-password?token={token-sent-on-email}
- * @description reset password of registered email
- * @access Private
- * @body password
- */
-authRouter.patch('/update-password', updatePasswordControlller);
 
 export default authRouter;
