@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './routes/auth.routes.js';
 import chatRouter from './routes/chat.route.js';
+import filesRouter from './routes/files.routes.js';
 import morgan from 'morgan';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -54,6 +55,7 @@ app.use(express.static(clientBuildPath));
 
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
+app.use('/api/files', filesRouter);
 app.use('/', appRouter);
 
 export default app;

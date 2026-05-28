@@ -8,6 +8,7 @@ import {
     streamAiReponse,
 } from '../services/ai/response.ai.service.js';
 import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
+import { buildPublicFileProxyUrl } from '../utils/file.utils.js';
 
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
@@ -86,9 +87,7 @@ async function getChats(req, res) {
     const guestId = req.user?.guestId;
     const userId = req.user?.id;
 
-    const query = isGuest
-        ? { guestId }
-        : { user: userId };
+    const query = isGuest ? { guestId } : { user: userId };
 
     const chats = await chatModel.find(query);
 
@@ -106,9 +105,7 @@ async function getMessages(req, res) {
     const userId = req.user?.id;
 
     const chat = await chatModel.findOne(
-        isGuest
-            ? { _id: chatId, guestId }
-            : { _id: chatId, user: userId },
+        isGuest ? { _id: chatId, guestId } : { _id: chatId, user: userId },
     );
 
     if (!chat) {
@@ -124,10 +121,24 @@ async function getMessages(req, res) {
         .sort({ createdAt: 1 })
         .populate('files');
 
+    const messagesWithProxiedFiles = messages.map((message) => {
+        const plainMessage = message.toObject();
+
+        plainMessage.files = (plainMessage.files || []).map((file) => ({
+            ...file,
+            url:
+                file.mimetype === 'application/pdf'
+                    ? buildPublicFileProxyUrl(file.url)
+                    : file.url,
+        }));
+
+        return plainMessage;
+    });
+
     res.status(200).json({
         message: 'messages fetched successfully',
         success: true,
-        messages,
+        messages: messagesWithProxiedFiles,
     });
 }
 
@@ -138,9 +149,7 @@ async function deleteChat(req, res) {
     const userId = req.user?.id;
 
     const chat = await chatModel.findOneAndDelete(
-        isGuest
-            ? { _id: chatId, guestId }
-            : { _id: chatId, user: userId },
+        isGuest ? { _id: chatId, guestId } : { _id: chatId, user: userId },
     );
 
     const message = await messageModel.deleteMany({ chat: chatId });
@@ -150,8 +159,6 @@ async function deleteChat(req, res) {
         success: 'true',
     });
 }
-
-
 
 /**
  * @description Upload the files provided by user
@@ -178,13 +185,7 @@ async function uploadFileController(req, res) {
     }
 }
 
-export {
-    sendMessage,
-    getChats,
-    getMessages,
-    deleteChat,
-    uploadFileController,
-};
+export { sendMessage, getChats, getMessages, deleteChat, uploadFileController };
 
 // // Success response:
 // {
