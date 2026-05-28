@@ -7,6 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import { setError } from '../auth.slice';
 import '../styles/_verify-otp-page.scss';
 
+//FIXME: the getMe api call is getting spammed when user is on this page
 const VerifyOtpPage = () => {
     const [otp, setOtp] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
@@ -22,16 +23,40 @@ const VerifyOtpPage = () => {
 
     const { handleVerifySignUpOtp, handleCheckSessionSilent } = useAuth();
 
-    // Check session on mount and poll silently in the background
+    // Check session on mount and poll silently in the background.
+    // Reduce frequency and avoid polling when tab is hidden to prevent spamming `getMe`.
     useEffect(() => {
         const checkSession = async () => {
-            await handleCheckSessionSilent();
+            if (typeof document !== 'undefined' && document.hidden) return;
+            try {
+                await handleCheckSessionSilent();
+            } catch (e) {
+                // ignore errors from silent check
+            }
         };
 
         checkSession();
 
-        const interval = setInterval(checkSession, 3000);
-        return () => clearInterval(interval);
+        const intervalMs = 15000; // poll every 15s instead of 3s
+        const id = setInterval(() => {
+            if (typeof document !== 'undefined' && !document.hidden) {
+                checkSession();
+            }
+        }, intervalMs);
+
+        const onVisibilityChange = () => {
+            if (typeof document !== 'undefined' && !document.hidden)
+                checkSession();
+        };
+        document.addEventListener('visibilitychange', onVisibilityChange);
+
+        return () => {
+            clearInterval(id);
+            document.removeEventListener(
+                'visibilitychange',
+                onVisibilityChange,
+            );
+        };
     }, [handleCheckSessionSilent]);
 
     // Guard: redirect if params missing
@@ -76,6 +101,8 @@ const VerifyOtpPage = () => {
         });
         setIsVerifying(false);
         if (result) {
+            await handleCheckSessionSilent();
+
             if (nextChatId) {
                 navigate(`/c/${nextChatId}`, { replace: true });
             } else {
@@ -115,7 +142,6 @@ const VerifyOtpPage = () => {
                 <OtpInput
                     value={otp}
                     onChange={handleOtpChange}
-                    onComplete={submitOtp}
                     disabled={isVerifying}
                     hasError={!!errorMsg}
                 />

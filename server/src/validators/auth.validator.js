@@ -29,7 +29,9 @@ const emailValidator = body('email')
     .withMessage('email is required')
     .isEmail()
     .withMessage('email must be valid')
-    .normalizeEmail();
+    .customSanitizer((value) =>
+        typeof value === 'string' ? value.trim().toLowerCase() : value,
+    );
 
 const SignUpEmailValidator = [emailValidator, validateRequest];
 

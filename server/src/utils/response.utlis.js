@@ -10,6 +10,7 @@ export async function sendResponse({
     ...additionalData
 }) {
     return res.status(statusCode).json({
+        statusCode,
         message,
         success,
         error,

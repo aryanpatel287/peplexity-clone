@@ -1,3 +1,5 @@
+//FIXME: the otp verification is failing with missing reason
+
 import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
 import chatModel from '../models/chat.model.js';
@@ -116,6 +118,8 @@ async function verifySignUpEmailController(req, res) {
                 error: 'email and otp are required',
             });
         }
+
+        username = email.split('@')[0].trim();
     }
 
     if (!register && !otp) {
@@ -166,6 +170,8 @@ async function verifySignUpEmailController(req, res) {
                 purpose: OTP_PURPOSES.SIGN_UP,
                 otp,
             });
+
+            console.log('OTP verification result:', isOtpValid);
 
             if (!isOtpValid.ok) {
                 return sendResponse({

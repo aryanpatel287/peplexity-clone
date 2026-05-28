@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
     {
@@ -22,8 +21,8 @@ const userSchema = new mongoose.Schema(
         },
         googleId: {
             type: String,
-            unique: true,
             trim: true,
+            default: null,
         },
     },
     {
