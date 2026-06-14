@@ -16,7 +16,6 @@ async function EmbedTheDocumentChunks(chunks) {
         throw new Error('No chunks to embed');
         return;
     }
-    console.log('chunk', chunks[0]);
 
     const docs = await Promise.all(
         chunks.map(async (chunk, idx) => {
@@ -41,8 +40,6 @@ async function upsertTheVectors(docs) {
     await pineconeIndex.upsert({
         records: docs,
     });
-
-    console.log('Vectors upserted successfully');
 }
 
 async function deleteAllTheVectors() {

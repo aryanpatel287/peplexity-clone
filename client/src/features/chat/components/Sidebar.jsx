@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router';
 import { Trash, SquarePen, User, ChevronRight } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
@@ -25,13 +26,14 @@ const Sidebar = ({ onSelectChat }) => {
         <div className="chat-sidebar">
             <div className="sidebar-header">
                 <div className="sidebar-header-actions">
-                    <button
+                    <Link
+                        to="/"
                         className="new-chat-btn"
-                        onClick={() => onSelectChat(null)}
+                        onClick={onSelectChat}
                     >
                         <SquarePen size={15} />
                         New Chat
-                    </button>
+                    </Link>
 
                     <a
                         href={repoUrl}
@@ -56,22 +58,24 @@ const Sidebar = ({ onSelectChat }) => {
                 ) : chats && Object.values(chats).length > 0 ? (
                     <>
                         {Object.values(chats).map((chat) => (
-                            <div
+                            <Link
                                 key={chat._id}
+                                to={`/c/${chat._id}`}
                                 className={`chat-item ${currentChatId === chat._id ? 'active' : ''}`}
-                                onClick={() => onSelectChat(chat._id)}
+                                onClick={onSelectChat}
                             >
                                 <div className="chat-title">{chat.title}</div>
                                 <button
                                     className="chat-delete-btn"
                                     onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         setChatToDelete(chat._id);
                                     }}
                                 >
                                     <Trash size={14} />
                                 </button>
-                            </div>
+                            </Link>
                         ))}
                     </>
                 ) : (

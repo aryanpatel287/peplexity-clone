@@ -9,8 +9,6 @@ import DragOverlay from './helpers/DragOverlay';
 import { setCurrentChatId } from '../../chat.slice';
 import '../../styles/_chat-area.scss';
 
-//TODO: the chat is not getting continued when user logs in after being blocked as guest. 
-
 const ChatArea = () => {
     const { chatId: urlChatId } = useParams();
     const dispatch = useDispatch();

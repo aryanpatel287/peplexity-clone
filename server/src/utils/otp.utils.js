@@ -123,9 +123,7 @@ export async function verifyOtp({ email, purpose, otp, policy }) {
 
     const key = buildRedisKey({ purpose, email: normalizedEmail });
     const storedData = await redis.get(key);
-    console.log('Verifying OTP for key:', key, 'Stored data:', storedData);
     if (!storedData) {
-        console.log('here');
         return { ok: false, reason: 'missing' };
     }
 

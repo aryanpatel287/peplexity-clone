@@ -29,6 +29,7 @@
             padding: 0 12px;
             font-size: 0.9rem;
             transition: background-color 0.2s ease;
+            text-decoration: none;
 
             &:hover {
                 background-color: rgba(255, 255, 255, 0.05);
@@ -79,6 +80,8 @@
             transition: background-color 0.2s ease;
             @include flex(flex-start, center, row, 12px);
             min-width: 0;
+            text-decoration: none;
+            color: inherit;
 
             &:hover {
                 background-color: rgba(255, 255, 255, 0.05);

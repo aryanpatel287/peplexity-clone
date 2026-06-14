@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu, SquarePen } from 'lucide-react';
-import { Outlet, useNavigate, useLocation } from 'react-router';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router';
 import { useChat } from '../hooks/useChat';
 import Sidebar from '../components/Sidebar';
 import { clearGuestLimit } from '../chat.slice';
@@ -36,13 +36,8 @@ const Dashboard = () => {
         }
     }, [currentChatId]);
 
-    const handleSelectChat = (selectedChatId) => {
+    const handleSelectChat = () => {
         setIsMobileMenuOpen(false);
-        if (selectedChatId) {
-            navigate(`/c/${selectedChatId}`);
-        } else {
-            navigate('/');
-        }
     };
 
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -53,12 +48,13 @@ const Dashboard = () => {
                 <button className="menu-btn" onClick={toggleMobileMenu}>
                     <Menu size={22} />
                 </button>
-                <button
+                <Link
+                    to="/"
                     className="new-chat-btn-mobile"
-                    onClick={() => handleSelectChat(null)}
+                    onClick={handleSelectChat}
                 >
                     <SquarePen size={16} /> New Chat
-                </button>
+                </Link>
             </div>
 
             <div className={`dashboard-sidebar ${isMobileMenuOpen ? 'open' : ''}`}>

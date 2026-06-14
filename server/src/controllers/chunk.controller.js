@@ -48,14 +48,11 @@ async function saveChunksToDb({
         documentType: savedChunk.documentType,
     }));
 
-    console.log('chunksToReturn: ', chunksToReturn[0]);
     return chunksToReturn;
 }
 
 async function retrieveChunksFromDb(chunkIds) {
     const retrievedChunks = await ChunkModel.find({ _id: { $in: chunkIds } });
-
-    console.log('Retrieved Chunks: ', retrievedChunks);
 
     return retrievedChunks;
 }

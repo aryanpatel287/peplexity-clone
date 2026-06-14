@@ -67,7 +67,6 @@ const ChatMessages = () => {
                                             />
                                         )}
 
-                                    {/* //FIXME: THE TOOL CALLS WERE RENDERED TWICE  */}
                                     {/* Tool status chips */}
                                     {message.toolCalls?.map((tool, i) => (
                                         <ToolStatus

@@ -7,7 +7,6 @@ import { useAuth } from '../hooks/useAuth';
 import { setError } from '../auth.slice';
 import '../styles/_verify-otp-page.scss';
 
-//FIXME: the getMe api call is getting spammed when user is on this page
 const VerifyOtpPage = () => {
     const [otp, setOtp] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);

@@ -1,5 +1,3 @@
-//FIXME: the otp verification is failing with missing reason
-
 import redis from '../config/cache.js';
 import userModel from '../models/user.model.js';
 import chatModel from '../models/chat.model.js';
