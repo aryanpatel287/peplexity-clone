@@ -8,7 +8,6 @@ import {
     streamAiReponse,
 } from '../services/ai/response.ai.service.js';
 import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
-import { buildPublicFileProxyUrl } from '../utils/file.utils.js';
 
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
@@ -121,24 +120,10 @@ async function getMessages(req, res) {
         .sort({ createdAt: 1 })
         .populate('files');
 
-    const messagesWithProxiedFiles = messages.map((message) => {
-        const plainMessage = message.toObject();
-
-        plainMessage.files = (plainMessage.files || []).map((file) => ({
-            ...file,
-            url:
-                file.mimetype === 'application/pdf'
-                    ? buildPublicFileProxyUrl(file.url)
-                    : file.url,
-        }));
-
-        return plainMessage;
-    });
-
     res.status(200).json({
         message: 'messages fetched successfully',
         success: true,
-        messages: messagesWithProxiedFiles,
+        messages,
     });
 }
 

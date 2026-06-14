@@ -83,7 +83,7 @@ export async function dataIngestion({
             `Data ingestion failed at ${stage}: ${message}`,
         );
         wrappedError.cause = error;
-        throw wrappedError;
+        console.error(wrappedError);
     }
 }
 

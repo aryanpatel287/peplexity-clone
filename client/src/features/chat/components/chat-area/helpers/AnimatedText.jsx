@@ -3,25 +3,77 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../../../styles/_animated-text.scss';
 
-const AnimatedText = ({ text, speed = 5, onDone }) => {
+const AnimatedText = ({ text, speed, onDone }) => {
     const [displayed, setDisplayed] = useState('');
     const indexRef = useRef(0);
+    const startTimeRef = useRef(0);
+    const onDoneRef = useRef(onDone);
+
+    // Keep onDone ref updated to avoid re-triggering effect if onDone changes
+    useEffect(() => {
+        onDoneRef.current = onDone;
+    }, [onDone]);
 
     useEffect(() => {
         indexRef.current = 0;
         setDisplayed('');
 
-        const interval = setInterval(() => {
-            indexRef.current += 1;
-            setDisplayed(text.slice(0, indexRef.current));
-            if (indexRef.current >= text.length) {
-                clearInterval(interval);
-                onDone?.();
-            }
-        }, speed);
+        if (!text) {
+            onDoneRef.current?.();
+            return;
+        }
 
-        return () => clearInterval(interval);
-    }, [text]);
+        // Calculate dynamic speed if not explicitly provided:
+        // - Default base speed is 2.5ms per character.
+        // - Capped total duration to ~1000ms max.
+        const calculatedSpeed = speed !== undefined 
+            ? speed 
+            : Math.min(2.5, 1000 / text.length);
+
+        if (calculatedSpeed <= 0.05) {
+            setDisplayed(text);
+            onDoneRef.current?.();
+            return;
+        }
+
+        startTimeRef.current = Date.now();
+        let intervalId;
+
+        const updateProgress = () => {
+            const timePassed = Date.now() - startTimeRef.current;
+            const targetIndex = Math.min(
+                Math.floor(timePassed / calculatedSpeed),
+                text.length
+            );
+
+            if (targetIndex !== indexRef.current) {
+                indexRef.current = targetIndex;
+                setDisplayed(text.slice(0, targetIndex));
+            }
+
+            if (targetIndex >= text.length) {
+                clearInterval(intervalId);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                onDoneRef.current?.();
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                updateProgress();
+            }
+        };
+
+        // Run interval at a standard tick rate (e.g. 10ms or calculatedSpeed, whichever is larger/safer)
+        const tickRate = Math.max(10, Math.min(50, calculatedSpeed));
+        intervalId = setInterval(updateProgress, tickRate);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(intervalId);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [text, speed]);
 
     return (
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayed}</ReactMarkdown>

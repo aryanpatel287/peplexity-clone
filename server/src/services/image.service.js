@@ -2,7 +2,6 @@ import ImageKit, { toFile } from '@imagekit/nodejs';
 
 import fs from 'fs';
 import envConfig from '../config/envconfig.js';
-import { buildPublicFileProxyUrl } from '../utils/file.utils.js';
 
 const imagekit = new ImageKit({
     privateKey: envConfig.IMAGEKIT_PRIVATE_KEY,
@@ -36,10 +35,7 @@ export async function uploadMultipleImagesOnImageKit(files) {
 
     const resultsWithMime = results.map((file, idx) => ({
         ...file,
-        url:
-            files[idx].mimetype === 'application/pdf'
-                ? buildPublicFileProxyUrl(file.url)
-                : file.url,
+        url: file.url,
         mimetype: files[idx].mimetype,
     }));
 
