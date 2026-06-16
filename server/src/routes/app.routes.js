@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { redirectUserToClient } from '../controllers/app.controller.js';
+import { handleSpaRequests } from '../middlewares/app.middleware.js';
 
 const appRouter = Router();
 
@@ -8,6 +9,10 @@ const appRouter = Router();
  * @description Redirect user to client on all non-api urls
  * @access Public
  */
-appRouter.get(/^(?!\/(api|assets)\/).*/, redirectUserToClient);
+appRouter.get(
+    /^(?!\/(api|assets)\/).*/,
+    handleSpaRequests,
+    redirectUserToClient,
+);
 
 export default appRouter;

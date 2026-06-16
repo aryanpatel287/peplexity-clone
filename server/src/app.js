@@ -11,6 +11,7 @@ import envConfig from './config/envconfig.js';
 import helmet from 'helmet';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { blockSuspiciousRequests } from './middlewares/app.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,6 +52,8 @@ passport.use(
 
 const clientBuildPath = path.join(__dirname, '../', 'public');
 app.use(express.static(clientBuildPath));
+
+app.use(blockSuspiciousRequests);
 
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
