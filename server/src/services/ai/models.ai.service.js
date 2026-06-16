@@ -8,6 +8,7 @@ import {
     searchInternetTool,
 } from './tools.ai.service.js';
 import envConfig from '../../config/envconfig.js';
+import { DocumentSummaryStructure } from './response-structure.ai.service.js';
 
 const toolAgentSystemPrompt = `You are an AI assistant that can use tools when needed.
 
@@ -50,6 +51,17 @@ export const geminiAgent = createAgent({
             exitBehavior: 'end',
         }),
     ],
+});
+
+export const geminiSummariseModel = new ChatGoogleGenerativeAI({
+    model: 'gemini-3.1-flash-lite',
+    apiKey: envConfig.GEMINI_API_KEY,
+    maxConcurrency: 5,
+});
+
+export const geminiSummariseAgent = createAgent({
+    model: geminiSummariseModel,
+    responseFormat: DocumentSummaryStructure,
 });
 
 const mistralModel = new ChatMistralAI({

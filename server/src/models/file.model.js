@@ -47,10 +47,6 @@ const fileSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.Mixed,
             default: null,
         },
-        description: {
-            type: String,
-            default: null,
-        },
         message: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'messages',
@@ -61,9 +57,46 @@ const fileSchema = new mongoose.Schema(
             ref: 'users',
             required: false,
         },
+        processingStatus: {
+            type: String,
+            enum: ['pending', 'completed', 'failed'],
+            default: 'pending',
+        },
+        ragStatus: {
+            type: String,
+            enum: ['pending', 'completed', 'failed'],
+            default: 'pending',
+        },
         metadata: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {},
+            title: {
+                type: String,
+                default: null,
+            },
+
+            summary: {
+                type: String,
+                default: null,
+            },
+
+            keywords: {
+                type: [String],
+                default: [],
+            },
+
+            sections: {
+                type: [String],
+                default: [],
+            },
+
+            retrievalQueries: {
+                type: [String],
+                default: [],
+            },
+
+            suggestedSystemContext: {
+                type: String,
+                default: null,
+            },
         },
     },
     { timestamps: true },
