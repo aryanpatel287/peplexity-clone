@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownRenderer from './MarkdownRenderer';
 import '../../../styles/_animated-text.scss';
 
 const AnimatedText = ({ text, speed, onDone }) => {
@@ -76,7 +75,7 @@ const AnimatedText = ({ text, speed, onDone }) => {
     }, [text, speed]);
 
     return (
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayed}</ReactMarkdown>
+        <MarkdownRenderer content={displayed} />
     );
 };
 

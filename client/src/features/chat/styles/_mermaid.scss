@@ -1,0 +1,40 @@
+@use '../../shared/styles/mixins' as *;
+
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.25rem 0;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow-x: auto;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+
+  svg {
+    max-width: 100%;
+    height: auto;
+    
+    // Customize text inside Mermaid elements to match theme variables
+    text {
+      font-family: var(--font-family) !important;
+      fill: var(--text-main) !important;
+    }
+  }
+
+  // Fallback state style while rendering or on error
+  &__fallback {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px 14px;
+    border-radius: 6px;
+    width: 100%;
+    overflow-x: auto;
+    border-left: 3px solid var(--primary);
+  }
+}

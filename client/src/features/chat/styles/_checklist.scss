@@ -1,0 +1,33 @@
+@use '../../shared/styles/mixins' as *;
+
+.contains-task-list {
+  list-style-type: none;
+  padding-left: 0 !important;
+  margin: 0.75rem 0;
+
+  .task-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    input[type='checkbox'] {
+      margin-top: 5px; // Vertically align with the first line of text
+      width: 15px;
+      height: 15px;
+      accent-color: var(--primary);
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    // Support line-through for checked task lists if desired
+    &.task-list-item--checked {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+  }
+}

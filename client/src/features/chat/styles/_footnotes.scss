@@ -1,0 +1,91 @@
+@use '../../shared/styles/mixins' as *;
+
+// Footnote Reference Link (superscript index)
+.markdown-footnote-ref {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 0.72em;
+  background-color: rgba(70, 138, 147, 0.12);
+  border: 1px solid rgba(70, 138, 147, 0.25);
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: super;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--primary-hover) !important;
+    background-color: rgba(70, 138, 147, 0.25);
+    border-color: rgba(70, 138, 147, 0.4);
+    box-shadow: 0 0 0 2px rgba(70, 138, 147, 0.15);
+    transform: translateY(-0.5px);
+  }
+}
+
+// Footnote Back-reference Link (↩ symbol at the end of the footnote)
+.markdown-footnote-backref {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+
+  &:hover {
+    color: var(--primary-hover) !important;
+    transform: scale(1.1);
+  }
+}
+
+// Footnotes Section Container at the bottom of markdown
+.markdown-footnotes {
+  border-top: 1px solid var(--border-color);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+
+  .markdown-footnotes__title {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 0.85rem;
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  ol {
+    padding-left: 1.4rem;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    list-style-type: decimal;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    // Interactive target highlight when clicking footnote reference link
+    &:target {
+      background-color: rgba(70, 138, 147, 0.12);
+      color: var(--text-main);
+      border-left: 3px solid var(--primary);
+      padding-left: 12px;
+      transform: translateX(2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+  }
+}

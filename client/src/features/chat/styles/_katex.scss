@@ -1,0 +1,35 @@
+@use '../../shared/styles/mixins' as *;
+
+// KaTeX overrides for mathematical rendering
+.katex-display {
+  margin: 1.8rem 0 !important;
+  padding: 16px 8px; // Extra vertical room for superscripts, fractions, and matrices
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  font-size: 1.35em !important; // Scale up display formulas for maximum visibility
+  
+  // Custom scrollbar for math containers
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+  }
+}
+
+.katex {
+  font-size: 1.15em; // Slightly larger inline math font size for readability
+  color: var(--text-main);
+  text-rendering: auto;
+}
+
+// Adjust inline math margins and vertical alignment
+p > .katex {
+  padding: 0 4px;
+}

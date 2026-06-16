@@ -1,11 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import '../../styles/_chat-messages.scss';
 import { useSelector } from 'react-redux';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import ThinkingBubble from './helpers/ThinkingBubble';
 import ToolStatus from './helpers/ToolStatus';
 import AnimatedText from './helpers/AnimatedText';
+import MarkdownRenderer from './helpers/MarkdownRenderer';
 import MessageFiles from './helpers/MessageFiles';
 import { TOOL_LABELS } from './helpers/chat.constants';
 
@@ -89,11 +88,9 @@ const ChatMessages = () => {
                                                 }
                                             />
                                         ) : (
-                                            <ReactMarkdown
-                                                remarkPlugins={[remarkGfm]}
-                                            >
-                                                {message.content}
-                                            </ReactMarkdown>
+                                            <MarkdownRenderer
+                                                content={message.content}
+                                            />
                                         ))}
                                 </>
                             ) : (

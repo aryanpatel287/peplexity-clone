@@ -1,0 +1,14 @@
+@use '../../shared/styles/mixins' as *;
+
+.markdown-mark {
+  background-color: rgba(234, 179, 8, 0.2);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin: 0 0.15em;
+  font-weight: 500;
+  display: inline-block;
+  line-height: 1.4;
+  vertical-align: baseline;
+}

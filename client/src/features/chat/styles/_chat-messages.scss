@@ -1,4 +1,12 @@
 @use '../../shared/styles/mixins' as *;
+@use 'code-block';
+@use 'mermaid';
+@use 'markdown-table';
+@use 'checklist';
+@use 'katex';
+@use 'kbd';
+@use 'mark';
+@use 'footnotes';
 
 // Scrollable messages area — fills all space above the absolute input.
 // Bottom padding reserves room so the last message isn't hidden.
@@ -9,11 +17,12 @@
     right: 0;
     bottom: 0; // fills full height; padding-bottom pushes content up
     overflow-y: auto;
+    scroll-behavior: smooth;
     @include flex(flex-start, stretch, column, 1.5rem);
-    padding: 24px max(10%, calc((100% - 800px) / 2)) 180px;
+    padding: 24px max(10%, calc((100% - 900px) / 2)) 180px;
 
     @media (max-width: 1024px) {
-        padding: 20px max(6%, calc((100% - 800px) / 2)) 160px;
+        padding: 20px max(6%, calc((100% - 900px) / 2)) 160px;
     }
     @media (max-width: 768px) {
         padding: 16px 20px 140px;
@@ -25,7 +34,7 @@
     .message {
         max-width: 80%;
         font-size: 1rem;
-        line-height: 1.6;
+        line-height: 1.7;
         @include flex(flex-start, flex-start, column, 6px);
 
         @media (max-width: 768px) {
@@ -40,13 +49,18 @@
         &.ai-message {
             align-self: flex-start;
             color: var(--text-main);
+            max-width: 100%;
+            width: 100%;
 
             .message-content {
                 padding: 0;
                 background-color: transparent;
+                width: 100%;
+                min-width: 0;
 
                 p {
-                    margin: 0 0 0.75em;
+                    margin: 0 0 1.2rem;
+                    line-height: 1.75;
                     &:last-child {
                         margin-bottom: 0;
                     }
@@ -56,25 +70,26 @@
                 h3,
                 h4 {
                     font-weight: 600;
-                    margin: 1em 0 0.4em;
-                    line-height: 1.3;
+                    margin: 1.8rem 0 0.8rem;
+                    line-height: 1.4;
                 }
                 h1 {
-                    font-size: 1.3rem;
+                    font-size: 1.5rem;
                 }
                 h2 {
-                    font-size: 1.15rem;
+                    font-size: 1.3rem;
                 }
                 h3 {
-                    font-size: 1rem;
+                    font-size: 1.12rem;
                 }
                 ul,
                 ol {
-                    padding-left: 1.4em;
-                    margin: 0.5em 0;
+                    padding-left: 1.6em;
+                    margin: 0.8rem 0;
                 }
                 li {
-                    margin-bottom: 0.25em;
+                    margin-bottom: 0.5rem;
+                    line-height: 1.7;
                 }
                 code {
                     background: rgba(255, 255, 255, 0.08);
@@ -106,6 +121,60 @@
                     padding-left: 12px;
                     color: var(--text-muted);
                     margin: 0.5em 0;
+                }
+                details {
+                    background-color: rgba(255, 255, 255, 0.03);
+                    border: 1px solid var(--border-color);
+                    border-left: 3px solid var(--primary);
+                    border-radius: 6px;
+                    padding: 12px 16px;
+                    margin: 1.25rem 0;
+                    transition: background-color 0.2s ease;
+                    color: var(--text-muted);
+
+                    &[open] {
+                        background-color: rgba(255, 255, 255, 0.05);
+                        
+                        summary {
+                            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                            padding-bottom: 8px;
+                            margin-bottom: 12px;
+                        }
+                    }
+
+                    summary {
+                        font-weight: 600;
+                        color: var(--text-main);
+                        cursor: pointer;
+                        outline: none;
+                        user-select: none;
+                        transition: color 0.2s ease;
+                        padding: 2px 0;
+
+                        &:hover {
+                            color: var(--primary);
+                        }
+                    }
+
+                    // Force any nested block containers (like raw HTML divs or blockquotes) to be dark and match the theme
+                    div, blockquote {
+                        background: transparent !important;
+                        background-color: transparent !important;
+                        color: var(--text-muted) !important;
+                        border-left-color: var(--primary) !important;
+
+                        p, li, span:not([class*="token"]) {
+                            color: var(--text-muted) !important;
+                        }
+                    }
+
+                    // Adjust nested block elements inside details to look structured
+                    p, ul, ol, pre {
+                        margin-bottom: 0.8rem;
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+                    }
                 }
                 a {
                     color: var(--text-main);
