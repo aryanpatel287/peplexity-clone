@@ -5,7 +5,6 @@ import {
     mistralModel,
     geminiSummariseAgent,
 } from './models.ai.service.js';
-import { writeFile } from 'node:fs/promises';
 export async function generateResponse(messages) {
     const mappedMessages = messages.map((message) => {
         if (message.role == 'user') return new HumanMessage(message.content);
@@ -62,19 +61,7 @@ function formatFileMetadata(file) {
     context += `\n*Note: The complete text of this document has been indexed and is searchable. If you need to retrieve specific details, direct quotes, or deep context from this document, use the \`contextRetrieverTool\`.*`;
     return context;
 }
-async function saveJsonToFile(data, filePath = 'data.json') {
-    try {
-        await writeFile(
-            filePath,
-            JSON.stringify(data, null, 2), // pretty formatted JSON
-            'utf8',
-        );
 
-        console.log(`JSON saved to ${filePath}`);
-    } catch (error) {
-        console.error('Failed to save JSON:', error);
-    }
-}
 export async function streamAiReponse(
     messageHistory,
     userFiles,
@@ -111,8 +98,6 @@ export async function streamAiReponse(
             return null;
         })
         .filter(Boolean);
-
-    console.log({ messages: mappedMessages });
 
     const stream = await geminiAgent.stream(
         {
@@ -196,6 +181,5 @@ export async function summariseFileWithAi(file) {
         ],
     });
 
-    console.log(result.structuredResponse);
     return result.structuredResponse;
 }
