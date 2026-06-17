@@ -1,17 +1,18 @@
 import { AIMessage, HumanMessage, SystemMessage } from 'langchain';
 import {
-    geminiAgent,
-    mistralAgent,
     mistralModel,
     geminiSummariseAgent,
+    getGeminiAgent,
+    getMistralAgent,
 } from './models.ai.service.js';
-export async function generateResponse(messages) {
+export async function generateResponse(messages, chatId) {
     const mappedMessages = messages.map((message) => {
         if (message.role == 'user') return new HumanMessage(message.content);
         if (message.role == 'ai') return new AIMessage(message.content);
     });
 
-    const response = await mistralAgent.invoke({ messages: mappedMessages });
+    const agent = getMistralAgent(chatId);
+    const response = await agent.invoke({ messages: mappedMessages });
     return response.messages[response.messages.length - 1].text;
 }
 
@@ -65,7 +66,7 @@ function formatFileMetadata(file) {
 export async function streamAiReponse(
     messageHistory,
     userFiles,
-    { onThinking, onToolCall } = {},
+    { onThinking, onToolCall, chatId } = {},
 ) {
     const lastIndex = messageHistory.length - 1;
 
@@ -99,7 +100,8 @@ export async function streamAiReponse(
         })
         .filter(Boolean);
 
-    const stream = await geminiAgent.stream(
+    const agent = getGeminiAgent(chatId);
+    const stream = await agent.stream(
         {
             messages: mappedMessages,
         },

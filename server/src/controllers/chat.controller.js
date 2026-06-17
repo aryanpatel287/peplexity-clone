@@ -60,15 +60,17 @@ async function sendMessage(req, res) {
         );
     }
 
+    const resolvedChatId = chatId || chat._id.toString();
+
     const messageHistory = await messageModel.find({
-        chat: chatId || chat._id,
+        chat: resolvedChatId,
     });
 
-    const aiResponse = await generateResponse(messageHistory);
+    const aiResponse = await generateResponse(messageHistory, resolvedChatId);
     // const aiResponse = await streamAiReponse(messageHistory, userFiles);
 
     const aiMessage = await messageModel.create({
-        chat: chatId || chat._id,
+        chat: resolvedChatId,
         content: aiResponse,
         role: 'ai',
     });

@@ -2,10 +2,10 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatMistralAI, MistralAIEmbeddings } from '@langchain/mistralai';
 import { createAgent, modelCallLimitMiddleware } from 'langchain';
 import {
-    contextRetrieverTool,
     emailTool,
     getCurrentDateTimeTool,
     searchInternetTool,
+    createContextRetrieverTool,
 } from './tools.ai.service.js';
 import envConfig from '../../config/envconfig.js';
 import { DocumentSummaryStructure } from './response-structure.ai.service.js';
@@ -36,22 +36,28 @@ const geminiModel = new ChatGoogleGenerativeAI({
     maxConcurrency: 3,
 });
 
-export const geminiAgent = createAgent({
-    model: geminiModel,
-    systemPrompt: toolAgentSystemPrompt,
-    tools: [
-        emailTool,
-        searchInternetTool,
-        getCurrentDateTimeTool,
-        contextRetrieverTool,
-    ],
-    middleware: [
-        modelCallLimitMiddleware({
-            runLimit: 5,
-            exitBehavior: 'end',
-        }),
-    ],
-});
+export function getGeminiAgent(chatId) {
+    const contextRetrieverToolForChat = createContextRetrieverTool(chatId);
+
+    return createAgent({
+        model: geminiModel,
+        systemPrompt: toolAgentSystemPrompt,
+        tools: [
+            emailTool,
+            searchInternetTool,
+            getCurrentDateTimeTool,
+            contextRetrieverToolForChat,
+        ],
+        middleware: [
+            modelCallLimitMiddleware({
+                runLimit: 5,
+                exitBehavior: 'end',
+            }),
+        ],
+    });
+}
+
+export const geminiAgent = getGeminiAgent();
 
 export const geminiSummariseModel = new ChatGoogleGenerativeAI({
     model: 'gemini-3.1-flash-lite',
@@ -75,21 +81,27 @@ const mistralEmbeddingModel = new MistralAIEmbeddings({
     model: 'mistral-embed',
 });
 
-export const mistralAgent = createAgent({
-    model: mistralModel,
-    systemPrompt: toolAgentSystemPrompt,
-    tools: [
-        emailTool,
-        searchInternetTool,
-        getCurrentDateTimeTool,
-        contextRetrieverTool,
-    ],
-    middleware: [
-        modelCallLimitMiddleware({
-            runLimit: 5,
-            exitBehavior: 'end',
-        }),
-    ],
-});
+export function getMistralAgent(chatId) {
+    const contextRetrieverToolForChat = createContextRetrieverTool(chatId);
+
+    return createAgent({
+        model: mistralModel,
+        systemPrompt: toolAgentSystemPrompt,
+        tools: [
+            emailTool,
+            searchInternetTool,
+            getCurrentDateTimeTool,
+            contextRetrieverToolForChat,
+        ],
+        middleware: [
+            modelCallLimitMiddleware({
+                runLimit: 5,
+                exitBehavior: 'end',
+            }),
+        ],
+    });
+}
+
+export const mistralAgent = getMistralAgent();
 
 export { geminiModel, mistralModel, mistralEmbeddingModel };

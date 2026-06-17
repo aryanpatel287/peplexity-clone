@@ -86,6 +86,7 @@ export async function handleChatSend(
         const finalText = await streamAiReponse(history, userFiles, {
             onThinking,
             onToolCall,
+            chatId: resolvedChatId,
         });
 
         const aiMessage = await messageModel.create({

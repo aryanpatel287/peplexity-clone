@@ -46,16 +46,28 @@ const getCurrentDateTimeTool = tool(
     },
 );
 
-const contextRetrieverTool = tool(retrieveRelevantContext, {
-    name: 'contextRetrieverTool',
-    description:
-        'Use this tool when the you think that there is need to retrieve relevant context for the query that user has asked. This is useful when you want to get information about the ingested data of the document and use that information to answer the user query.',
-    schema: z.string().describe('The query to retrieve relevant context'),
-});
+function createContextRetrieverTool(chatId) {
+    return tool(
+        async (query) => {
+            if (!chatId) {
+                throw new Error('Unauthorized RAG access: No active chatId in session context.');
+            }
+            return retrieveRelevantContext({ prompt: query, chatId });
+        },
+        {
+            name: 'contextRetrieverTool',
+            description:
+                'Use this tool when the you think that there is need to retrieve relevant context for the query that user has asked. This is useful when you want to get information about the ingested data of the document and use that information to answer the user query.',
+            schema: z
+                .string()
+                .describe('The query to retrieve relevant context'),
+        },
+    );
+}
 
 export {
     emailTool,
     searchInternetTool,
     getCurrentDateTimeTool,
-    contextRetrieverTool,
+    createContextRetrieverTool,
 };
