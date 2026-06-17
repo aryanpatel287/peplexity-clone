@@ -19,10 +19,34 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.set('trust proxy', 1);
-app.use(express.json());
-app.use(cookieParser());
+
+// 1. Logger
 app.use(morgan('dev'));
-app.use(helmet());
+
+// 2. Security Headers (with custom CSP to allow API/WebSocket domains & CDNs)
+const wsUrl = envConfig.SERVER_URL.replace(/^http/, 'ws');
+const connectSources = [
+    "'self'",
+    envConfig.SERVER_URL,
+    wsUrl,
+    ...(envConfig.CLIENT_ORIGINS || []),
+];
+
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                'connect-src': connectSources,
+                'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+                'font-src': ["'self'", 'data:', 'https://cdn.jsdelivr.net'],
+                'img-src': ["'self'", 'data:', 'https://ik.imagekit.io'],
+            },
+        },
+    }),
+);
+
+// 3. CORS configuration
 app.use(
     cors({
         origin(origin, callback) {
@@ -32,7 +56,14 @@ app.use(
     }),
 );
 
-// Initialize Passport for Google OAuth
+// 4. Block malicious scanners early (before parsing body/cookies or running passport/static logic)
+app.use(blockSuspiciousRequests);
+
+// 5. Body and Cookie Parsers
+app.use(express.json());
+app.use(cookieParser());
+
+// 6. Passport Initialization for Google OAuth
 app.use(passport.initialize());
 
 passport.use(
@@ -50,11 +81,11 @@ passport.use(
     ),
 );
 
+// 7. Static Client Assets
 const clientBuildPath = path.join(__dirname, '../', 'public');
 app.use(express.static(clientBuildPath));
 
-app.use(blockSuspiciousRequests);
-
+// 8. API & SPA Routing
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
 app.use('/', appRouter);

@@ -45,14 +45,6 @@ if (
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR REDIS');
 }
 
-if (
-    !process.env.MJ_APIKEY_PUBLIC ||
-    !process.env.MJ_APIKEY_PRIVATE ||
-    !process.env.MJ_USER
-) {
-    throw new Error('MISSING ENVIRONMENT VARIABLES FOR MAILJET API');
-}
-
 if (!process.env.GEMINI_API_KEY || !process.env.MISTRAL_API_KEY) {
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR AI MODELS');
 }
@@ -103,11 +95,6 @@ const envConfig = {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
     GOOGLE_SENDER_EMAIL: process.env.GOOGLE_SENDER_EMAIL,
-
-    //  Mailjet Api keys
-    MJ_APIKEY_PUBLIC: process.env.MJ_APIKEY_PUBLIC,
-    MJ_APIKEY_PRIVATE: process.env.MJ_APIKEY_PRIVATE,
-    MJ_USER: process.env.MJ_USER,
 
     //  Ai models keys
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
