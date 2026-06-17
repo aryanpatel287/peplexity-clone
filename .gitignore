@@ -9,3 +9,5 @@ AGENTS.md
 .agents/
 .github/
 DESIGN.md
+.kilocode/
+skills-lock.json
