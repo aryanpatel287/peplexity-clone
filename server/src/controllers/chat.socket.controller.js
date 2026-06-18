@@ -9,6 +9,21 @@ import {
     summariseFileWithAi,
 } from '../services/ai/response.ai.service.js';
 import parseDocumentsByLlama from '../rag/llama-parser.rag.js';
+import rollbar from '../services/rollbar.service.js';
+
+const getSocketRequestContext = (socket) => {
+    if (!socket || !socket.handshake) return null;
+    return {
+        headers: socket.handshake.headers || {},
+        url: socket.handshake.url || '',
+        method: 'SOCKET',
+        user: socket.user ? {
+            id: socket.user.id || socket.user._id,
+            username: socket.user.username,
+            email: socket.user.email,
+        } : null,
+    };
+};
 
 export async function handleChatSend(
     socket,
@@ -66,6 +81,7 @@ export async function handleChatSend(
                 userMessageId: userMessage._id,
                 userId,
                 resolvedChatId,
+                socket,
             });
 
             if (!userFiles || !userFiles.length) {
@@ -101,7 +117,8 @@ export async function handleChatSend(
             finalText,
         });
     } catch (err) {
-        console.error('[socket] handleChatSend error:', err);
+        const reqContext = getSocketRequestContext(socket);
+        rollbar.error(err, reqContext);
         socket.emit('chat:error', {
             chatId: resolvedChatId ?? chatId,
             error: err?.message ?? 'Something went wrong',
@@ -141,6 +158,7 @@ async function processFiles({
     userMessageId,
     userId,
     resolvedChatId,
+    socket,
 }) {
     if (!uploadedFiles || !uploadedFiles.length) return [];
 
@@ -193,10 +211,8 @@ async function processFiles({
                         isImage: false,
                     };
                 } catch (fileError) {
-                    console.error(
-                        `[socket] processFiles error for file ${file.name}:`,
-                        fileError,
-                    );
+                    const reqContext = getSocketRequestContext(socket);
+                    rollbar.error(fileError, reqContext, { fileName: file.name });
                     return {
                         ...file,
                         metadata: {},
@@ -240,7 +256,8 @@ async function processFiles({
 
         return createdFiles;
     } catch (dbError) {
-        console.error('[socket] processFiles database error:', dbError);
+        const reqContext = getSocketRequestContext(socket);
+        rollbar.error(dbError, reqContext);
 
         const filesToCreate = uploadedFiles.map((file) => ({
             fileId: file.fileId,

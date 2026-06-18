@@ -8,6 +8,7 @@ import {
     streamAiReponse,
 } from '../services/ai/response.ai.service.js';
 import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
+import rollbar from '../services/rollbar.service.js';
 
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
@@ -174,7 +175,7 @@ async function uploadFileController(req, res) {
             uploadedFiles,
         });
     } catch (err) {
-        console.error('[uploadFileController]', err);
+        rollbar.error(err, req);
 
         const isClientError =
             err.message?.includes('No files provided') ||

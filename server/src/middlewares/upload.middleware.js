@@ -1,4 +1,5 @@
 import multer from 'multer';
+import rollbar from '../services/rollbar.service.js';
 
 const MB = 1024 * 1024;
 const DEFAULT_MAX_FILE_SIZE = 2 * MB;
@@ -38,19 +39,23 @@ export function createFileUploadMiddleware({
     return (req, res, next) => {
         parseFiles(req, res, (err) => {
             if (err) {
-                console.error('[upload middleware]', err);
+                const isTooLarge = err.code === 'LIMIT_FILE_SIZE';
+                if (!isTooLarge) {
+                    rollbar.error(err, req);
+                } else {
+                    console.warn(`[upload middleware] File size limit exceeded: each file must be ${formatFileSizeLimit(maxFileSize)} or smaller`);
+                }
+
                 return res.status(400).json({
-                    message: 'File upload failed',
+                    message: isTooLarge
+                        ? `Max ${formatFileSizeLimit(maxFileSize)} allowed`
+                        : 'File upload failed',
                     success: false,
                     error: {
-                        code:
-                            err.code === 'LIMIT_FILE_SIZE'
-                                ? 'FILE_TOO_LARGE'
-                                : 'UPLOAD_ERROR',
-                        details:
-                            err.code === 'LIMIT_FILE_SIZE'
-                                ? `Each file must be ${formatFileSizeLimit(maxFileSize)} or smaller`
-                                : err.message,
+                        code: isTooLarge ? 'FILE_TOO_LARGE' : 'UPLOAD_ERROR',
+                        details: isTooLarge
+                            ? `Each file must be ${formatFileSizeLimit(maxFileSize)} or smaller`
+                            : err.message,
                     },
                 });
             }

@@ -12,6 +12,7 @@ import helmet from 'helmet';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { blockSuspiciousRequests } from './middlewares/app.middleware.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +39,11 @@ app.use(
             directives: {
                 ...helmet.contentSecurityPolicy.getDefaultDirectives(),
                 'connect-src': connectSources,
-                'style-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+                'style-src': [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://cdn.jsdelivr.net',
+                ],
                 'font-src': ["'self'", 'data:', 'https://cdn.jsdelivr.net'],
                 'img-src': ["'self'", 'data:', 'https://ik.imagekit.io'],
             },
@@ -88,6 +93,15 @@ app.use(express.static(clientBuildPath));
 // 8. API & SPA Routing
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
+
+// Test endpoint to verify Rollbar / global error monitoring
+app.get('/api/test-error', (req, res) => {
+    throw new Error('Verification error: Centralized error monitoring is working successfully!');
+});
+
 app.use('/', appRouter);
+
+// Global Error Handler (must be registered at the very end of middleware stack)
+app.use(errorHandler);
 
 export default app;

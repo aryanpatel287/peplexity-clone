@@ -65,6 +65,10 @@ if (!process.env.PINECONE_API_KEY || !process.env.PINECONE_INDEX) {
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR PINECONE');
 }
 
+if (isProduction && !process.env.ROLLBAR_ACCESS_TOKEN) {
+    throw new Error('MISSING ENVIRONMENT VARIABLE: ROLLBAR_ACCESS_TOKEN');
+}
+
 const envConfig = {
     //  Server configuration keys
     SERVER_PORT: process.env.SERVER_PORT || 3000,
@@ -112,6 +116,11 @@ const envConfig = {
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
     LLAMA_CLOUD_API_KEY: process.env.LLAMA_CLOUD_API_KEY,
+
+    // Rollbar keys
+    ROLLBAR_ACCESS_TOKEN: process.env.ROLLBAR_ACCESS_TOKEN,
+    ROLLBAR_ENVIRONMENT: process.env.ROLLBAR_ENVIRONMENT || process.env.NODE_ENV || 'development',
+
     isAllowedClientOrigin(origin) {
         if (!origin) return true;
         return clientOrigins.includes(normalizeOrigin(origin));
