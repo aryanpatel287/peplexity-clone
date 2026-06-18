@@ -37,6 +37,10 @@ if (
     throw new Error('MISSING ENVIRONMENT VARIABLES FOR GOOGLE API');
 }
 
+if (!process.env.RESEND_API_KEY || !process.env.RESEND_USER) {
+    throw new Error('MISSING ENVIRONMENT VARIABLES FOR RESEND API');
+}
+
 if (
     !process.env.REDIS_HOST ||
     !process.env.REDIS_PORT ||
@@ -95,6 +99,10 @@ const envConfig = {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
     GOOGLE_SENDER_EMAIL: process.env.GOOGLE_SENDER_EMAIL,
+
+    //  Resend Api keys
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_USER: process.env.RESEND_USER,
 
     //  Ai models keys
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,

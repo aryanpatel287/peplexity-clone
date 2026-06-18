@@ -39,6 +39,7 @@
         "passport-google-oauth20": "^2.0.0",
         "pdf-parse": "^2.4.5",
         "pptx2json": "^0.0.10",
+        "resend": "^6.14.0",
         "socket.io": "^4.8.3",
         "unpdf": "^1.6.2",
         "xlsx": "^0.18.5",
