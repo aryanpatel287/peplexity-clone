@@ -19,9 +19,27 @@ try {
     });
 
     console.log('Gmail API client initialized');
+
+    // Asynchronously verify if the refresh token is valid or expired without blocking startup
+    oauth2Client.getAccessToken().catch((error) => {
+        if (
+            error.message &&
+            (error.message.includes('invalid_grant') ||
+                error.message.includes('expired'))
+        ) {
+            console.error('Gmail API refresh token is expired.');
+        } else {
+            console.error(
+                'Error verifying Gmail API refresh token: ',
+                error.message || error,
+            );
+        }
+    });
 } catch (error) {
-    console.error('Error initializing Gmail API client: ', error);
-    throw error;
+    console.error(
+        'Error initializing Gmail API client: ',
+        error.message || error,
+    );
 }
 
 export const sendEmailUsingGmailAPI = async ({ to, subject, html, text }) => {
@@ -62,7 +80,6 @@ export const sendEmailUsingGmailAPI = async ({ to, subject, html, text }) => {
         };
     } catch (error) {
         console.error('Error sending email: ', error);
-        throw error;
         return 'Failed to send email to ' + to;
     }
 };
