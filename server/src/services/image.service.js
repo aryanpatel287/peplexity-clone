@@ -7,37 +7,75 @@ const imagekit = new ImageKit({
     privateKey: envConfig.IMAGEKIT_PRIVATE_KEY,
 });
 
+function validateFile(file) {
+    if (!file?.buffer?.length) {
+        throw new Error(
+            `File "${file?.originalname ?? 'unknown'}" is empty or missing file data`,
+        );
+    }
+    if (!file.originalname) {
+        throw new Error('File is missing a name');
+    }
+}
+
 export async function uploadImageOnImageKit({ image }) {
-    const file = await imagekit.files.upload({
-        file: await toFile(Buffer.from(image.buffer), 'file'),
-        fileName: image.originalname,
-        folder: '/cohort2-genAi/images',
-    });
+    try {
+        validateFile(image);
+
+        return await imagekit.files.upload({
+            file: await toFile(Buffer.from(image.buffer), image.originalname),
+            fileName: image.originalname,
+            folder: '/cohort2-genAi/images',
+        });
+    } catch (error) {
+        console.error('[ImageKit] uploadImageOnImageKit failed:', error);
+        throw error;
+    }
 }
 
 export async function uploadMultipleImagesOnImageKit(files) {
-    const uploadPromises = files.map(async (file) =>
-        imagekit.files.upload({
-            file: await toFile(Buffer.from(file.buffer), 'file'),
-            fileName: file.originalname,
-            folder: file.mimetype.startsWith('image/')
-                ? '/cohort2-genAi/images'
-                : file.mimetype === 'application/pdf'
-                  ? '/cohort2-genAi/pdfs'
-                  : '/cohort2-genAi/others',
-            customMetadata: {
-                mimetype: file.mimetype,
-            },
-        }),
-    );
+    if (!Array.isArray(files) || files.length === 0) {
+        throw new Error('No files provided for upload');
+    }
 
-    const results = await Promise.all(uploadPromises);
+    try {
+        const uploadPromises = files.map(async (file) => {
+            try {
+                validateFile(file);
 
-    const resultsWithMime = results.map((file, idx) => ({
-        ...file,
-        url: file.url,
-        mimetype: files[idx].mimetype,
-    }));
+                return await imagekit.files.upload({
+                    file: await toFile(
+                        Buffer.from(file.buffer),
+                        file.originalname,
+                    ),
+                    fileName: file.originalname,
+                    folder: file.mimetype.startsWith('image/')
+                        ? '/cohort2-genAi/images'
+                        : file.mimetype === 'application/pdf'
+                          ? '/cohort2-genAi/pdfs'
+                          : '/cohort2-genAi/others',
+                    customMetadata: {
+                        mimetype: file.mimetype,
+                    },
+                });
+            } catch (error) {
+                console.error(
+                    `[ImageKit] upload failed for "${file?.originalname ?? 'unknown'}":`,
+                    error,
+                );
+                throw error;
+            }
+        });
 
-    return resultsWithMime;
+        const results = await Promise.all(uploadPromises);
+
+        return results.map((result, idx) => ({
+            ...result,
+            url: result.url,
+            mimetype: files[idx].mimetype,
+        }));
+    } catch (error) {
+        console.error('[ImageKit] uploadMultipleImagesOnImageKit failed:', error);
+        throw error;
+    }
 }

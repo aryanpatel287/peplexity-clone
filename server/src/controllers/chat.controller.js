@@ -155,6 +155,17 @@ async function deleteChat(req, res) {
  */
 async function uploadFileController(req, res) {
     try {
+        if (!req.files?.length) {
+            return res.status(400).json({
+                message: 'No files received. Send files under the "files" field.',
+                success: false,
+                error: {
+                    code: 'NO_FILES',
+                    details: 'Request must include at least one file',
+                },
+            });
+        }
+
         const uploadedFiles = await uploadMultipleImagesOnImageKit(req.files);
 
         res.status(200).json({
@@ -163,11 +174,21 @@ async function uploadFileController(req, res) {
             uploadedFiles,
         });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({
+        console.error('[uploadFileController]', err);
+
+        const isClientError =
+            err.message?.includes('No files provided') ||
+            err.message?.includes('empty or missing') ||
+            err.message?.includes('missing a name') ||
+            err.status === 400;
+
+        res.status(isClientError ? 400 : 500).json({
             message: 'File upload failed',
             success: false,
-            error: 'File upload failed',
+            error: {
+                code: isClientError ? 'INVALID_FILE' : 'UPLOAD_FAILED',
+                details: err.error?.message ?? err.message ?? 'File upload failed',
+            },
         });
     }
 }

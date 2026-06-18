@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authUserOrGuest } from '../middlewares/auth.middleware.js';
+import { uploadFilesMiddleware } from '../middlewares/upload.middleware.js';
 import {
     deleteChat,
     getChats,
@@ -7,13 +8,8 @@ import {
     sendMessage,
     uploadFileController,
 } from '../controllers/chat.controller.js';
-import multer from 'multer';
 
 const chatRouter = Router();
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-});
 
 /**
  * @route /api/chats/message
@@ -56,7 +52,7 @@ chatRouter.delete('/delete/:chatId', authUserOrGuest, deleteChat);
 chatRouter.post(
     '/uploads',
     authUserOrGuest,
-    upload.array('files', 5),
+    uploadFilesMiddleware,
     uploadFileController,
 );
 
