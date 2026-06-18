@@ -93,12 +93,6 @@ app.use(express.static(clientBuildPath));
 // 8. API & SPA Routing
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
-
-// Test endpoint to verify Rollbar / global error monitoring
-app.get('/api/test-error', (req, res) => {
-    throw new Error('Verification error: Centralized error monitoring is working successfully!');
-});
-
 app.use('/', appRouter);
 
 // Global Error Handler (must be registered at the very end of middleware stack)
