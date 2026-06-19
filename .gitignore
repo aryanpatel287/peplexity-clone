@@ -1,8 +1,5 @@
+.env
 node_modules/
-client/node_modules/
-server/node_modules/
-CLIENT_COPILOT_RULES.md
-SERVER_COPILOT_RULES.md
 GEMINI.md 
 AGENTS.md
 .ai/
