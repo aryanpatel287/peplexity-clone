@@ -5,11 +5,19 @@ This repository contains a full-stack AI chat application split into two apps:
 - client: React + Vite frontend for authentication and chat UI
 - server: Express + Socket.IO backend for auth, chat persistence, AI orchestration, and file uploads
 
-## API Collection and Quick Testing
+## API Testing & Auto-Generated Documentation
 
-- Live demo (deployed): [https://cohort2-0-backend-1-kphk.onrender.com](https://cohort2-0-backend-1-kphk.onrender.com)
-- Postman collection: [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
-- Route-by-route request and response examples: [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md)
+We use automated integration tests with **Jest** and **Supertest** to verify all backend API endpoints and dynamically output live request and response examples.
+
+- **Auto-Generated API Reference:** [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md) (dynamically compiled when running the test suite)
+- **Live Demo (deployed):** [https://cohort2-0-backend-1-kphk.onrender.com](https://cohort2-0-backend-1-kphk.onrender.com)
+- **Postman Collection:** [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+
+To execute the test suite and refresh the API examples documentation:
+```bash
+cd server
+npm run test
+```
 
 ## Key Features
 

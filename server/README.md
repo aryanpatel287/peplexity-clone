@@ -2,10 +2,17 @@
 
 Backend API and socket server for the Perplexity clone application.
 
-## API Collection and Examples
+## API Testing & Examples
 
-- Postman collection: [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
-- Detailed request and response examples: [API_REQUEST_RESPONSE_EXAMPLES.md](API_REQUEST_RESPONSE_EXAMPLES.md)
+We use Jest and Supertest to write integration tests verifying all routes. The test runner compiles exact request/response schemas dynamically:
+
+- **Auto-Generated API Reference:** [API_REQUEST_RESPONSE_EXAMPLES.md](API_REQUEST_RESPONSE_EXAMPLES.md)
+- **Postman Collection:** [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+
+To execute the tests and refresh the documentation:
+```bash
+npm run test
+```
 
 ## What This Service Does
 

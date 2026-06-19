@@ -57,6 +57,8 @@ The client calls backend REST APIs through Axios:
 - Auth base: {VITE_API_URL}/api/auth
 - Chat base: {VITE_API_URL}/api/chats
 
+For complete request and response payloads, check the [Auto-Generated API Reference](../server/API_REQUEST_RESPONSE_EXAMPLES.md).
+
 Main chat APIs used:
 
 - send message
