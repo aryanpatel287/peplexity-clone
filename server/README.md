@@ -1,168 +1,200 @@
-# Perplexity Server
+<!-- prettier-ignore -->
+<div align="center">
 
-Backend API and socket server for the Perplexity clone application.
+<h1>Perplexity Clone - Server</h1>
 
-## API Testing & Examples
+_The Node.js & Express 5 backend engine for the Perplexity clone, orchestrating Google Gemini/Mistral AI agents, secure Pinecone RAG, and Gmail API integration._
 
-We use Jest and Supertest to write integration tests verifying all routes. The test runner compiles exact request/response schemas dynamically:
+[![Node version](https://img.shields.io/badge/Node.js->=20-3c873a?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![Express version](https://img.shields.io/badge/Express-5.0-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
+[![MongoDB version](https://img.shields.io/badge/MongoDB-Mongoose_9-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongoosejs.com)
+[![Redis version](https://img.shields.io/badge/Redis-ioredis_5-FF4438?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![Pinecone version](https://img.shields.io/badge/Pinecone-7.x-2C5E8A?style=flat-square)](https://pinecone.io)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.x-010101?style=flat-square&logo=socketdotio&logoColor=white)](https://socket.io)
 
-- **Auto-Generated API Reference:** [API_REQUEST_RESPONSE_EXAMPLES.md](API_REQUEST_RESPONSE_EXAMPLES.md)
-- **Postman Collection:** [Cohort2.0 Backend Collection (Live Link)](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
-  - Alternatively, import the local [Perplexity_API_Collection.postman_collection.json](Perplexity_API_Collection.postman_collection.json) export file directly into Postman (pre-populated with request schemas and mock response examples!).
+⭐ If you like this project, star it on GitHub — it helps a lot!
 
-To execute the tests and refresh the documentation:
-```bash
-npm run test
+[Features](#features) • [Tech Stack](#tech-stack) • [Folder Structure](#folder-structure) • [AI Architecture](#ai-architecture) • [RAG Ingestion & Retrieval](#rag-ingestion--retrieval) • [API & Socket Reference](#api--socket-reference) • [Environment Variables](#environment-variables) • [Testing & Local Setup](#testing--local-setup)
+
+</div>
+
+## Features
+
+- **Authentication & Claims Migration**: Stateful HTTP cookie session manager (JWT). Delivers alphanumeric OTP codes and verification Magic Links using Gmail OAuth2 API. Automatically transfers guest session chats to full user profiles on verification.
+- **Bi-directional Stream Controller**: WebSocket handler (Socket.IO) mapping raw tokens, thought sequences (`chat:thinking`), invoked LangChain agent tools (`chat:tool_call`), and rates-limit checks.
+- **Isolated Parsing & Direct Ingest**: Integrates safe processing loops for multi-file attachments (images, PDFs, PowerPoint, Word, TXT, CSV, JSON, Markdown). Isolates errors to prevent a single file failure from aborting batch uploads. Bypasses LlamaParse for images and text-based formats to save API costs.
+- **Secure Chat-Scoped RAG**: Ingests document chunk vectors mapped to the active `chatId`. Employs Pinecone vector query filters and MongoDB chunk lookups to guarantee chats retrieve only their own documents.
+- **Centralized Telemetry & PII Stripping**: Rollbar logging system configured to strip authorization tokens, user passwords, cookie headers, and anonymize request IP addresses.
+- **Security Hardening Filters**: Mounts early bot protection filters rejecting suspicious directory probes (`.env`, `.php`, `.bak`) with clean 404 responses before loading heavy server modules.
+
+---
+
+## Tech Stack
+
+- **Runtime**: Node.js (ESM import syntax)
+- **Framework**: Express 5 (routing, controllers, error handlers)
+- **Database Layer**: MongoDB + Mongoose 9 (Schemas, compound indexing, virtual relations)
+- **Vector DB**: Pinecone Client 7
+- **Cache & TTL Store**: Redis (ioredis 5) for blacklisting, OTP lifecycle, and guest rate counters
+- **Security Filters**: Helmet (dynamic CSP), CORS, bcrypt
+- **AI Agent Wrapper**: LangChain 1.x
+- **Services**: Tavily (search), ImageKit (file upload), LlamaCloud (PDF conversion), Gmail API (SMTP mailing)
+
+---
+
+## Folder Structure
+
+```text
+server/
+├── tests/                    # Integration Test Suite
+│   └── api.test.js           # Jest contract tests & schema documentation compiler
+├── src/
+│   ├── app.js                # Express app setup, routing, and middlewares
+│   ├── config/               # Database, Redis, and envconfig setups
+│   ├── controllers/          # Route handlers & socket streaming controls
+│   ├── middlewares/          # Auth filters, upload helpers, and security monitors
+│   ├── models/               # Mongoose DB Schemas (User, Chat, Message, File, Chunk)
+│   ├── rag/                  # RAG flow (LlamaParse, Chunking, Ingestion, Retrieval)
+│   ├── routes/               # Express REST routers
+│   ├── services/             # Integrations (AI agents/embeddings, Gmail API, ImageKit, Tavily)
+│   ├── sockets/              # Socket.IO WebSocket initialization
+│   ├── utils/                # Response structure helpers, OTP caches, email templates
+│   └── validators/           # express-validator payload guards
+└── server.js                 # App Entry Point (bootstraps HTTP/WS and Mongo connections)
 ```
 
-## What This Service Does
+---
 
-- **Authentication & Claims Management:** Full registration, email validation (OTP & Magic Links), login, logout, and password resets using secure HttpOnly cookies. Supports seamless migration of guest chat sessions to user profiles.
-- **Bi-directional AI Orchestration:** WebSockets (Socket.IO) controller streaming raw tokens, thought processes (`chat:thinking`), tool logs (`chat:tool_call`), final responses, and client rate limit warnings.
-- **Multimodal Document Uploads:** Processes batch uploads of images and documents (PDF, PowerPoint, Word, TXT, CSV, JSON, Markdown) via ImageKit storage.
-- **Isolated Parsing & Direct Ingest:** Features direct markdown fetching and plain-text file handlers to bypass LlamaParse where unnecessary. Each file in a batch is processed in isolation, preventing a single corrupted file from crashing the entire batch upload.
-- **Secure Chat-Scoped RAG:** Ingests document chunk vectors mapped to the current `chatId`. Pinecone vector searches and MongoDB chunk lookups enforce ownership restrictions to prevent cross-chat data leakage.
-- **Centralized Telemetry & PII Stripping:** Centralized Rollbar error logging that strips passwords, cookie strings, authorization tokens, and anonymizes IP addresses.
-- **Security Hardening:** Mounts early security filters blocking malicious bots scanning for configuration files (`.env`), scripts (`.php`), and backup structures (`.php.bak`, etc.), and helmet CSP rules.
+## AI Architecture
 
-## Stack
+Orchestrated via LangChain agents using request-scoped factory closures (`getGeminiAgent(chatId)` / `getMistralAgent(chatId)`):
 
-- **Runtime Environment:** Node.js (ESM import syntax)
-- **Application Framework:** Express 5
-- **Database Layer:** MongoDB & Mongoose 9 (Schemas, virtuals, and index controls)
-- **Vector Storage:** Pinecone (Vector database client)
-- **Caching & OTP Store:** Redis (ioredis client, supporting JWT blacklists, OTP TTL, and guest message counters)
-- **Authentication Engine:** Passport (Google OAuth 2.0 verification) + JWT
-- **AI Orchestration Framework:** LangChain (Tools, agents, and concurrency middleware)
-- **Language Models (LLMs):** Google GenAI (`gemma-4-31b-it` & `gemini-3.1-flash-lite`), Mistral AI (`mistral-medium-latest`)
-- **Document parsing utilities:** Llama Cloud (LlamaParse SDK), UnPDF, pdf-parse
-- **Mail Integration:** Nodemailer + Gmail API (OAuth2 authorization)
-- **Error Tracking:** Rollbar SDK
+| LLM Model                   | Provider          | Primary Role                                                                              |
+| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------- |
+| **`gemma-4-31b-it`**        | Google Gemini API | Core reasoning agent with tool-calling and token streaming capabilities.                  |
+| **`gemini-3.1-flash-lite`** | Google Gemini API | Specialized fast parser for metadata tagging, file summary extraction, and index caching. |
+| **`mistral-medium-latest`** | Mistral AI        | Secondary model generating user-friendly conversation titles from prompts.                |
+| **`mistral-embed`**         | Mistral AI        | Text embedder mapping chunks and search queries to multi-dimensional vectors.             |
 
-## AI Models Used
+### Configured Agent Tools
 
-The server configures several models for agent execution:
-- **`gemma-4-31b-it`** (via `@langchain/google-genai`)
-  - Primary LLM utilized in the streaming agent handler (`getGeminiAgent(chatId)`).
-- **`gemini-3.1-flash-lite`** (via `@langchain/google-genai`)
-  - Specialized, highly concurrent model used to extract metadata, section indexes, and summaries from uploaded files.
-- **`mistral-medium-latest`** (via `@langchain/mistralai`)
-  - Generates conversational titles for new chat sessions.
-- **`mistral-embed`** (via `@langchain/mistralai`)
-  - Translates raw document chunks and user search queries into vector embeddings.
+- **`searchInternetTool`** - Tavily Web Search API integration extracting top-5 search results.
+- **`emailTool`** - Formats and sends transaction-based emails using Gmail API.
+- **`getCurrentDateTime`** - Resolves active timestamp in localized `Asia/Kolkata` (IST) timezone.
+- **`createContextRetrieverTool(chatId)`** - Custom vector search tool pulling scoped context.
 
-## AI Tools Used
+---
 
-The agent is granted access to the following tools:
-- **`emailTool`**
-  - Sends formatted HTML messages to recipients via the Gmail API SMTP pool.
-- **`searchInternetTool`**
-  - Interrogates the Tavily search engine to resolve real-time internet information.
-- **`getCurrentDateTime`**
-  - Resolves current timestamp in the `Asia/Kolkata` (IST) timezone for time-aware queries.
-- **`createContextRetrieverTool(chatId)`**
-  - Closure factory that compiles a chat-scoped tool to pull context from Pinecone and MongoDB chunk databases.
+## RAG Ingestion & Retrieval
 
-## RAG Pipeline (High Level)
+### 1. Document Ingestion Flow
 
-1. **Upload:** User sends files → uploaded to ImageKit.
-2. **Inspect & Route:** Plain text/JSON files get raw content read. Markdown files get fetched directly. PDFs/Office files get passed to LlamaParse.
-3. **Parse & Structure:** Files get summarized, keywords extracted, and segmented by heading tags.
-4. **Chunk:** Structured texts are split using recursive character chunking (700 character size, 120 character overlap).
-5. **Index:** Chunks are saved to MongoDB, embedded using Mistral Embeddings, and vector indexed in Pinecone using the active `chatId` as a metadata filter.
-6. **Query:** Agent invokes `contextRetrieverTool` → queries Pinecone utilizing a strict `chat` filter -> retrieves original chunks from MongoDB using matching object IDs.
+```
+PDF/Office Docs ──► LlamaParse ──► Page Margins Parser ──► Recursive Splitter (700 chars / 120 overlap)
+                                                                 │
+  Pinecone Vector DB (Indexed by chat ID) ◄── Mistral Embed ◄────┴────► MongoDB Chunks Collection
+```
 
-## Data Models
+### 2. Context Retrieval Flow
 
-- **users**: Username, lowercase unique email, hashed password, verified status, and Google OAuth ID fields.
-- **chats**: User-specific or guest-specific conversational threads.
-- **messages**: Prompt payloads mapped to chats. Files are attached via mongoose virtual models.
-- **files**: ImageKit handles, sizes, original filenames, parsing state records, and summaries/keywords.
-- **chunks**: Plain text and markdown chunks with associated page ranges and parent file references.
+```
+User Query ──► Mistral Embed ──► Pinecone Vector Search (filtered by chatId) ──► Mongo Chunk Lookup ──► AI State Context
+```
 
+---
 
-## API Routes
+## API & Socket Reference
 
-Base URL: /api
+### REST Endpoints
 
-### Auth routes
+- **`/api/auth`**:
+    - `POST /send-signup-email` - Delivers OTP & Magic Link.
+    - `POST /verify-signup-email` - Validates OTP.
+    - `GET /verify-email?register=<jwt>` - Validates Magic Link.
+    - `POST /guest-session` - Creates guest session cookie.
+    - `GET /get-me` - Fetches authenticated profile.
+    - `POST /logout` - Invalidates active token.
+    - `POST /claim-guest-chats` - Claims guest sessions.
+- **`/api/chats`**:
+    - `GET /` - Fetches active conversations list.
+    - `GET /:chatId/messages` - Loads message history.
+    - `DELETE /delete/:chatId` - Deletes chat and cascades.
+    - `POST /uploads` - File upload endpoint (Images & PDF, 2MB each, max 5).
 
-- POST /auth/send-signup-email
-- GET /auth/verify-email?register=<token>
-- POST /auth/verify-signup-email
-- GET /auth/google
-- GET /auth/google/callback
-- POST /auth/guest-session
-- GET /auth/get-me
-- POST /auth/logout
-- POST /auth/claim-guest-chats
+### WebSocket Flow
 
-### Chat routes
+- **`chat:send`** (Client -> Server) - Submits chat query with file attachments.
+- **`chat:chat_created`** (Server -> Client) - Emits details for first-message sessions.
+- **`chat:thinking`** (Server -> Client) - Streams current AI reasoning token steps.
+- **`chat:tool_call`** (Server -> Client) - Emits details about executing tool operations.
+- **`chat:done`** (Server -> Client) - Emits final text string.
+- `chat:error` (Server -> Client) - Emits failures.
 
-- POST /chats/message
-- GET /chats
-- GET /chats/:chatId/messages
-- DELETE /chats/delete/:chatId
-- POST /chats/uploads
+### Postman Collection
 
-Upload constraints:
+- **Live Workspace Link**: [Cohort 2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+- **Local File Import**: import the local [Perplexity_API_Collection.postman_collection.json](server/Perplexity_API_Collection.postman_collection.json) export file directly into Postman (pre-populated with request schemas and mock response examples!).
 
-- Allowed mimetypes: image/*, application/pdf
-- Max size: 2 MB per file
-- Max files per request: 5
-
-## Socket Events
-
-Client emits:
-
-- chat:send
-
-Server emits:
-
-- chat:chat_created
-- chat:thinking
-- chat:tool_call
-- chat:done
-- chat:error
+---
 
 ## Environment Variables
 
-Copy server/.env.example to server/.env and fill in the values.
+Create a `server/.env` file referencing the following keys:
 
-## Run Locally
+```env
+# Server config
+PORT=3000
+MONGO_URI=your-mongodb-uri
+JWT_SECRET=your-jwt-secret
+CLIENT_ORIGINS=http://localhost:5173,http://localhost:3000
+
+# Redis Config
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+
+# AI Credentials
+GEMINI_API_KEY=your-gemini-key
+MISTRAL_API_KEY=your-mistral-key
+
+# Tool Credentials
+TAVILY_API_KEY=your-tavily-key
+IMAGEKIT_PRIVATE_KEY=your-imagekit-key
+IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
+IMAGEKIT_URL_ENDPOINT=your-imagekit-url
+LLAMA_CLOUD_API_KEY=your-llama-cloud-key
+
+# Pinecone Config
+PINECONE_API_KEY=your-pinecone-key
+PINECONE_INDEX=cohort-2-rag
+
+# Gmail OAuth API Config
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REFRESH_TOKEN=your-google-refresh-token
+GOOGLE_SENDER_EMAIL=your-sender-email
+
+# Rollbar Config
+ROLLBAR_ACCESS_TOKEN=your-rollbar-token
+```
+
+---
+
+## Testing & Local Setup
+
+### 1. Run Development Server
 
 ```bash
 npm install
 npm run dev
 ```
 
-Default port:
+### 2. Run Integration Tests
 
-- http://localhost:3000
+The server incorporates integration tests using **Jest** and **Supertest** mocking databases, caches, and AI endpoints for fast execution times.
 
-## Folder Map
-
-```text
-server/
-  server.js
-  src/
-    app.js
-    config/
-    controllers/
-    middlewares/
-    models/
-    rag/
-    routes/
-    services/
-      ai/
-      mail/
-    sockets/
-    utils/
-    validators/
+```bash
+npm run test
 ```
 
-## Important Notes
-
-- Keep env secrets out of version control.
-- Cookies and CORS require matching frontend origin.
-- Redis is used to store logged-out tokens for blacklist behavior.
+Running the test suite automatically generates/updates the [API_REQUEST_RESPONSE_EXAMPLES.md](API_REQUEST_RESPONSE_EXAMPLES.md) reference file capturing real request and response formats.

@@ -226,9 +226,9 @@ describe('Perplexity API Endpoints & Contract Tests', () => {
                 if (q) markdown += `?${q}`;
             }
             if (api.cookies.token) {
-                markdown += ` \\\n  -H "Cookie: token=${api.cookies.token}"`;
+                markdown += ` \\\n  -H "Cookie: token=<your-jwt-token>"`;
             } else if (api.cookies.guest_token) {
-                markdown += ` \\\n  -H "Cookie: guest_token=${api.cookies.guest_token}"`;
+                markdown += ` \\\n  -H "Cookie: guest_token=<your-guest-token>"`;
             }
             if (api.body) {
                 markdown += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(api.body)}'`;

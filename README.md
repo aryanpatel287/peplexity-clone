@@ -1,98 +1,115 @@
-# Perplexity Clone
+<!-- prettier-ignore -->
+<div align="center">
 
-This repository contains a full-stack AI chat application split into two apps:
+<h1>Perplexity Clone</h1>
 
-- client: React + Vite frontend for authentication and chat UI
-- server: Express + Socket.IO backend for auth, chat persistence, AI orchestration, and file uploads
+_A premium, full-stack AI-powered search engine with real-time stream orchestration, secure chat-scoped RAG, dynamic agent tools, and advanced LaTeX/Markdown rendering._
 
-### API Testing & Auto-Generated Documentation
+[![Official Demo](https://img.shields.io/badge/Demo-Live_Site-blue?style=flat-square&logo=googlechrome&logoColor=white)](https://perplexity.aryanpatel.in)
+[![Node version](https://img.shields.io/badge/Node.js->=20-3c873a?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![React version](https://img.shields.io/badge/React-19.0-61dafb?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![Express version](https://img.shields.io/badge/Express-5.0-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.x-010101?style=flat-square&logo=socketdotio&logoColor=white)](https://socket.io)
 
-We use automated integration tests with **Jest** and **Supertest** to verify all backend API endpoints and dynamically output live request and response examples.
+⭐ If you like this project, star it on GitHub — it helps a lot!
 
-- **Auto-Generated API Reference:** [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md) (dynamically compiled when running the test suite)
-- **Live Demo (deployed):** [https://perplexity.aryanpatel.in](https://perplexity.aryanpatel.in)
-- **Postman Collection:** [Cohort2.0 Backend Collection (Live Link)](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
-  - Alternatively, import the local [Perplexity_API_Collection.postman_collection.json](server/Perplexity_API_Collection.postman_collection.json) export file directly into Postman (pre-populated with request schemas and mock response examples!).
+[Overview](#overview) • [Key Features](#key-features) • [Tech Stack](#tech-stack) • [Architecture](#architecture) • [Getting Started](#getting-started) • [API & Socket Reference](#api--socket-reference)
 
-To execute the test suite and refresh the API examples documentation:
-```bash
-cd server
-npm run test
-```
+</div>
+
+## Overview
+
+This repository contains a production-grade, full-stack clone of the Perplexity AI search engine. It features an interactive React frontend and a powerful Express backend that integrates multiple AI models (Google Gemini and Mistral AI) using LangChain.
+
+The application utilizes an advanced RAG (Retrieval-Augmented Generation) pipeline to extract content from user-uploaded documents and images, enabling context-aware chat experiences. It is fully responsive, optimized for both authenticated users and guests, and includes enterprise-level security precautions.
+
+> [!TIP]
+> You can experience the live app at [perplexity.aryanpatel.in](https://perplexity.aryanpatel.in). To run the project locally, ensure you have Redis and MongoDB instances running before starting the development servers.
+
+---
 
 ## Key Features
 
-- **Hybrid Authentication:** Stateful, secure HttpOnly cookie session management for both registered users (OTP & Magic Links verification via Gmail API) and guests. Includes guest session chat migration to user profiles upon registration/login.
-- **Real-Time Stream Orchestration:** Two-way WebSockets (Socket.IO) mapping raw tokens, reasoning steps (`chat:thinking`), tool execution tracking (`chat:tool_call`), and completions.
-- **Multimodal File Attachments:** Seamless uploading and processing of images and a wide range of document types (PDFs, PPTX, DOCX, TXT, CSV, JSON, Markdown, etc.) using ImageKit cloud storage.
-- **Isolated Parsing & Fallbacks:** Bypasses heavy document parsing (LlamaParse) for images, direct text/markdown files, and spreadsheet data to preserve API credits and maximize response speeds. Individual file errors are gracefully caught so they don't break concurrent batch uploads.
-- **Secure Chat-Scoped RAG:** Ingests document embeddings strictly isolated by `chatId`. Pinecone vector search and MongoDB chunk retrieval enforce ownership matching, eliminating cross-chat context leakage.
-- **Dynamic LangChain Tools:** AI agent queries web resources (Tavily search), triggers transaction emails (Gmail API), checks live dates/times (Asia/Kolkata timezone), and retrieves scoped document fragments automatically.
-- **Enhanced AI Output Rendering:** Render upgraded markup featuring custom physical keyboard keycaps (`<kbd>`), translucent highlights (`==highlight==`), polished details collapsibles, math equations resizing (KaTeX), and dynamic references smooth scrolling with pulse animation targeting.
-- **Production-Grade Monitoring & Hardening:** Early vulnerability scanner protection middleware (rejection of `.php`, `.bak`, `.env` probes), Helmet CSP dynamic setup, and centralized Rollbar integration with strict PII/credential scrubbing.
+- **Real-Time Stream Orchestration**: Utilizes WebSockets (Socket.IO) to stream raw response tokens, detailed reasoning thoughts (`chat:thinking`), and active tool execution statuses (`chat:tool_call`) directly to the client.
+- **Secure Chat-Scoped RAG**: Restricts document context vectors in Pinecone and database chunks in MongoDB utilizing strict `chatId` filters, preventing cross-chat document information leaks.
+- **Hybrid Passwordless Authentication**: Manages stateful user sessions (JWT in secure HttpOnly cookies) for both registered users (OTP and Magic Link delivery via Gmail API) and guests. Includes automatic chat session migration to user profiles upon signup.
+- **Multimodal Document Uploads**: Supports concurrent file uploads (images, PDFs, PowerPoint, Word, TXT, CSV, JSON, Markdown). Integrates isolated processing logic to prevent a single parsing error from crashing batch processes.
+- **Isolated Parsing & Fallbacks**: Smart routing bypasses heavy document parsing (LlamaParse) for images and text-based files, preserving API credits and maximizing response speeds.
+- **Dynamic AI Agent Tools**: Empowers the AI agent with tools to query web search (Tavily Search API), send transaction emails (Gmail API), check localized date/time (IST timezone), and retrieve chat-scoped document context.
+- **Enhanced Formatting & Renderers**: Custom markdown parser that supports LaTeX math equations (KaTeX), physical keyboard keycaps (`<kbd>`), translucent highlights (`==text==`), collapsible accordion details, and academic footnotes with smooth scrolling.
+- **Vulnerability Scanner Protection**: Mounted middleware to block malicious scanners looking for configuration files (`.env`), backup files (`.bak`), or PHP scripts (`.php`), returning early 404s to optimize resource usage.
 
-## Architecture Overview
-
-- **Monorepo-Style decouping:** Frontend (`/client`) and backend (`/server`) run as isolated, specialized applications.
-- **RAG Ingestion:** Asynchronous document parser routes text files directly, runs PDFs and Office documents through LlamaCloud/LlamaParse, generates embeddings with Mistral AI, writes fragments into MongoDB, and indexes vectors inside Pinecone.
-- **RAG Retrieval:** On tool invocation, the agent queries Pinecone under chat-scoped vector filters, maps indices back to MongoDB database chunks, and renders the synthesized context.
-- **Production Packaging:** Production builds use a synchronization script to bundle the client app directly into the server's public folder for unified static delivery.
+---
 
 ## Tech Stack
 
-### Client
+| Component        | Technology                                           | Description                                                                                                                                        |
+| ---------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Client**       | React 19, Vite 7, Redux Toolkit, React Router v7     | Modern single-page app layout with modular state management and custom SCSS layouts.                                                               |
+| **Server**       | Node.js (ESM), Express 5, Socket.IO                  | High-concurrency server hosting REST APIs and bidirectional websocket channels.                                                                    |
+| **Database**     | MongoDB (Mongoose 9), Redis, Pinecone                | Multi-tier storage layer separating structural metadata, vectors, and session caches.                                                              |
+| **AI Models**    | Google Gemini, Mistral AI, Mistral Embeddings        | Multi-model orchestration: Gemini (`gemma-4-31b-it`) for reasoning; Mistral (`mistral-medium-latest` & `mistral-embed`) for titles and embeddings. |
+| **Integrations** | LlamaCloud (LlamaParse), Tavily, ImageKit, Gmail API | Supporting services for parsing documents, searching the web, hosting uploads, and sending emails.                                                 |
 
-- **React 19** & **Vite**
-- **Redux Toolkit** (State slices for `auth` and `chat`)
-- **React Router v7**
-- **Axios** (REST requests)
-- **Socket.IO Client** (Real-time events)
-- **Sass (SCSS)** (Modular layout and theme styling)
-- **React Markdown** + `remark-gfm` + `rehype-raw` (custom components)
-- **KaTeX** (Math equations rendering)
-- **Rollbar Client** (Error logging and session replay)
+---
 
-### Server
+## Architecture
 
-- **Node.js** (ESM syntax) + **Express 5**
-- **MongoDB** + **Mongoose 9** (Data persistence)
-- **Redis (ioredis)** (Guest token limits, blacklist invalidation, OTP TTL)
-- **Socket.IO** (Websocket server)
-- **LangChain** (Agent routing and tool execution wrapper)
-- **Google GenAI** (`gemma-4-31b-it` & `gemini-3.1-flash-lite`)
-- **Mistral AI** (`mistral-medium-latest` & `mistral-embed`)
-- **Pinecone** (Vector DB)
-- **Llama Cloud** (LlamaParse document conversion)
-- **Nodemailer** (Gmail OAuth2 SMTP integration)
-- **Rollbar SDK** (Scrubbed production tracking)
+The project is split into two specialized applications for decoupled, monorepo-style deployment:
 
-## AI Models and Tools
+```
+┌───────────────────────────────────────────────────────────────┐
+│                         CLIENT (React)                        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │
+│  │  Redux   │  │  Hooks   │  │  API     │  │  Socket.IO   │   │
+│  │  Store   │←→│ useAuth  │←→│ Services │←→│  Client      │   │
+│  │ auth+chat│  │ useChat  │  │ (axios)  │  │              │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │
+└───────────────────────┬───────────────────────┬───────────────┘
+                        │ HTTP (REST)           │ WebSocket
+                        ▼                       ▼
+┌───────────────────────────────────────────────────────────────┐
+│                         SERVER (Express 5)                    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │
+│  │  Routes  │→ │ Middle-  │→ │ Control- │→ │  Services    │   │
+│  │          │  │ ware     │  │ lers     │  │  (AI, Mail,  │   │
+│  │          │  │ (auth)   │  │          │  │   Image)     │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │
+│  │ Socket.IO│  │ RAG      │  │ Models   │  │  Config      │   │
+│  │ Server   │  │ Pipeline │  │(Mongoose)│  │ (env,db,     │   │
+│  │          │  │          │  │          │  │  cache)      │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │
+└───────────────────────────────────────────────────────────────┘
+        │              │              │
+        ▼              ▼              ▼
+   ┌─────────┐   ┌──────────┐   ┌──────────┐
+   │ MongoDB │   │ Pinecone │   │  Redis   │
+   │         │   │ (Vector) │   │ (Cache)  │
+   └─────────┘   └──────────┘   └──────────┘
+```
 
-The backend orchestrates models via LangChain:
-- **`gemma-4-31b-it`**: Primary agent model generating streaming, real-time responses with tools.
-- **`gemini-3.1-flash-lite`**: Used for structured summarization of documents and extracting metadata.
-- **`mistral-medium-latest`**: Used for chat title generation and standard invoke utilities.
-- **`mistral-embed`**: Generates text embeddings for vector storage indexing.
+> [!NOTE]
+> For production deployment, running `npm run build` in the server directory bundles the React client app directly into the server's public folder for single-host static delivery.
 
-Active Agent Tools:
-- **`emailTool`**: Sends emails to recipients via Gmail API.
-- **`searchInternetTool`**: Queries Tavily Search engine for real-time web results.
-- **`getCurrentDateTimeTool`**: Resolves current localized date/time.
-- **`createContextRetrieverTool(chatId)`**: Generates context using chat-scoped vectors.
+---
 
-## Core Data Models
+## Getting Started
 
-- **users**: Accounts storing username, email, hashed credentials, and Google OAuth ID references.
-- **chats**: Active sessions bound to a user ID or a temporary cookie guest session token.
-- **messages**: Prompt bubbles storing role (`user` / `ai`), timestamp metadata, and attachments.
-- **files**: ImageKit descriptors, mimetype headers, parsing progress, and structured text summaries.
-- **chunks**: Extracted document fragments referencing parent file and chat scopes.
+### Prerequisites
 
-## Local Setup
+Ensure you have the following installed on your machine:
 
-### 1) Clone and install
+- [Node.js LTS](https://nodejs.org/) (v20 or higher recommended)
+- [MongoDB Server](https://www.mongodb.com/) (or MongoDB Atlas URI)
+- [Redis Server](https://redis.io/)
+
+### 1. Installation
+
+Clone the repository and install dependencies in both project directories:
 
 ```bash
+# Clone the repository
 git clone <your-repo-url>
 cd perplexity-clone
 
@@ -105,44 +122,63 @@ cd ../client
 npm install
 ```
 
-### 2) Configure environment variables
+### 2. Configuration
 
-Create and populate the local configuration files:
-- `server/.env` (reference `server/.env.example` for details)
-- `client/.env` (reference `client/.env.example` for details)
+Create local environment configuration files using the provided templates:
 
-### 3) Run apps
+- **Server**: Copy `server/.env.example` to `server/.env` and supply the required API keys (MongoDB, Redis, Gemini, Mistral, Pinecone, Tavily, ImageKit, Llama Cloud, and Gmail OAuth credentials).
+- **Client**: Copy `client/.env.example` to `client/.env` and update the connection ports if custom values are used.
 
-Launch the development servers:
+### 3. Launch Development Servers
 
-In terminal 1:
-```bash
-cd server
-npm run dev
-```
+Start both application instances concurrently:
 
-In terminal 2:
-```bash
-cd client
-npm run dev
-```
+- **Backend Server** (Terminal 1):
+    ```bash
+    cd server
+    npm run dev
+    ```
+- **Frontend Client** (Terminal 2):
+    ```bash
+    cd client
+    npm run dev
+    ```
 
-Default URLs:
-- Frontend Client: `http://localhost:5173`
-- Backend API: `http://localhost:3000`
+Once both processes are running, visit `http://localhost:5173` in your browser.
 
-## API and Socket Summary
+---
 
-Base REST Endpoints:
-- Authentication: `/api/auth`
-- Conversation management: `/api/chats`
+## API & Socket Reference
 
-Primary socket event flow:
-- Client emits: `chat:send`
-- Server emits: `chat:chat_created`, `chat:thinking`, `chat:tool_call`, `chat:done`, `chat:error`
+The server exposes a REST API for session state management and a Socket.IO interface for chat operations.
 
-## Notes
+### Key REST Endpoints
 
-- Keep secrets out of repository logs; use environmental configurations.
-- Client CORS origin matches must specify the client server port (`5173` locally).
-- Image and file uploads support batches up to **5 files** (max **2 MB** per file).
+- **Authentication (`/api/auth`)**:
+    - `POST /send-signup-email` - Requests alphanumeric OTP & Magic Link.
+    - `POST /verify-signup-email` - Verifies OTP and creates/logs in user.
+    - `GET /verify-email?register=token` - Verifies Magic Link.
+    - `GET /google` - Passport redirection portal for Google OAuth.
+    - `POST /guest-session` - Registers/recovers temporary guest credentials.
+- **Conversations (`/api/chats`)**:
+    - `GET /` - Retrieves active chat histories.
+    - `GET /:chatId/messages` - Loads message history.
+    - `POST /uploads` - File uploading deck endpoint.
+
+### WebSocket Communication Flow
+
+- **Client Emits**:
+    - `chat:send` - Sends prompt alongside attachment metadata.
+- **Server Streams**:
+    - `chat:chat_created` - Emits title and initialized message structures.
+    - `chat:thinking` - Streams the model's intermediate thoughts.
+    - `chat:tool_call` - Details about tool execution (e.g. web search, file ingestion).
+    - `chat:done` - Emits final text string and stamps data models.
+
+### Postman Collection
+
+- **Live Workspace Link**: [Cohort 2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+- **Local File Import**: import the local [Perplexity_API_Collection.postman_collection.json](server/Perplexity_API_Collection.postman_collection.json) export file directly into Postman (pre-populated with request schemas and mock response examples!).
+
+> [!IMPORTANT]
+> The backend features a test suite verifying endpoint contracts. To run integration tests and automatically compile the API schema reference, execute `npm run test` in the `server/` directory. Check [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md) for full request/response payloads.
