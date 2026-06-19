@@ -17,84 +17,69 @@ npm run test
 
 ## What This Service Does
 
-- User authentication and account lifecycle
-  - register, verify email, login, logout
-  - forgot password and update password
-- Chat persistence
-  - create chats, store messages, fetch history, delete chats
-- AI orchestration
-  - streaming responses over sockets
-  - tool-calling through LangChain
-- File upload support
-  - image and PDF upload through ImageKit
-- RAG ingestion and retrieval
-  - PDF to markdown parsing, chunking, embeddings, and Pinecone indexing
+- **Authentication & Claims Management:** Full registration, email validation (OTP & Magic Links), login, logout, and password resets using secure HttpOnly cookies. Supports seamless migration of guest chat sessions to user profiles.
+- **Bi-directional AI Orchestration:** WebSockets (Socket.IO) controller streaming raw tokens, thought processes (`chat:thinking`), tool logs (`chat:tool_call`), final responses, and client rate limit warnings.
+- **Multimodal Document Uploads:** Processes batch uploads of images and documents (PDF, PowerPoint, Word, TXT, CSV, JSON, Markdown) via ImageKit storage.
+- **Isolated Parsing & Direct Ingest:** Features direct markdown fetching and plain-text file handlers to bypass LlamaParse where unnecessary. Each file in a batch is processed in isolation, preventing a single corrupted file from crashing the entire batch upload.
+- **Secure Chat-Scoped RAG:** Ingests document chunk vectors mapped to the current `chatId`. Pinecone vector searches and MongoDB chunk lookups enforce ownership restrictions to prevent cross-chat data leakage.
+- **Centralized Telemetry & PII Stripping:** Centralized Rollbar error logging that strips passwords, cookie strings, authorization tokens, and anonymizes IP addresses.
+- **Security Hardening:** Mounts early security filters blocking malicious bots scanning for configuration files (`.env`), scripts (`.php`), and backup structures (`.php.bak`, etc.), and helmet CSP rules.
 
 ## Stack
 
-- Runtime: Node.js (ESM)
-- Framework: Express 5
-- Database: MongoDB with Mongoose
-- Cache/blacklist: Redis (ioredis)
-- Auth: JWT in cookies
-- Realtime: Socket.IO
-- Validation: express-validator, zod
-- Uploads: multer + ImageKit
-- Mail: Gmail API, Nodemailer OAuth2 (dev), Mailjet fallback
-- AI orchestration: LangChain
-- Vector DB: Pinecone
-- PDF parsing: Llama Cloud, UnPDF, pdf-parse
+- **Runtime Environment:** Node.js (ESM import syntax)
+- **Application Framework:** Express 5
+- **Database Layer:** MongoDB & Mongoose 9 (Schemas, virtuals, and index controls)
+- **Vector Storage:** Pinecone (Vector database client)
+- **Caching & OTP Store:** Redis (ioredis client, supporting JWT blacklists, OTP TTL, and guest message counters)
+- **Authentication Engine:** Passport (Google OAuth 2.0 verification) + JWT
+- **AI Orchestration Framework:** LangChain (Tools, agents, and concurrency middleware)
+- **Language Models (LLMs):** Google GenAI (`gemma-4-31b-it` & `gemini-3.1-flash-lite`), Mistral AI (`mistral-medium-latest`)
+- **Document parsing utilities:** Llama Cloud (LlamaParse SDK), UnPDF, pdf-parse
+- **Mail Integration:** Nodemailer + Gmail API (OAuth2 authorization)
+- **Error Tracking:** Rollbar SDK
 
 ## AI Models Used
 
-The code configures these model clients:
-
-- gemma-4-31b-it
-  - Provider package: @langchain/google-genai
-  - Used in streaming flow via geminiAgent.
-- mistral-medium-latest
-  - Provider package: @langchain/mistralai
-  - Used for chat title generation and standard invoke flow.
-- Mistral embeddings
-  - Used for chunk embeddings in the RAG pipeline.
+The server configures several models for agent execution:
+- **`gemma-4-31b-it`** (via `@langchain/google-genai`)
+  - Primary LLM utilized in the streaming agent handler (`getGeminiAgent(chatId)`).
+- **`gemini-3.1-flash-lite`** (via `@langchain/google-genai`)
+  - Specialized, highly concurrent model used to extract metadata, section indexes, and summaries from uploaded files.
+- **`mistral-medium-latest`** (via `@langchain/mistralai`)
+  - Generates conversational titles for new chat sessions.
+- **`mistral-embed`** (via `@langchain/mistralai`)
+  - Translates raw document chunks and user search queries into vector embeddings.
 
 ## AI Tools Used
 
-The agent can call the following tools:
-
-- emailTool
-  - Purpose: send email to a recipient.
-  - Backed by: sendEmail in mail.service.js.
-- searchInternetTool
-  - Purpose: fetch latest web information.
-  - Backed by: Tavily search API.
-- getCurrentDateTime
-  - Purpose: return current date/time payload.
-  - Timezone: Asia/Kolkata.
-- contextRetrieverTool
-  - Purpose: retrieve relevant context from ingested documents.
-  - Backed by: Pinecone + MongoDB chunk storage.
+The agent is granted access to the following tools:
+- **`emailTool`**
+  - Sends formatted HTML messages to recipients via the Gmail API SMTP pool.
+- **`searchInternetTool`**
+  - Interrogates the Tavily search engine to resolve real-time internet information.
+- **`getCurrentDateTime`**
+  - Resolves current timestamp in the `Asia/Kolkata` (IST) timezone for time-aware queries.
+- **`createContextRetrieverTool(chatId)`**
+  - Closure factory that compiles a chat-scoped tool to pull context from Pinecone and MongoDB chunk databases.
 
 ## RAG Pipeline (High Level)
 
-- Parse PDFs to markdown via Llama Cloud.
-- Chunk markdown into structured sections and plain text.
-- Store chunks in MongoDB and embed with Mistral embeddings.
-- Upsert vectors into Pinecone and retrieve relevant chunks at query time.
+1. **Upload:** User sends files → uploaded to ImageKit.
+2. **Inspect & Route:** Plain text/JSON files get raw content read. Markdown files get fetched directly. PDFs/Office files get passed to LlamaParse.
+3. **Parse & Structure:** Files get summarized, keywords extracted, and segmented by heading tags.
+4. **Chunk:** Structured texts are split using recursive character chunking (700 character size, 120 character overlap).
+5. **Index:** Chunks are saved to MongoDB, embedded using Mistral Embeddings, and vector indexed in Pinecone using the active `chatId` as a metadata filter.
+6. **Query:** Agent invokes `contextRetrieverTool` → queries Pinecone utilizing a strict `chat` filter -> retrieves original chunks from MongoDB using matching object IDs.
 
 ## Data Models
 
-- users
-  - Fields: username, email, password, verified
-- chats
-  - Fields: user, title
-- messages
-  - Fields: chat, content, role
-  - Virtual relation: files
-- files
-  - Stores upload metadata linked to messages
-- chunks
-  - Stores parsed document chunks and metadata
+- **users**: Username, lowercase unique email, hashed password, verified status, and Google OAuth ID fields.
+- **chats**: User-specific or guest-specific conversational threads.
+- **messages**: Prompt payloads mapped to chats. Files are attached via mongoose virtual models.
+- **files**: ImageKit handles, sizes, original filenames, parsing state records, and summaries/keywords.
+- **chunks**: Plain text and markdown chunks with associated page ranges and parent file references.
+
 
 ## API Routes
 
@@ -102,14 +87,15 @@ Base URL: /api
 
 ### Auth routes
 
-- POST /auth/register
-- GET /auth/verify-email?token=<token>
-- POST /auth/login
+- POST /auth/send-signup-email
+- GET /auth/verify-email?register=<token>
+- POST /auth/verify-signup-email
+- GET /auth/google
+- GET /auth/google/callback
+- POST /auth/guest-session
 - GET /auth/get-me
-- POST /auth/resend-verify-email
 - POST /auth/logout
-- POST /auth/forgot-password
-- PATCH /auth/update-password?token=<token>
+- POST /auth/claim-guest-chats
 
 ### Chat routes
 

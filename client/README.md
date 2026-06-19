@@ -4,109 +4,91 @@ Frontend app for authentication and AI chat experience.
 
 ## What This App Does
 
-- User authentication screens
-  - register, login, forgot password, update password
-- Protected dashboard chat interface with nested chat routes
-- Chat sidebar with chat list and deletion
-- Real-time AI response rendering with socket events
-- File attachments for images and PDFs with preview and lightbox
-- Markdown rendering and toast notifications for status/errors
+- **Comprehensive User Auth Screens:** Integrated login and register views utilizing secure HttpOnly cookies.
+- **Dynamic Dashboard Chat Interface:** Multi-chat layout with sidebar history, session controls, and chat deletion features. Supports responsive split views.
+- **Real-Time Stream HUD:** Displays interactive visual states for AI reasoning tokens (`chat:thinking`), invoked LangChain agent tools (`chat:tool_call`), completed markdown blocks, and connection status.
+- **Multimodal Upload Deck:** Interactive upload zone accepting images and document types (PDFs, PPTX, DOCX, TXT, CSV, JSON, Markdown). Showcases inline status indicators, file size validations, upload progress, and a gallery lightbox.
+- **Rich Markdown Rendering Pipeline:** Parses LaTeX blocks and inline math symbols using KaTeX. Leverages `rehype-raw` to output physical keyboard buttons (`<kbd>`), custom highlights, and collapsible accordion selectors. Footnote references dynamically highlight and smooth-scroll on click.
+- **Diagnostics & Error Boundaries:** Uses client boundaries to catch runtime exceptions and logs anonymized diagnostic telemetry and session playbacks through Rollbar when configured.
 
 ## Stack
 
-- React 19
-- Vite
-- Redux Toolkit + React Redux
-- React Router
-- Axios
-- Socket.IO Client
-- Sass
-- React Markdown + remark-gfm
-- React Toastify
-- Lucide React
+- **React 19** & **Vite**
+- **Redux Toolkit** (Global state slices for auth and chat streaming)
+- **React Router v7** (Declarative routing)
+- **Axios** (Configured client for base REST queries)
+- **Socket.IO Client** (Persistent socket connections with state persistence)
+- **Sass (SCSS)** (Modular stylesheets with CSS-Variables)
+- **Markdown & Math**: `react-markdown` + `remark-gfm` + `rehype-raw` + `katex`
+- **Error Tracking**: `rollbar` client SDK
+- **Icons**: Lucide React + Remix Icon
 
 ## Routing
 
-- /
-  - Protected route, renders dashboard and chat area
-- /c/:chatId
-  - Opens a specific chat inside dashboard
-- /dashboard
-  - Redirects to /
-- /login
-- /register
-- /forgot-password
-- /update-password
-- /forbidden
-- '*'
-- Not found page
+- `/`
+  - Protected root, renders dashboard sidebar and default chat prompt interface
+- `/c/:chatId`
+  - Opens a specific chat session inside the dashboard viewport
+- `/dashboard`
+  - Redirects user back to root `/`
+- `/login`
+  - Authentication portal
+- `/register`
+  - Account signup portal
+- `/forbidden`
+  - Standard permission error view
+- `*`
+  - Custom 404 Not Found fallback view
 
 ## State Management
 
-Redux slices:
-
-- auth
-  - user, loading, error, isUpdatingPassword
-- chat
-  - chat map, currentChatId, loading, isUploading, socket streaming states
+Redux slices (`client/src/app/app.store.js`):
+- **auth**
+  - Session verification, user metadata, loading/error states.
+- **chat**
+  - Conversations index map, current session tracker, list states, file uploading queue, real-time message stream flags (`thinking`, `toolCall`, `streamingText`).
 
 ## API Integration
 
-The client calls backend REST APIs through Axios:
+The client calls backend REST endpoints via Axios:
+- Auth Endpoints: `{VITE_API_URL}/api/auth`
+- Chat Endpoints: `{VITE_API_URL}/api/chats`
 
-- Auth base: {VITE_API_URL}/api/auth
-- Chat base: {VITE_API_URL}/api/chats
+For complete request and response schemas, refer to the [Auto-Generated API Reference](../server/API_REQUEST_RESPONSE_EXAMPLES.md).
 
-For complete request and response payloads, check the [Auto-Generated API Reference](../server/API_REQUEST_RESPONSE_EXAMPLES.md).
-
-Main chat APIs used:
-
-- send message
-- fetch chats
-- fetch messages by chat
-- delete chat
-- upload files
+Primary Rest Calls:
+- `/api/auth/send-signup-email` & `/api/auth/verify-signup-email`
+- `/api/auth/google` (Google OAuth trigger redirection)
+- `/api/auth/guest-session` (Guest initialization)
+- `/api/chats` (List all user/guest chats)
+- `/api/chats/:chatId/messages` (Load historical conversation message log)
+- `/api/chats/delete/:chatId` (Remove active chat session)
+- `/api/chats/uploads` (Upload file payload to ImageKit middleware)
 
 ## Socket Integration
 
-The chat UI listens to these server events:
+Listens for real-time push events from the Express server:
+- `chat:chat_created` (Emitted on first message in a thread to link the session title)
+- `chat:thinking` (Passes current AI reasoning thoughts)
+- `chat:tool_call` (Indicates active tool usage like web search or file retrieval)
+- `chat:done` (Signals final response string is fully flushed)
+- `chat:error` (Handles socket-specific processing errors)
 
-- chat:chat_created
-- chat:thinking
-- chat:tool_call
-- chat:done
-- chat:error
-
-Client emits:
-
-- chat:send
-
-## AI Models and Tools Context
-
-Model execution happens on the backend. This client consumes responses generated by:
-
-- gemma-4-31b-it
-- mistral-medium-latest
-
-It also displays backend tool activity emitted during streaming:
-
-- emailTool
-- searchInternetTool
-- getCurrentDateTime
-- contextRetrieverTool
+Emits client actions:
+- `chat:send` (Submits user prompt and attachments to active thread)
 
 ## Environment Variables
 
-Create client/.env:
-
-- VITE_API_URL
-- VITE_SOCKET_URL
+Create `client/.env`:
+- `VITE_API_URL` (Base backend server REST URL)
+- `VITE_SOCKET_URL` (Base backend server WebSocket connection URL)
+- `VITE_ROLLBAR_CLIENT_TOKEN` (Optional - Rollbar token for client-side diagnostics)
 
 Example:
-
 ```env
 VITE_API_URL=http://localhost:3000
 VITE_SOCKET_URL=http://localhost:3000
+VITE_ROLLBAR_CLIENT_TOKEN=your-token-here
 ```
 
 ## Run Locally
@@ -116,16 +98,15 @@ npm install
 npm run dev
 ```
 
-Default dev URL:
-
-- http://localhost:5173
+Default URL: `http://localhost:5173`
 
 ## Scripts
 
-- npm run dev
-- npm run build
-- npm run lint
-- npm run preview
+- `npm run dev`: Launch hot-reloading development server
+- `npm run build`: Compile bundle optimized for production
+- `npm run lint`: Code formatting audit
+- `npm run preview`: Serve production bundle locally for previewing
+
 
 ## Folder Map
 
