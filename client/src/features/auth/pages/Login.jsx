@@ -88,11 +88,6 @@ const Login = () => {
                         hasError={!!errorMsg && errorMsg.toLowerCase().includes('credentials')}
                     />
 
-                    <div className="forgot-password-link">
-                        <Link to="/forgot-password">Forgot your password?</Link>
-                    </div>
-
-
                     <button type="submit" className="btn btn-primary">
                         Log In
                     </button>
