@@ -1,0 +1,717 @@
+{
+  "info": {
+    "_postman_id": "8c5b6b80-ec36-4fc6-b0fa-986c57f20251",
+    "name": "Perplexity Clone API Collection",
+    "description": "Postman Collection for testing Perplexity Clone APIs with saved success and error responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send Signup Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/send-signup-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "send-signup-email"
+              ]
+            },
+            "description": "Send magic link and signup OTP code to user's email address."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"john@example.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/send-signup-email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "send-signup-email"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Registration email sent successfully\",\n  \"success\": true,\n  \"error\": null\n}"
+            },
+            {
+              "name": "Validation Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"invalid-email\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/send-signup-email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "send-signup-email"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"email must be valid\",\n  \"errors\": [\n    {\n      \"field\": \"email\",\n      \"message\": \"email must be valid\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Signup Email OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-signup-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-signup-email"
+              ]
+            },
+            "description": "Submit email OTP to complete registration or login."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/verify-signup-email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "verify-signup-email"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Email verified successfully\",\n  \"success\": true,\n  \"error\": null,\n  \"user\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"john@example.com\",\n    \"createdAt\": \"2026-06-19T12:22:26.032Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Guest Session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/guest-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "guest-session"
+              ]
+            },
+            "description": "Initialize a temporary guest session cookie."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/guest-session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "guest-session"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"guest session created\",\n  \"success\": true,\n  \"guestId\": \"546cb9f8-ce74-4a3a-88a3-ad817396ea67\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile Info (get-me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/get-me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "get-me"
+              ]
+            },
+            "description": "Fetch user profile details (requires token cookie)."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/get-me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "get-me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"user found successfully\",\n  \"success\": true,\n  \"user\": {\n    \"_id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"john@example.com\",\n    \"username\": \"john\",\n    \"createdAt\": \"2026-06-19T12:22:26.058Z\",\n    \"updatedAt\": \"2026-06-19T12:22:26.058Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Claim Guest Chats",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/claim-guest-chats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "claim-guest-chats"
+              ]
+            },
+            "description": "Claim any chats created as guest onto the logged in user profile (requires both token and guest_token cookies)."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/claim-guest-chats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "claim-guest-chats"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Guest chats claimed successfully\",\n  \"success\": true,\n  \"claimedCount\": 3\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revoke active token and log out the user."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Logged out successfully\",\n  \"success\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chats",
+      "item": [
+        {
+          "name": "List Chats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats"
+              ]
+            },
+            "description": "List all chats belonging to the user or guest session."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chats"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"chats fetched successfully\",\n  \"success\": true,\n  \"chats\": [\n    {\n      \"_id\": \"507f1f77bcf86cd799439012\",\n      \"title\": \"What is Perplexity AI?\",\n      \"createdAt\": \"2026-06-19T12:22:26.091Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Chat Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/:chatId/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                ":chatId",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "chatId",
+                  "value": "507f1f77bcf86cd799439012"
+                }
+              ]
+            },
+            "description": "Fetch all messages within a specific conversation thread."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chats/:chatId/messages",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chats",
+                    ":chatId",
+                    "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "chatId",
+                      "value": "507f1f77bcf86cd799439012"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"messages fetched successfully\",\n  \"success\": true,\n  \"messages\": [\n    {\n      \"_id\": \"507f1f77bcf86cd799439013\",\n      \"chat\": \"507f1f77bcf86cd799439012\",\n      \"role\": \"user\",\n      \"content\": \"Hello AI\",\n      \"files\": [],\n      \"createdAt\": \"2026-06-19T12:22:26.101Z\"\n    },\n    {\n      \"_id\": \"507f1f77bcf86cd799439014\",\n      \"chat\": \"507f1f77bcf86cd799439012\",\n      \"role\": \"ai\",\n      \"content\": \"This is a mock AI response from Mistral.\",\n      \"files\": [],\n      \"createdAt\": \"2026-06-19T12:22:26.101Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello AI\",\n  \"chat\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/message",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "message"
+              ]
+            },
+            "description": "Send a prompt to the AI agent synchronously (REST fall-back flow)."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"Hello AI\",\n  \"chat\": null\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chats/message",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chats",
+                    "message"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"chat\": {\n    \"_id\": \"507f1f77bcf86cd799439012\",\n    \"title\": \"Mock Chat Title\"\n  },\n  \"aiMessage\": {\n    \"_id\": \"507f1f77bcf86cd799439014\",\n    \"chat\": \"507f1f77bcf86cd799439012\",\n    \"role\": \"ai\",\n    \"content\": \"This is a mock AI response from Mistral.\",\n    \"createdAt\": \"2026-06-19T12:22:26.112Z\"\n  },\n  \"userMessage\": {\n    \"_id\": \"507f1f77bcf86cd799439013\",\n    \"chat\": \"507f1f77bcf86cd799439012\",\n    \"role\": \"user\",\n    \"content\": \"Hello AI\",\n    \"createdAt\": \"2026-06-19T12:22:26.112Z\"\n  },\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Chat",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/delete/:chatId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "delete",
+                ":chatId"
+              ],
+              "variable": [
+                {
+                  "key": "chatId",
+                  "value": "507f1f77bcf86cd799439012"
+                }
+              ]
+            },
+            "description": "Delete a chat conversation and all related messages."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chats/delete/:chatId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chats",
+                    "delete",
+                    ":chatId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "chatId",
+                      "value": "507f1f77bcf86cd799439012"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Chat deleted successfully\",\n  \"success\": \"true\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload Files",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select file(s) to upload (max 5, 2MB each)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/uploads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chats",
+                "uploads"
+              ]
+            },
+            "description": "Upload a file (image/PDF) attachment to be stored and used in chat."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "files",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/chats/uploads",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chats",
+                    "uploads"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Files uploaded successfully\",\n  \"success\": true,\n  \"uploadedFiles\": [\n    {\n      \"fileId\": \"mock_file_123\",\n      \"name\": \"test.jpg\",\n      \"size\": 1024,\n      \"filePath\": \"/mock_file_123.jpg\",\n      \"url\": \"https://ik.imagekit.io/mock/test.jpg\",\n      \"mimetype\": \"image/jpeg\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

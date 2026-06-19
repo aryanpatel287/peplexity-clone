@@ -172,7 +172,7 @@ console.log(data);
     "user": {
         "id": "507f1f77bcf86cd799439011",
         "email": "john@example.com",
-        "createdAt": "2026-06-19T12:22:26.032Z"
+        "createdAt": "2026-06-19T12:35:56.907Z"
     }
 }
 ```
@@ -223,7 +223,7 @@ console.log(data);
 {
     "message": "guest session created",
     "success": true,
-    "guestId": "546cb9f8-ce74-4a3a-88a3-ad817396ea67"
+    "guestId": "ae8ff971-f6e9-4c8e-8701-1db58c74ff0b"
 }
 ```
 
@@ -266,8 +266,8 @@ console.log(data);
         "_id": "507f1f77bcf86cd799439011",
         "email": "john@example.com",
         "username": "john",
-        "createdAt": "2026-06-19T12:22:26.058Z",
-        "updatedAt": "2026-06-19T12:22:26.058Z"
+        "createdAt": "2026-06-19T12:35:56.924Z",
+        "updatedAt": "2026-06-19T12:35:56.924Z"
     }
 }
 ```
@@ -276,7 +276,7 @@ console.log(data);
 
 ```bash
 curl -X GET http://localhost:3000/api/auth/get-me \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -318,7 +318,7 @@ console.log(data);
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/claim-guest-chats \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -362,7 +362,7 @@ console.log(data);
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/logout \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -400,7 +400,7 @@ console.log(data);
         {
             "_id": "507f1f77bcf86cd799439012",
             "title": "What is Perplexity AI?",
-            "createdAt": "2026-06-19T12:22:26.091Z"
+            "createdAt": "2026-06-19T12:35:56.944Z"
         }
     ]
 }
@@ -410,7 +410,7 @@ console.log(data);
 
 ```bash
 curl -X GET http://localhost:3000/api/chats \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -451,7 +451,7 @@ console.log(data);
             "role": "user",
             "content": "Hello AI",
             "files": [],
-            "createdAt": "2026-06-19T12:22:26.101Z"
+            "createdAt": "2026-06-19T12:35:56.950Z"
         },
         {
             "_id": "507f1f77bcf86cd799439014",
@@ -459,7 +459,7 @@ console.log(data);
             "role": "ai",
             "content": "This is a mock AI response from Mistral.",
             "files": [],
-            "createdAt": "2026-06-19T12:22:26.101Z"
+            "createdAt": "2026-06-19T12:35:56.950Z"
         }
     ]
 }
@@ -469,7 +469,7 @@ console.log(data);
 
 ```bash
 curl -X GET http://localhost:3000/api/chats/507f1f77bcf86cd799439012/messages \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -522,14 +522,14 @@ console.log(data);
         "chat": "507f1f77bcf86cd799439012",
         "role": "ai",
         "content": "This is a mock AI response from Mistral.",
-        "createdAt": "2026-06-19T12:22:26.112Z"
+        "createdAt": "2026-06-19T12:35:56.958Z"
     },
     "userMessage": {
         "_id": "507f1f77bcf86cd799439013",
         "chat": "507f1f77bcf86cd799439012",
         "role": "user",
         "content": "Hello AI",
-        "createdAt": "2026-06-19T12:22:26.112Z"
+        "createdAt": "2026-06-19T12:35:56.958Z"
     },
     "success": true
 }
@@ -539,7 +539,7 @@ console.log(data);
 
 ```bash
 curl -X POST http://localhost:3000/api/chats/message \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk" \
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk" \
   -H "Content-Type: application/json" \
   -d '{"message":"Hello AI","chat":null}'
 ```
@@ -587,7 +587,7 @@ console.log(data);
 
 ```bash
 curl -X DELETE http://localhost:3000/api/chats/delete/507f1f77bcf86cd799439012 \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)
@@ -641,7 +641,7 @@ console.log(data);
 
 ```bash
 curl -X POST http://localhost:3000/api/chats/uploads \
-  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MTc0NX0.F3kc5328o-iY5BrW6MkCz4Wtmk7hu0YuSTYPaJ7xAxk"
+  -H "Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwN2YxZjc3YmNmODZjZDc5OTQzOTAxMSIsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTc4MTg3MjU1Nn0.oh8dW7Je47ias_bUXy4WoD5GiLE4I8RlTZF9bieQ9lk"
 ```
 
 ### Example Request (JavaScript Fetch)

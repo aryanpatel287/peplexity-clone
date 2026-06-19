@@ -11,7 +11,8 @@ We use automated integration tests with **Jest** and **Supertest** to verify all
 
 - **Auto-Generated API Reference:** [server/API_REQUEST_RESPONSE_EXAMPLES.md](server/API_REQUEST_RESPONSE_EXAMPLES.md) (dynamically compiled when running the test suite)
 - **Live Demo (deployed):** [https://cohort2-0-backend-1-kphk.onrender.com](https://cohort2-0-backend-1-kphk.onrender.com)
-- **Postman Collection:** [Cohort2.0 Backend Collection](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+- **Postman Collection:** [Cohort2.0 Backend Collection (Live Link)](https://www.postman.com/aryanpatel287-9653818/workspace/cohort2-0-backend/collection/47014706-4b0ef594-e434-465c-a382-87d22c11b4a5?action=share&source=copy-link&creator=47014706)
+  - Alternatively, import the local [Perplexity_API_Collection.postman_collection.json](server/Perplexity_API_Collection.postman_collection.json) export file directly into Postman (pre-populated with request schemas and mock response examples!).
 
 To execute the test suite and refresh the API examples documentation:
 ```bash
