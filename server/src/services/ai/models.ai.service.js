@@ -59,6 +59,35 @@ export function getGeminiAgent(chatId) {
 
 export const geminiAgent = getGeminiAgent();
 
+const geminiFallbackModel = new ChatGoogleGenerativeAI({
+    model: 'gemini-3.1-flash-lite',
+    apiKey: envConfig.GEMINI_API_KEY,
+    maxConcurrency: 5,
+});
+
+export function getGeminiFallbackAgent(chatId) {
+    const contextRetrieverToolForChat = createContextRetrieverTool(chatId);
+
+    return createAgent({
+        model: geminiFallbackModel,
+        systemPrompt: toolAgentSystemPrompt,
+        tools: [
+            emailTool,
+            searchInternetTool,
+            getCurrentDateTimeTool,
+            contextRetrieverToolForChat,
+        ],
+        middleware: [
+            modelCallLimitMiddleware({
+                runLimit: 5,
+                exitBehavior: 'end',
+            }),
+        ],
+    });
+}
+
+export const geminiFallbackAgent = getGeminiFallbackAgent();
+
 export const geminiSummariseModel = new ChatGoogleGenerativeAI({
     model: 'gemini-3.1-flash-lite',
     apiKey: envConfig.GEMINI_API_KEY,

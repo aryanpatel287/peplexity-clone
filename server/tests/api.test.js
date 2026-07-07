@@ -255,8 +255,11 @@ describe('Perplexity API Endpoints & Contract Tests', () => {
 
         const fs = await import('fs');
         const path = await import('path');
-        const projectRoot = 'd:/Cohort2.0 Study/peplexity-clone';
-        fs.writeFileSync(path.join(projectRoot, 'server/API_REQUEST_RESPONSE_EXAMPLES.md'), markdown);
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const serverRoot = path.join(__dirname, '..');
+        fs.writeFileSync(path.join(serverRoot, 'API_REQUEST_RESPONSE_EXAMPLES.md'), markdown);
         console.log('Automated API Documentation written successfully!');
     });
 

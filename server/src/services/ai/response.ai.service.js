@@ -3,8 +3,10 @@ import {
     mistralModel,
     geminiSummariseAgent,
     getGeminiAgent,
+    getGeminiFallbackAgent,
     getMistralAgent,
 } from './models.ai.service.js';
+import rollbar from '../rollbar.service.js';
 export async function generateResponse(messages, chatId) {
     const mappedMessages = messages.map((message) => {
         if (message.role == 'user') return new HumanMessage(message.content);
@@ -63,51 +65,7 @@ function formatFileMetadata(file) {
     return context;
 }
 
-export async function streamAiReponse(
-    messageHistory,
-    userFiles,
-    { onThinking, onToolCall, chatId } = {},
-) {
-    const lastIndex = messageHistory.length - 1;
-
-    const mappedMessages = messageHistory
-        .map((message, index) => {
-            if (message.role === 'user') {
-                const content = [{ type: 'text', text: message.content }];
-
-                if (index === lastIndex && userFiles?.length) {
-                    let docContexts = '';
-                    for (const file of userFiles) {
-                        if (file.mimetype?.startsWith('image/')) {
-                            content.push({ type: 'image', url: file.url });
-                        } else {
-                            docContexts += formatFileMetadata(file);
-                        }
-                    }
-                    if (docContexts) {
-                        content[0].text += docContexts;
-                    }
-                }
-
-                return new HumanMessage({ role: 'user', content });
-            }
-
-            if (message.role === 'ai') {
-                return new AIMessage(message.content);
-            }
-
-            return null;
-        })
-        .filter(Boolean);
-
-    const agent = getGeminiAgent(chatId);
-    const stream = await agent.stream(
-        {
-            messages: mappedMessages,
-        },
-        { streamMode: 'values' },
-    );
-
+async function consumeStream(stream, { onThinking, onToolCall } = {}) {
     let finalText = '';
 
     for await (const chunk of stream) {
@@ -154,6 +112,67 @@ export async function streamAiReponse(
     }
 
     return finalText;
+}
+
+export async function streamAiReponse(
+    messageHistory,
+    userFiles,
+    { onThinking, onToolCall, chatId } = {},
+) {
+    const lastIndex = messageHistory.length - 1;
+
+    const mappedMessages = messageHistory
+        .map((message, index) => {
+            if (message.role === 'user') {
+                const content = [{ type: 'text', text: message.content }];
+
+                if (index === lastIndex && userFiles?.length) {
+                    let docContexts = '';
+                    for (const file of userFiles) {
+                        if (file.mimetype?.startsWith('image/')) {
+                            content.push({ type: 'image', url: file.url });
+                        } else {
+                            docContexts += formatFileMetadata(file);
+                        }
+                    }
+                    if (docContexts) {
+                        content[0].text += docContexts;
+                    }
+                }
+
+                return new HumanMessage({ role: 'user', content });
+            }
+
+            if (message.role === 'ai') {
+                return new AIMessage(message.content);
+            }
+
+            return null;
+        })
+        .filter(Boolean);
+
+    try {
+        const agent = getGeminiAgent(chatId);
+        const stream = await agent.stream(
+            {
+                messages: mappedMessages,
+            },
+            { streamMode: 'values' },
+        );
+        return await consumeStream(stream, { onThinking, onToolCall });
+    } catch (err) {
+        console.warn(`Primary Gemma model failed: ${err.message}. Falling back to Gemini...`);
+        rollbar.warn(`Primary Gemma model failed. Triggering Gemini fallback. Error: ${err.message}`);
+
+        const fallbackAgent = getGeminiFallbackAgent(chatId);
+        const fallbackStream = await fallbackAgent.stream(
+            {
+                messages: mappedMessages,
+            },
+            { streamMode: 'values' },
+        );
+        return await consumeStream(fallbackStream, { onThinking, onToolCall });
+    }
 }
 
 export async function summariseFileWithAi(file) {
