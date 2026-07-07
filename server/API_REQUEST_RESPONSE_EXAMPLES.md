@@ -2,7 +2,7 @@
 
 > This document contains live, verified request and response examples captured by running the integration test suite.
 > Base URL: `http://localhost:3000`
-> Generated on: 2026-06-19
+> Generated on: 2026-07-07
 
 ---
 
@@ -153,7 +153,7 @@ console.log(data);
   "user": {
     "id": "507f1f77bcf86cd799439011",
     "email": "john@example.com",
-    "createdAt": "2026-06-19T14:13:49.353Z"
+    "createdAt": "2026-07-07T19:10:53.422Z"
   }
 }
 ```
@@ -197,7 +197,7 @@ console.log(data);
 {
   "message": "guest session created",
   "success": true,
-  "guestId": "c2728398-3b9c-49b5-9b93-584912c86452"
+  "guestId": "8cdce0df-1520-4bc3-be76-b47d85bf5774"
 }
 ```
 
@@ -237,8 +237,8 @@ console.log(data);
     "_id": "507f1f77bcf86cd799439011",
     "email": "john@example.com",
     "username": "john",
-    "createdAt": "2026-06-19T14:13:49.369Z",
-    "updatedAt": "2026-06-19T14:13:49.369Z"
+    "createdAt": "2026-07-07T19:10:53.439Z",
+    "updatedAt": "2026-07-07T19:10:53.439Z"
   }
 }
 ```
@@ -356,7 +356,7 @@ console.log(data);
     {
       "_id": "507f1f77bcf86cd799439012",
       "title": "What is Perplexity AI?",
-      "createdAt": "2026-06-19T14:13:49.389Z"
+      "createdAt": "2026-07-07T19:10:53.461Z"
     }
   ]
 }
@@ -403,7 +403,7 @@ console.log(data);
       "role": "user",
       "content": "Hello AI",
       "files": [],
-      "createdAt": "2026-06-19T14:13:49.395Z"
+      "createdAt": "2026-07-07T19:10:53.467Z"
     },
     {
       "_id": "507f1f77bcf86cd799439014",
@@ -411,7 +411,7 @@ console.log(data);
       "role": "ai",
       "content": "This is a mock AI response from Mistral.",
       "files": [],
-      "createdAt": "2026-06-19T14:13:49.395Z"
+      "createdAt": "2026-07-07T19:10:53.467Z"
     }
   ]
 }
@@ -466,14 +466,14 @@ console.log(data);
     "chat": "507f1f77bcf86cd799439012",
     "role": "ai",
     "content": "This is a mock AI response from Mistral.",
-    "createdAt": "2026-06-19T14:13:49.403Z"
+    "createdAt": "2026-07-07T19:10:53.473Z"
   },
   "userMessage": {
     "_id": "507f1f77bcf86cd799439013",
     "chat": "507f1f77bcf86cd799439012",
     "role": "user",
     "content": "Hello AI",
-    "createdAt": "2026-06-19T14:13:49.403Z"
+    "createdAt": "2026-07-07T19:10:53.473Z"
   },
   "success": true
 }
