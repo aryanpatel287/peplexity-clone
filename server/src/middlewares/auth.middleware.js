@@ -14,7 +14,7 @@ async function authUser(req, res, next) {
         });
     }
 
-    const isTokenBlacklisted = await redis.get(`perplexity-blacklist:${token}`);
+    const isTokenBlacklisted = await redis.get(`perplexity:blacklist:${token}`);
     if (isTokenBlacklisted) {
         return res.status(401).json({
             message: 'Invalid token',
@@ -55,7 +55,7 @@ async function authUserOrGuest(req, res, next) {
 
     if (userToken) {
         const isTokenBlacklisted = await redis.get(
-            `perplexity-blacklist:${userToken}`,
+            `perplexity:blacklist:${userToken}`,
         );
         if (isTokenBlacklisted) {
             return res.status(401).json({
