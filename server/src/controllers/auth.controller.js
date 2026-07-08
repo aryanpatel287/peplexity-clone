@@ -301,6 +301,31 @@ async function createGuestSession(req, res) {
         guestId,
     });
 }
+// cache helper
+async function getCachedUser(userId) {
+    const cacheKey = `perplexity:user:${userId}`;
+    const cached = await redis.get(cacheKey);
+
+    if (cached) {
+        return JSON.parse(cached);
+    }
+
+    const user = await userModel.findById(userId).lean();
+    if (!user) return null;
+
+    const safeUser = {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        googleId: user.googleId,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(safeUser), 'EX', 60 * 10); // 10 min
+    return safeUser;
+}
 
 /**
  * @description get the user details using token
@@ -308,6 +333,39 @@ async function createGuestSession(req, res) {
  * @access Public
  * @body none
  */
+async function getMeController(req, res) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({
+            message: 'unauthorized access',
+            success: false,
+            error: 'user details not attached in the req',
+        });
+    }
+
+    const user = await getCachedUser(userId);
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'user not found',
+            success: false,
+            error: 'user not found',
+        });
+    }
+
+    return res.status(200).json({
+        message: 'user found successfully',
+        success: true,
+        user,
+    });
+}
+
+// call this after any profile update
+async function invalidateUserCache(userId) {
+    await redis.del(`perplexity:user:${userId}`);
+}
+
 async function getMeController(req, res) {
     const userId = req.user.id;
 
@@ -356,7 +414,7 @@ async function logoutController(req, res) {
     res.clearCookie('token', envConfig.AUTH_COOKIE_OPTIONS);
 
     await redis.set(
-        `perplexity-blacklist:${token}`,
+        `perplexity:blacklist:${token}`,
         'true',
         'EX',
         24 * 60 * 60,
@@ -388,7 +446,7 @@ async function claimGuestChatsHelper(guestToken, userId) {
         );
 
         await redis.set(
-            `perplexity-blacklist:${guestToken}`,
+            `perplexity:blacklist:${guestToken}`,
             'true',
             'EX',
             24 * 60 * 60,
