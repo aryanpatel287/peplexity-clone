@@ -366,34 +366,6 @@ async function invalidateUserCache(userId) {
     await redis.del(`perplexity:user:${userId}`);
 }
 
-async function getMeController(req, res) {
-    const userId = req.user.id;
-
-    if (!userId) {
-        return res.status(401).json({
-            message: 'unauthorized access',
-            success: true,
-            error: 'user details not attached in the req',
-        });
-    }
-
-    const user = await userModel.findById(userId);
-
-    if (!user) {
-        return res.status(404).json({
-            message: 'user not found',
-            success: false,
-            error: 'user not found',
-        });
-    }
-
-    return res.status(200).json({
-        message: 'user found successfully',
-        success: true,
-        user,
-    });
-}
-
 /**
  * @description logout a user
  * @route POST /api/auth/logout
