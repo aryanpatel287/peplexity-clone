@@ -2,7 +2,7 @@
 
 > This document contains live, verified request and response examples captured by running the integration test suite.
 > Base URL: `http://localhost:3000`
-> Generated on: 2026-07-07
+> Generated on: 2026-07-14
 
 ---
 
@@ -17,6 +17,7 @@
 - [POST /api/auth/logout — Blacklist session token and clear authentication cookie](#post-apiauthlogout)
 - [GET /api/chats — Fetch all chat histories created by active user/guest](#get-apichats)
 - [GET /api/chats/507f1f77bcf86cd799439012/messages — Fetch chat messages for a specific conversation session](#get-apichats507f1f77bcf86cd799439012messages)
+- [GET /api/chats/507f1f77bcf86cd799439012/active-stream — Check active stream state for a chat session](#get-apichats507f1f77bcf86cd799439012active-stream)
 - [POST /api/chats/message — Submit user message to generate synchronous AI agent response](#post-apichatsmessage)
 - [DELETE /api/chats/delete/507f1f77bcf86cd799439012 — Delete conversation thread and all corresponding messages](#delete-apichatsdelete507f1f77bcf86cd799439012)
 - [POST /api/chats/uploads — Upload local files (images or documents) onto storage](#post-apichatsuploads)
@@ -153,7 +154,7 @@ console.log(data);
   "user": {
     "id": "507f1f77bcf86cd799439011",
     "email": "john@example.com",
-    "createdAt": "2026-07-07T19:10:53.422Z"
+    "createdAt": "2026-07-14T08:17:12.884Z"
   }
 }
 ```
@@ -197,7 +198,7 @@ console.log(data);
 {
   "message": "guest session created",
   "success": true,
-  "guestId": "8cdce0df-1520-4bc3-be76-b47d85bf5774"
+  "guestId": "d6e5a129-6523-41f2-9a9a-c8f2ffa6be7d"
 }
 ```
 
@@ -234,11 +235,11 @@ console.log(data);
   "message": "user found successfully",
   "success": true,
   "user": {
-    "_id": "507f1f77bcf86cd799439011",
-    "email": "john@example.com",
+    "id": "507f1f77bcf86cd799439011",
     "username": "john",
-    "createdAt": "2026-07-07T19:10:53.439Z",
-    "updatedAt": "2026-07-07T19:10:53.439Z"
+    "email": "john@example.com",
+    "createdAt": "2026-07-14T08:17:12.902Z",
+    "updatedAt": "2026-07-14T08:17:12.902Z"
   }
 }
 ```
@@ -356,7 +357,7 @@ console.log(data);
     {
       "_id": "507f1f77bcf86cd799439012",
       "title": "What is Perplexity AI?",
-      "createdAt": "2026-07-07T19:10:53.461Z"
+      "createdAt": "2026-07-14T08:17:12.923Z"
     }
   ]
 }
@@ -403,7 +404,7 @@ console.log(data);
       "role": "user",
       "content": "Hello AI",
       "files": [],
-      "createdAt": "2026-07-07T19:10:53.467Z"
+      "createdAt": "2026-07-14T08:17:12.929Z"
     },
     {
       "_id": "507f1f77bcf86cd799439014",
@@ -411,7 +412,7 @@ console.log(data);
       "role": "ai",
       "content": "This is a mock AI response from Mistral.",
       "files": [],
-      "createdAt": "2026-07-07T19:10:53.467Z"
+      "createdAt": "2026-07-14T08:17:12.929Z"
     }
   ]
 }
@@ -426,6 +427,43 @@ curl -X GET http://localhost:3000/api/chats/507f1f77bcf86cd799439012/messages \
 ### Example Request (JavaScript Fetch)
 ```javascript
 const response = await fetch('http://localhost:3000/api/chats/507f1f77bcf86cd799439012/messages', {
+  method: 'GET',
+  headers: {
+    'Credentials': 'include',
+  },
+});
+const data = await response.json();
+console.log(data);
+```
+
+---
+
+<a name="get-apichats507f1f77bcf86cd799439012active-stream"></a>
+## GET /api/chats/507f1f77bcf86cd799439012/active-stream
+
+**Description:** Check active stream state for a chat session
+
+**Authentication:** Registered User Session Token (Cookie)
+
+**Response Status:** `200`
+
+**Response Body:**
+```json
+{
+  "success": true,
+  "activeStream": null
+}
+```
+
+### Example Request (cURL)
+```bash
+curl -X GET http://localhost:3000/api/chats/507f1f77bcf86cd799439012/active-stream \
+  -H "Cookie: token=<your-jwt-token>"
+```
+
+### Example Request (JavaScript Fetch)
+```javascript
+const response = await fetch('http://localhost:3000/api/chats/507f1f77bcf86cd799439012/active-stream', {
   method: 'GET',
   headers: {
     'Credentials': 'include',
@@ -466,14 +504,14 @@ console.log(data);
     "chat": "507f1f77bcf86cd799439012",
     "role": "ai",
     "content": "This is a mock AI response from Mistral.",
-    "createdAt": "2026-07-07T19:10:53.473Z"
+    "createdAt": "2026-07-14T08:17:12.942Z"
   },
   "userMessage": {
     "_id": "507f1f77bcf86cd799439013",
     "chat": "507f1f77bcf86cd799439012",
     "role": "user",
     "content": "Hello AI",
-    "createdAt": "2026-07-07T19:10:53.473Z"
+    "createdAt": "2026-07-14T08:17:12.942Z"
   },
   "success": true
 }

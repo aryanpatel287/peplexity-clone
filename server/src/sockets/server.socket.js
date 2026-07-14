@@ -56,6 +56,20 @@ export function initSocket(httpServer) {
     io.on('connection', (socket) => {
         console.log('A user connected: ' + socket.id);
 
+        socket.on('chat:join', ({ chatId }) => {
+            if (chatId) {
+                socket.join(chatId);
+                console.log(`Socket ${socket.id} joined room ${chatId}`);
+            }
+        });
+
+        socket.on('chat:leave', ({ chatId }) => {
+            if (chatId) {
+                socket.leave(chatId);
+                console.log(`Socket ${socket.id} left room ${chatId}`);
+            }
+        });
+
         // --- Legacy handler (unchanged) ---
         // listenMessage(socket);
 
