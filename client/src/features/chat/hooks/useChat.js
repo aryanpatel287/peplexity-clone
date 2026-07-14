@@ -2,8 +2,10 @@ import {
     initializeSocketConnection,
     getSocket,
     registerSocketListeners,
+    setCurrentChatIdForSocket,
+    leaveChatRoom,
 } from '../services/chat.socket';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useStore } from 'react-redux';
 import { toast } from 'react-toastify';
 import { capitalize } from '../../shared/utils/format';
 import {
@@ -17,6 +19,7 @@ import {
     setAllMessages,
     setDeleteChat,
     setisUploading,
+    restoreActiveStream,
 } from '../chat.slice';
 import {
     sendMessage,
@@ -24,10 +27,12 @@ import {
     getMessages,
     deleteChat,
     uploadFiles,
+    getActiveStream,
 } from '../services/chat.api';
 
 export const useChat = () => {
     const dispatch = useDispatch();
+    const store = useStore();
 
     async function handleSendMessage({ message, chatId }) {
         dispatch(setSending(true));
@@ -103,12 +108,31 @@ export const useChat = () => {
         }
     }
 
+    async function handleCheckAndJoinActiveStream({ chatId }) {
+        try {
+            setCurrentChatIdForSocket(chatId);
+            const data = await getActiveStream({ chatId });
+            if (data?.activeStream) {
+                dispatch(
+                    restoreActiveStream({
+                        chatId,
+                        thinking: data.activeStream.thinking,
+                        toolCalls: data.activeStream.toolCalls,
+                    }),
+                );
+            }
+        } catch (err) {
+            console.error('Failed to sync active stream status:', err);
+        }
+    }
+
     async function handleGetMessages({ chatId }) {
         dispatch(setLoading(true));
         try {
             const data = await getMessages({ chatId });
             const { messages } = data;
             dispatch(setAllMessages({ chatId, messages }));
+            await handleCheckAndJoinActiveStream({ chatId });
         } catch (err) {
             const msg = capitalize(
                 err.response?.data?.message ||
@@ -123,7 +147,14 @@ export const useChat = () => {
     }
 
     function handleCurrentChatId(chatId) {
+        const prevId = store.getState().chat.currentChatId;
+        if (prevId && prevId !== chatId) {
+            leaveChatRoom(prevId);
+        }
         dispatch(setCurrentChatId(chatId));
+        if (chatId) {
+            setCurrentChatIdForSocket(chatId);
+        }
     }
 
     async function handleDeleteChat({ chatId }) {
@@ -170,7 +201,6 @@ export const useChat = () => {
         dispatch(setSending(true));
 
         if (chatId) {
-            console.log('uploadedFiles: ', uploadedFiles);
             dispatch(
                 addNewMessage({
                     chatId,
@@ -195,5 +225,6 @@ export const useChat = () => {
         handleDeleteChat,
         handleCurrentChatId,
         handleUploadFiles,
+        handleCheckAndJoinActiveStream,
     };
 };
