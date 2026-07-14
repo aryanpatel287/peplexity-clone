@@ -23,8 +23,12 @@ const ChatArea = () => {
     );
     const blockedChatId = useSelector((state) => state.chat.blockedChatId);
 
-    const { handleSendMessageSocket, handleGetMessages, handleUploadFiles } =
-        useChat();
+    const {
+        handleSendMessageSocket,
+        handleGetMessages,
+        handleUploadFiles,
+        handleCheckAndJoinActiveStream,
+    } = useChat();
     const { handleOpenSignUpModal } = useAuth();
 
     const [messageInput, setMessageInput] = useState('');
@@ -39,6 +43,8 @@ const ChatArea = () => {
             dispatch(setCurrentChatId(urlChatId));
             if (!chats[urlChatId]?.messagesLoaded) {
                 handleGetMessages({ chatId: urlChatId });
+            } else {
+                handleCheckAndJoinActiveStream({ chatId: urlChatId });
             }
         } else {
             dispatch(setCurrentChatId(null));

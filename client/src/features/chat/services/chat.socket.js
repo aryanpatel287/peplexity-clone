@@ -19,6 +19,7 @@ import {
 let socket = null;
 let listenersRegistered = false;
 let currentSessionType = null;
+let currentChatIdForSocket = null;
 
 export function initializeSocketConnection(sessionType = 'user') {
     if (socket && currentSessionType === sessionType) return socket;
@@ -36,6 +37,10 @@ export function initializeSocketConnection(sessionType = 'user') {
 
     socket.on('connect', () => {
         console.log('Connected to Socket.IO server:', socket.id);
+        if (currentChatIdForSocket) {
+            socket.emit('chat:join', { chatId: currentChatIdForSocket });
+            console.log(`Auto-joined active chat room on connect: ${currentChatIdForSocket}`);
+        }
     });
 
     socket.on('disconnect', () => {
@@ -47,6 +52,25 @@ export function initializeSocketConnection(sessionType = 'user') {
 
 export function getSocket() {
     return socket;
+}
+
+export function joinChatRoom(chatId) {
+    if (socket && socket.connected) {
+        socket.emit('chat:join', { chatId });
+        console.log(`Sent chat:join for room ${chatId}`);
+    }
+}
+
+export function leaveChatRoom(chatId) {
+    if (socket && socket.connected) {
+        socket.emit('chat:leave', { chatId });
+        console.log(`Sent chat:leave for room ${chatId}`);
+    }
+}
+
+export function setCurrentChatIdForSocket(chatId) {
+    currentChatIdForSocket = chatId;
+    joinChatRoom(chatId);
 }
 
 /**
@@ -67,6 +91,7 @@ export function registerSocketListeners(dispatch) {
         ({ chatId, title, userMessage, uploadedFiles }) => {
         dispatch(createNewChat({ chatId, title }));
         dispatch(setCurrentChatId(chatId));
+        setCurrentChatIdForSocket(chatId);
         dispatch(
             addNewMessage({
                 chatId,

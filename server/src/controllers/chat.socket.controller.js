@@ -10,6 +10,13 @@ import {
 } from '../services/ai/response.ai.service.js';
 import parseDocumentsByLlama from '../rag/llama-parser.rag.js';
 import rollbar from '../services/rollbar.service.js';
+import {
+    startTracking,
+    updateThinking,
+    addToolCall,
+    stopTracking,
+} from '../services/ai/streamTracker.service.js';
+import { getIO } from '../sockets/server.socket.js';
 
 const getSocketRequestContext = (socket) => {
     if (!socket || !socket.handshake) return null;
@@ -68,6 +75,11 @@ export async function handleChatSend(
             });
         }
 
+        await startTracking(resolvedChatId);
+        socket.join(resolvedChatId);
+
+        const io = getIO();
+
         const userMessage = await messageModel.create({
             chat: resolvedChatId,
             content: message,
@@ -91,12 +103,14 @@ export async function handleChatSend(
 
         const history = await messageModel.find({ chat: resolvedChatId });
 
-        const onThinking = (thinking) => {
-            socket.emit('chat:thinking', { chatId: resolvedChatId, thinking });
+        const onThinking = async (thinking) => {
+            await updateThinking(resolvedChatId, thinking);
+            io.to(resolvedChatId).emit('chat:thinking', { chatId: resolvedChatId, thinking });
         };
 
-        const onToolCall = (toolName) => {
-            socket.emit('chat:tool_call', { chatId: resolvedChatId, toolName });
+        const onToolCall = async (toolName) => {
+            await addToolCall(resolvedChatId, toolName);
+            io.to(resolvedChatId).emit('chat:tool_call', { chatId: resolvedChatId, toolName });
         };
 
         const finalText = await streamAiReponse(history, userFiles, {
@@ -111,18 +125,31 @@ export async function handleChatSend(
             role: 'ai',
         });
 
-        socket.emit('chat:done', {
+        io.to(resolvedChatId).emit('chat:done', {
             chatId: resolvedChatId,
             messageId: aiMessage._id.toString(),
             finalText,
         });
+        await stopTracking(resolvedChatId);
     } catch (err) {
         const reqContext = getSocketRequestContext(socket);
         rollbar.error(err, reqContext);
-        socket.emit('chat:error', {
-            chatId: resolvedChatId ?? chatId,
-            error: err?.message ?? 'Something went wrong',
-        });
+        
+        await stopTracking(resolvedChatId);
+        
+        const io = getIO();
+        const target = resolvedChatId || chatId;
+        if (target) {
+            io.to(target).emit('chat:error', {
+                chatId: target,
+                error: err?.message ?? 'Something went wrong',
+            });
+        } else {
+            socket.emit('chat:error', {
+                chatId: null,
+                error: err?.message ?? 'Something went wrong',
+            });
+        }
     }
 }
 

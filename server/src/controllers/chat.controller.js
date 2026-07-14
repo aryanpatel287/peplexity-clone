@@ -9,6 +9,7 @@ import {
 } from '../services/ai/response.ai.service.js';
 import { uploadMultipleImagesOnImageKit } from '../services/image.service.js';
 import rollbar from '../services/rollbar.service.js';
+import { getActiveStream } from '../services/ai/streamTracker.service.js';
 
 async function sendMessage(req, res) {
     const { message, chat: chatId, uploadedFiles } = req.body;
@@ -194,7 +195,24 @@ async function uploadFileController(req, res) {
     }
 }
 
-export { sendMessage, getChats, getMessages, deleteChat, uploadFileController };
+async function getActiveStreamController(req, res) {
+    const { chatId } = req.params;
+    try {
+        const activeStream = await getActiveStream(chatId);
+        return res.status(200).json({
+            success: true,
+            activeStream,
+        });
+    } catch (err) {
+        rollbar.error(err, req);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Failed to check active stream',
+        });
+    }
+}
+
+export { sendMessage, getChats, getMessages, deleteChat, uploadFileController, getActiveStreamController };
 
 // // Success response:
 // {

@@ -25,6 +25,23 @@ jest.unstable_mockModule('ioredis', () => {
                     store.set(key, val.toString());
                     return val;
                 }),
+                hset: jest.fn().mockImplementation(async (key, fieldOrObj, val) => {
+                    let hash = store.get(key) || {};
+                    if (typeof fieldOrObj === 'object') {
+                        hash = { ...hash, ...fieldOrObj };
+                    } else {
+                        hash[fieldOrObj] = val;
+                    }
+                    store.set(key, hash);
+                    return 1;
+                }),
+                hget: jest.fn().mockImplementation(async (key, field) => {
+                    const hash = store.get(key) || {};
+                    return hash[field] || null;
+                }),
+                hgetall: jest.fn().mockImplementation(async (key) => {
+                    return store.get(key) || {};
+                }),
                 expire: jest.fn().mockResolvedValue(1),
                 on: jest.fn(),
             };
@@ -35,7 +52,10 @@ jest.unstable_mockModule('ioredis', () => {
 // 2. Mock Mongoose models
 const mockUserFindOne = jest.fn();
 const mockUserCreate = jest.fn();
-const mockUserFindById = jest.fn();
+const mockUserFindByIdQuery = {
+    lean: jest.fn()
+};
+const mockUserFindById = jest.fn().mockReturnValue(mockUserFindByIdQuery);
 jest.unstable_mockModule('../src/models/user.model.js', () => ({
     default: {
         findOne: mockUserFindOne,
@@ -168,7 +188,7 @@ describe('Perplexity API Endpoints & Contract Tests', () => {
 
     beforeEach(async () => {
         // Clear token blacklisting in redis to prevent state pollution from logout test
-        await redis.del(`perplexity-blacklist:${userToken}`);
+        await redis.del(`perplexity:blacklist:${userToken}`);
     });
 
     afterAll(async () => {
@@ -358,7 +378,7 @@ describe('Perplexity API Endpoints & Contract Tests', () => {
     });
 
     it('GET /api/auth/get-me - Success with User Cookie', async () => {
-        mockUserFindById.mockResolvedValue({
+        mockUserFindByIdQuery.lean.mockResolvedValue({
             _id: testUserId,
             email: testEmail,
             username: 'john',
@@ -483,6 +503,26 @@ describe('Perplexity API Endpoints & Contract Tests', () => {
             method: 'GET',
             route: `/api/chats/${testChatId}/messages`,
             description: 'Fetch chat messages for a specific conversation session',
+            cookies,
+            status: res.status,
+            responseBody: res.body,
+        });
+    });
+
+    it('GET /api/chats/:chatId/active-stream - Success (No Active Stream)', async () => {
+        const cookies = { token: userToken };
+        const res = await supertest(app)
+            .get(`/api/chats/${testChatId}/active-stream`)
+            .set('Cookie', `token=${userToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.activeStream).toBeNull();
+
+        capture({
+            method: 'GET',
+            route: `/api/chats/${testChatId}/active-stream`,
+            description: 'Check active stream state for a chat session',
             cookies,
             status: res.status,
             responseBody: res.body,

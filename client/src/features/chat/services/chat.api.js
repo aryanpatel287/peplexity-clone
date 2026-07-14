@@ -41,3 +41,8 @@ export async function uploadFiles({ files }) {
     const response = await api.post('/uploads', formData);
     return response.data;
 }
+
+export async function getActiveStream({ chatId }) {
+    const response = await api.get(`/${chatId}/active-stream`);
+    return response.data;
+}

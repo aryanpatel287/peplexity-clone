@@ -7,6 +7,7 @@ import {
     getMessages,
     sendMessage,
     uploadFileController,
+    getActiveStreamController,
 } from '../controllers/chat.controller.js';
 
 const chatRouter = Router();
@@ -34,6 +35,14 @@ chatRouter.get('/', authUserOrGuest, getChats);
  * @body none
  */
 chatRouter.get('/:chatId/messages', authUserOrGuest, getMessages);
+
+/**
+ * @route /api/chats/:chatId/active-stream
+ * @description check if there is an active stream for a chat
+ * @access Private/Guest
+ * @body none
+ */
+chatRouter.get('/:chatId/active-stream', authUserOrGuest, getActiveStreamController);
 
 /**
  * @route /api/chats/delete-chat/:chatId

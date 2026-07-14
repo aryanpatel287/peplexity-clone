@@ -122,6 +122,29 @@ const chatSlice = createSlice({
             const { chatId } = action.payload;
             state.chats[chatId]?.messages.pop();
         },
+
+        restoreActiveStream: (state, action) => {
+            const { chatId, thinking, toolCalls } = action.payload;
+            const chat = state.chats[chatId];
+            if (!chat) return;
+
+            state.isSending = true;
+
+            const msgs = chat.messages;
+            const lastMsg = msgs[msgs.length - 1];
+            
+            if (lastMsg && lastMsg.role === 'ai') {
+                lastMsg.thinking = thinking;
+                lastMsg.toolCalls = toolCalls;
+            } else {
+                msgs.push({
+                    content: '',
+                    role: 'ai',
+                    thinking,
+                    toolCalls,
+                });
+            }
+        },
     },
 });
 
@@ -144,6 +167,7 @@ export const {
     setStreamingChunk,
     finalizeMessage,
     removeLastMessage,
+    restoreActiveStream,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
