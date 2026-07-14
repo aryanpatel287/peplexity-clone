@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import '../styles/_confirm-modal.scss';
 
@@ -30,7 +31,7 @@ const ConfirmModal = ({
 
     if (!render) return null;
 
-    return (
+    return createPortal(
         <div className={`modal-overlay ${isClosing ? 'is-closing' : ''}`} onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
@@ -54,7 +55,8 @@ const ConfirmModal = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

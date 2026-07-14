@@ -17,6 +17,7 @@ const Sidebar = ({ onSelectChat }) => {
     const loading = useSelector((state) => state.chat.loading);
     const currentChatId = useSelector((state) => state.chat.currentChatId);
     const isGuest = useSelector((state) => state.auth.isGuest);
+    const user = useSelector((state) => state.auth.user);
     const { handleDeleteChat } = useChat();
     const { handleOpenSignUpModal } = useAuth();
 
@@ -58,7 +59,7 @@ const Sidebar = ({ onSelectChat }) => {
                 ) : chats && Object.values(chats).length > 0 ? (
                     <>
                         {Object.values(chats).map((chat) => (
-                            <Link
+                             <Link
                                 key={chat._id}
                                 to={`/c/${chat._id}`}
                                 className={`chat-item ${currentChatId === chat._id ? 'active' : ''}`}
@@ -87,7 +88,7 @@ const Sidebar = ({ onSelectChat }) => {
             </div>
 
             <div className="sidebar-footer">
-                {isGuest ? (
+                {isGuest || !user ? (
                     <button onClick={handleOpenSignUpModal} className="sidebar-signin">
                         <span className="signin-icon">
                             <User size={16} />
