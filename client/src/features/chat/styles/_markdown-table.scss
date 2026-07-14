@@ -11,8 +11,25 @@
   background-color: rgba(255, 255, 255, 0.01);
   -webkit-overflow-scrolling: touch;
 
+  // Custom scrollbar layout for table responsive container
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-color, #333);
+    border-radius: 4px;
+    
+    &:hover {
+      background-color: var(--text-muted, #b7ada5);
+    }
+  }
+
   table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
     text-align: left;
     font-size: 0.92rem;
@@ -29,6 +46,8 @@
     font-weight: 600;
     color: var(--text-main);
     letter-spacing: 0.02em;
+    min-width: 120px;
+    white-space: nowrap;
   }
 
   td {
@@ -36,6 +55,7 @@
     border-bottom: 1px solid var(--border-color);
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
+    min-width: 120px;
   }
 
   tbody tr {
